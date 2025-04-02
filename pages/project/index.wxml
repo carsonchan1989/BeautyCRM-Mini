@@ -1,0 +1,61 @@
+<view class="container">
+  <view class="header">
+    <view class="tabs">
+      <view class="tab {{activeTab === 'list' ? 'active' : ''}}" bindtap="switchTab" data-tab="list">
+        项目列表
+      </view>
+      <view class="tab {{activeTab === 'import' ? 'active' : ''}}" bindtap="switchTab" data-tab="import">
+        项目导入
+      </view>
+    </view>
+  </view>
+
+  <!-- 项目列表页面 -->
+  <view class="content" hidden="{{activeTab !== 'list'}}">
+    <view class="search-bar">
+      <input type="text" placeholder="搜索项目名称" bindinput="onSearchInput" value="{{searchKeyword}}" />
+      <icon type="search" size="20"></icon>
+    </view>
+
+    <view class="project-list">
+      <view class="project-item" wx:for="{{projects}}" wx:key="id">
+        <view class="project-info">
+          <view class="project-name">{{item.name}}</view>
+          <view class="project-desc">{{item.description}}</view>
+          <view class="project-price">￥{{item.price}}</view>
+        </view>
+        <view class="project-actions">
+          <button class="btn-edit" bindtap="editProject" data-id="{{item.id}}">编辑</button>
+          <button class="btn-delete" bindtap="deleteProject" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="add-button" bindtap="addProject">
+      <text class="add-icon">+</text>
+      <text>新增项目</text>
+    </view>
+  </view>
+
+  <!-- 项目导入页面 -->
+  <view class="content" hidden="{{activeTab !== 'import'}}">
+    <view class="import-options">
+      <view class="import-option" bindtap="showManualInput">
+        <image src="/images/manual-input.png" mode="aspectFit"></image>
+        <text>手动录入</text>
+      </view>
+      <view class="import-option" bindtap="importExcel">
+        <image src="/images/excel-import.png" mode="aspectFit"></image>
+        <text>Excel导入</text>
+      </view>
+    </view>
+
+    <view class="import-tips">
+      <text class="tips-title">导入说明：</text>
+      <text class="tips-content">1. 手动录入：单个项目信息录入</text>
+      <text class="tips-content">2. Excel导入：批量导入项目信息</text>
+      <text class="tips-content">3. 支持的Excel表格格式下载</text>
+      <button class="download-template" bindtap="downloadTemplate">下载模板</button>
+    </view>
+  </view>
+</view> 

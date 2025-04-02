@@ -1,0 +1,284 @@
+/* pages/report/create.wxss */
+
+/* 主容器 */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 标题栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+.back-icon {
+  margin-right: 5rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+  text-align: center;
+}
+
+/* 错误信息 */
+.error-message {
+  background-color: #ffebeb;
+  color: #e64340;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.error-message icon {
+  margin-right: 10rpx;
+}
+
+/* 客户信息卡片 */
+.customer-card {
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.customer-info {
+  display: flex;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background-color: #10aeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+}
+
+.info {
+  flex: 1;
+}
+
+.name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 24rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 4rpx 15rpx;
+  border-radius: 30rpx;
+  margin-right: 10rpx;
+  margin-bottom: 5rpx;
+}
+
+.customer-summary {
+  display: flex;
+  margin-top: 15rpx;
+}
+
+.summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.item-label {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 5rpx;
+}
+
+.item-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 选项卡 */
+.config-tabs {
+  display: flex;
+  background-color: #fff;
+  border-radius: 15rpx 15rpx 0 0;
+  overflow: hidden;
+  margin-bottom: 2rpx;
+  box-shadow: 0 2rpx 5rpx rgba(0, 0, 0, 0.03);
+}
+
+.tab {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab.active {
+  color: #10aeff;
+  font-weight: bold;
+}
+
+.tab.active:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  width: 50%;
+  height: 6rpx;
+  background-color: #10aeff;
+  border-radius: 3rpx;
+}
+
+/* 配置内容 */
+.config-content {
+  margin-bottom: 30rpx;
+}
+
+.config-card {
+  background-color: #fff;
+  border-radius: 0 0 15rpx 15rpx;
+  padding: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 15rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.config-item {
+  margin-bottom: 25rpx;
+}
+
+.item-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.length-options {
+  display: flex;
+  justify-content: space-between;
+}
+
+.radio-label {
+  font-size: 26rpx;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.picker-view {
+  height: 70rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  padding: 0 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.picker-arrow {
+  color: #999;
+  font-size: 24rpx;
+}
+
+.custom-prompt {
+  width: 100%;
+  height: 160rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  padding: 20rpx;
+  font-size: 26rpx;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.reset-button {
+  margin-top: 30rpx;
+  text-align: center;
+  color: #10aeff;
+  font-size: 28rpx;
+  padding: 10rpx;
+}
+
+/* 生成按钮和进度 */
+.action-section {
+  margin-top: 30rpx;
+  margin-bottom: 50rpx;
+}
+
+.generate-button {
+  width: 100%;
+  height: 90rpx;
+  line-height: 90rpx;
+  background-color: #10aeff;
+  color: #fff;
+  font-size: 32rpx;
+  border-radius: 45rpx;
+}
+
+.progress-bar {
+  height: 20rpx;
+  background-color: #eee;
+  border-radius: 10rpx;
+  overflow: hidden;
+  margin-bottom: 15rpx;
+}
+
+.progress-inner {
+  height: 100%;
+  background-color: #10aeff;
+  border-radius: 10rpx;
+  transition: width 0.3s;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 28rpx;
+  color: #666;
+}

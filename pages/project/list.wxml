@@ -1,0 +1,54 @@
+<view class="container">
+  <view class="header">
+    <view class="search-box">
+      <input type="text" placeholder="搜索项目" bindinput="onSearchInput" value="{{searchKeyword}}" />
+      <icon type="search" size="20"></icon>
+    </view>
+    <view class="filter-box">
+      <picker bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}">
+        <view class="picker">
+          {{categoryIndex === null ? '全部分类' : categories[categoryIndex]}}
+          <text class="arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="project-list">
+    <block wx:if="{{projects.length > 0}}">
+      <view class="project-item" wx:for="{{projects}}" wx:key="id" bindtap="onProjectTap" data-id="{{item.id}}">
+        <view class="project-info">
+          <view class="project-header">
+            <view class="project-name">{{item.name || '未命名项目'}}</view>
+            <view class="project-price">¥{{item.price || '0'}}</view>
+          </view>
+          <view class="project-details">
+            <view class="project-detail-item" wx:if="{{item.category}}">
+              <text class="detail-label">分类：</text>
+              <text class="detail-value">{{item.category}}</text>
+            </view>
+            <view class="project-detail-item" wx:if="{{item.duration}}">
+              <text class="detail-label">时长：</text>
+              <text class="detail-value">{{item.duration}}分钟</text>
+            </view>
+            <view class="project-desc" wx:if="{{item.description}}">{{item.description}}</view>
+          </view>
+        </view>
+        <view class="project-actions">
+          <button class="btn-edit" catchtap="onEditProject" data-id="{{item.id}}">编辑</button>
+          <button class="btn-delete" catchtap="onDeleteProject" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+    </block>
+    <view class="empty-tip" wx:else>
+      <view class="empty-icon">📋</view>
+      <text>暂无项目数据</text>
+      <text class="empty-sub-tip">点击下方按钮添加项目</text>
+    </view>
+  </view>
+
+  <view class="add-button" bindtap="onAddProject">
+    <text>+</text>
+    <text>添加项目</text>
+  </view>
+</view> 

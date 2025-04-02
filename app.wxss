@@ -1,0 +1,166 @@
+/**app.wxss**/
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  font-size: 28rpx;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 列表容器 */
+.list-container {
+  padding: 20rpx;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.card-body {
+  padding: 20rpx;
+}
+
+.card-footer {
+  padding: 15rpx 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 按钮样式 */
+.btn {
+  display: inline-block;
+  padding: 10rpx 30rpx;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #10aeff;
+  color: #fff;
+}
+
+.btn-default {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.btn-danger {
+  background-color: #e64340;
+  color: #fff;
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  font-size: 22rpx;
+  margin-right: 10rpx;
+}
+
+.tag-primary {
+  background-color: #e6f3fb;
+  color: #10aeff;
+}
+
+.tag-success {
+  background-color: #e6f7e6;
+  color: #09bb07;
+}
+
+.tag-warning {
+  background-color: #fff7e6;
+  color: #ffbe00;
+}
+
+/* 加载中 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 空状态 */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #999;
+}
+
+.empty-subtext {
+  font-size: 24rpx;
+  color: #c0c0c0;
+  margin-top: 10rpx;
+}
+
+/* 操作栏 */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}

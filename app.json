@@ -1,0 +1,29 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/upload/upload",
+    "pages/customer/customer",
+    "pages/customer/list",
+    "pages/customer/add",
+    "pages/customer/detail",
+    "pages/excel/import",
+    "pages/excel/preview",
+    "pages/report/report",
+    "pages/report/detail",
+    "pages/report/create",
+    "pages/history/history",
+    "pages/project/list",
+    "pages/project/add",
+    "pages/project/edit",
+    "pages/project/detail"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "美容院客户管理",
+    "navigationBarTextStyle": "black"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

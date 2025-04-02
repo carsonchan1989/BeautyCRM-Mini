@@ -1,0 +1,75 @@
+<view class="container">
+  <!-- 标题栏 -->
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">客户分析报告</view>
+    <view class="share-button" bindtap="shareReport" wx:if="{{report}}">
+      <text>分享</text>
+    </view>
+  </view>
+  
+  <!-- 错误信息 -->
+  <view class="error-message" wx:if="{{errorMessage}}">
+    <icon type="warn" size="18"></icon>
+    <text>{{errorMessage}}</text>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text>加载中...</text>
+  </view>
+  
+  <!-- 报告内容 -->
+  <block wx:if="{{report && !isLoading}}">
+    <!-- 客户信息卡片 -->
+    <view class="customer-card">
+      <view class="card-header">
+        <view class="customer-info">
+          <text class="customer-name">{{customer.name || '未命名客户'}}</text>
+          <view class="customer-tags">
+            <text class="customer-tag">{{customer.gender || '未知'}}</text>
+            <text class="customer-tag" wx:if="{{customer.age}}">{{customer.age}}岁</text>
+            <text class="customer-tag" wx:if="{{customer.memberLevel}}">{{customer.memberLevel}}</text>
+          </view>
+        </view>
+        <view class="report-date">生成日期: {{report.date}}</view>
+      </view>
+    </view>
+    
+    <!-- 报告内容 -->
+    <view class="report-content">
+      <view class="section-title">分析报告</view>
+      
+      <view class="report-body">
+        <block wx:for="{{report.content}}" wx:key="index">
+          <view class="report-paragraph">{{item}}</view>
+        </block>
+      </view>
+      
+      <view class="report-footer">
+        <view class="disclaimer">
+          <text>注意：本报告由AI生成，仅供参考</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="action-button regenerate" bindtap="regenerateReport">
+        重新生成
+      </button>
+    </view>
+  </block>
+  
+  <!-- 无数据提示 -->
+  <view class="no-data" wx:if="{{!report && !isLoading && !errorMessage}}">
+    <icon type="info" size="60" color="#999"></icon>
+    <text>报告不存在</text>
+    <text class="sub-tip">请先为该客户生成分析报告</text>
+    <button class="generate-button" bindtap="regenerateReport">生成报告</button>
+  </view>
+</view>

@@ -1,0 +1,309 @@
+/* pages/customer/list.wxss */
+
+/* 主容器 */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 标题栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+.back-icon {
+  margin-right: 5rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.add-button {
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+/* 错误信息 */
+.error-message {
+  background-color: #ffebeb;
+  color: #e64340;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.error-message icon {
+  margin-right: 10rpx;
+}
+
+/* 搜索和筛选 */
+.search-filter-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.search-box {
+  flex: 1;
+  height: 70rpx;
+  background-color: #fff;
+  border-radius: 35rpx;
+  padding: 0 30rpx;
+  display: flex;
+  align-items: center;
+  margin-right: 20rpx;
+}
+
+.search-box icon {
+  margin-right: 15rpx;
+}
+
+.search-box input {
+  flex: 1;
+  height: 100%;
+  font-size: 28rpx;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+.filter-icon {
+  margin-left: 5rpx;
+  font-size: 24rpx;
+}
+
+/* 筛选面板 */
+.filter-panel {
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.filter-label {
+  width: 160rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.filter-value {
+  flex: 1;
+  height: 70rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  padding: 0 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.filter-arrow {
+  color: #999;
+  font-size: 24rpx;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 30rpx;
+}
+
+.reset-button {
+  width: 200rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  background-color: #f5f5f5;
+  color: #666;
+  font-size: 28rpx;
+  border-radius: 35rpx;
+}
+
+/* 结果统计 */
+.result-count {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+}
+
+/* 客户列表 */
+.customer-list {
+  margin-bottom: 30rpx;
+}
+
+.customer-item {
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.customer-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #10aeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-right: 20rpx;
+}
+
+.customer-info {
+  flex: 1;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5rpx;
+}
+
+.info-row.secondary {
+  margin-bottom: 10rpx;
+}
+
+.customer-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.customer-level {
+  font-size: 24rpx;
+  color: #ff9500;
+  background-color: #fff7e6;
+  padding: 2rpx 10rpx;
+  border-radius: 4rpx;
+}
+
+.customer-gender-age, .customer-store {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.customer-phone {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.customer-arrow {
+  color: #999;
+  font-size: 28rpx;
+  margin-left: 10rpx;
+}
+
+/* 空提示 */
+.empty-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 30rpx;
+}
+
+.empty-tip icon {
+  margin-bottom: 20rpx;
+}
+
+.sub-tip {
+  font-size: 24rpx;
+  margin-top: 10rpx;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.loading-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #f5f5f5;
+  border-top: 4rpx solid #10aeff;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 添加客户操作按钮的样式 */
+.customer-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 10rpx;
+}
+
+.action-btn {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 25rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5rpx 0;
+}
+
+.edit-btn {
+  background-color: #07c160;
+  color: #fff;
+}
+
+.delete-btn {
+  background-color: #e64340;
+  color: #fff;
+}
+
+.action-icon {
+  font-size: 28rpx;
+  font-weight: bold;
+}

@@ -1,0 +1,5 @@
+<view class="container">
+  <view class="loading">
+    <text>跳转中...</text>
+  </view>
+</view>

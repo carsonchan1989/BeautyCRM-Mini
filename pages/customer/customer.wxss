@@ -1,0 +1,316 @@
+/* pages/customer/customer.wxss */
+
+/* 主容器 */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+.back-icon {
+  margin-right: 5rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.edit-button {
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+/* 错误信息 */
+.error-message {
+  background-color: #ffebeb;
+  color: #e64340;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.error-message icon {
+  margin-right: 10rpx;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.loading-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #f5f5f5;
+  border-top: 4rpx solid #10aeff;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 客户信息卡片 */
+.customer-card {
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.customer-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+  padding-bottom: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.avatar-box {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: #10aeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 30rpx;
+}
+
+.avatar-text {
+  color: #fff;
+  font-size: 60rpx;
+  font-weight: bold;
+}
+
+.customer-basic {
+  flex: 1;
+}
+
+.customer-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15rpx;
+}
+
+.customer-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.customer-tag {
+  font-size: 24rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 6rpx 15rpx;
+  border-radius: 6rpx;
+  margin-right: 15rpx;
+  margin-bottom: 10rpx;
+}
+
+.member-tag {
+  color: #ff9500;
+  background-color: #fff7e6;
+}
+
+/* 信息区块 */
+.info-section {
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 5rpx;
+}
+
+.info-value {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.info-value.address {
+  grid-column: span 2;
+  white-space: normal;
+  word-break: break-all;
+}
+
+.info-remarks {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed #f0f0f0;
+}
+
+.remarks-label {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.remarks-content {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30rpx;
+}
+
+.action-button {
+  flex: 1;
+  margin: 0 10rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button.report {
+  background-color: #10aeff;
+  color: #fff;
+}
+
+.action-button.consumption {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.button-icon {
+  margin-right: 10rpx;
+  font-size: 32rpx;
+}
+
+/* 消费记录列表 */
+.consumption-list {
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.list-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.list-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.consumption-item {
+  display: flex;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.consumption-date {
+  width: 160rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.consumption-info {
+  flex: 1;
+}
+
+.consumption-project {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 5rpx;
+}
+
+.consumption-detail {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.technician, .payment {
+  margin-right: 15rpx;
+}
+
+.consumption-amount {
+  font-size: 32rpx;
+  color: #ff9500;
+  font-weight: bold;
+}
+
+/* 空消费记录提示 */
+.empty-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.empty-tip icon {
+  margin-bottom: 20rpx;
+}

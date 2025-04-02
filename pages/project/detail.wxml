@@ -1,0 +1,35 @@
+<view class="container">
+  <view class="project-card">
+    <view class="header">
+      <view class="title">{{projectData.name}}</view>
+      <view class="category">{{projectData.category}}</view>
+    </view>
+
+    <view class="info-section">
+      <view class="info-item">
+        <text class="label">价格</text>
+        <text class="value price">¥{{projectData.price}}</text>
+      </view>
+
+      <view class="info-item">
+        <text class="label">时长</text>
+        <text class="value">{{projectData.duration}}分钟</text>
+      </view>
+    </view>
+
+    <view class="description-section">
+      <view class="section-title">项目描述</view>
+      <view class="description-content">{{projectData.description || '暂无描述'}}</view>
+    </view>
+
+    <view class="notes-section">
+      <view class="section-title">注意事项</view>
+      <view class="notes-content">{{projectData.notes || '暂无注意事项'}}</view>
+    </view>
+  </view>
+
+  <view class="button-group">
+    <button class="btn-edit" bindtap="onEditProject">编辑项目</button>
+    <button class="btn-delete" bindtap="onDeleteProject">删除项目</button>
+  </view>
+</view> 

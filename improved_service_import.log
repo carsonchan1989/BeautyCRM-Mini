@@ -1,0 +1,239 @@
+2025-04-01 19:02:25,293 - service_import - INFO - 开始导入Excel服务记录: 模拟-客户信息档案.xlsx
+2025-04-01 19:02:25,497 - service_import - INFO - 原始消耗表形状: (32, 27)
+2025-04-01 19:02:25,497 - service_import - INFO - 使用第2行开始作为数据，第1行作为标题
+2025-04-01 19:02:25,497 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,499 - service_import - INFO - 创建服务记录: S898CB237
+2025-04-01 19:02:25,501 - service_import - INFO - 创建服务项目: 颈部导入 - 张伟 - 200.0元 - 未指定
+2025-04-01 19:02:25,501 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,501 - service_import - INFO - 创建服务记录: SF0DF717E
+2025-04-01 19:02:25,502 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,503 - service_import - INFO - 创建服务记录: SAA4DC43C
+2025-04-01 19:02:25,503 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:02:25,503 - service_import - INFO - 创建服务项目: 冰肌焕颜护理 - 李婷 - 480.0元 - 未指定
+2025-04-01 19:02:25,503 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,503 - service_import - INFO - 创建服务记录: S310E1494
+2025-04-01 19:02:25,503 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:02:25,504 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,504 - service_import - INFO - 创建服务记录: S2B6947ED
+2025-04-01 19:02:25,505 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,505 - service_import - INFO - 创建服务记录: SE6D8DDB8
+2025-04-01 19:02:25,505 - service_import - INFO - 创建服务项目: 帝王艾灸调理 - 王芳 - 533.0元 - 未指定
+2025-04-01 19:02:25,507 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,507 - service_import - INFO - 创建服务记录: S344F9C5A
+2025-04-01 19:02:25,508 - service_import - INFO - 创建服务项目: 头皮护理 - 王芳 - 350.0元 - 未指定
+2025-04-01 19:02:25,508 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,509 - service_import - INFO - 创建服务记录: SE3AAF815
+2025-04-01 19:02:25,511 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,511 - service_import - INFO - 创建服务记录: SA74D3FCC
+2025-04-01 19:02:25,511 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:02:25,511 - service_import - INFO - 创建服务项目: 颈部导入 - 王芳 - 480.0元 - 未指定
+2025-04-01 19:02:25,511 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:02:25,512 - service_import - INFO - 创建服务记录: SE2C7DB3D
+2025-04-01 19:02:25,512 - service_import - INFO - 创建服务项目: 帝王艾灸调理 - 王芳 - 533.0元 - 未指定
+2025-04-01 19:02:25,512 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,512 - service_import - INFO - 创建服务记录: SC8760143
+2025-04-01 19:02:25,512 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 王芳 - 197.5元 - 未指定
+2025-04-01 19:02:25,512 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,513 - service_import - INFO - 创建服务记录: SB7C6D420
+2025-04-01 19:02:25,514 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,515 - service_import - INFO - 创建服务记录: SB6ED9732
+2025-04-01 19:02:25,516 - service_import - INFO - 创建服务项目: 帝王艾灸调理 - 陈莉 - 533.0元 - 未指定
+2025-04-01 19:02:25,517 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,517 - service_import - INFO - 创建服务记录: S644DE322
+2025-04-01 19:02:25,518 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,518 - service_import - INFO - 创建服务记录: S47EFEE82
+2025-04-01 19:02:25,519 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,519 - service_import - INFO - 创建服务记录: S3A9A3F10
+2025-04-01 19:02:25,519 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 陈莉 - 197.5元 - 未指定
+2025-04-01 19:02:25,520 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,520 - service_import - INFO - 创建服务记录: S19E17B9C
+2025-04-01 19:02:25,520 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:02:25,520 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,521 - service_import - INFO - 创建服务记录: SEEF299CE
+2025-04-01 19:02:25,522 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,522 - service_import - INFO - 创建服务记录: S9E4EBB37
+2025-04-01 19:02:25,522 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 陈莉 - 197.5元 - 未指定
+2025-04-01 19:02:25,522 - service_import - INFO - 创建服务项目: 头皮护理 - 王芳 - 350.0元 - 未指定
+2025-04-01 19:02:25,523 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:02:25,523 - service_import - INFO - 创建服务记录: SB7FF9B6B
+2025-04-01 19:02:25,530 - service_import - INFO - 已导入 20 条服务记录，28 个服务项目
+2025-04-01 19:02:25,530 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,531 - service_import - INFO - 创建服务记录: SD9934D08
+2025-04-01 19:02:25,532 - service_import - INFO - 创建服务项目: 极光净透泡泡 - 张莉 - 293.0元 - 未指定
+2025-04-01 19:02:25,532 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,532 - service_import - INFO - 创建服务记录: SA1E93CEC
+2025-04-01 19:02:25,534 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,534 - service_import - INFO - 创建服务记录: S36F0ABC9
+2025-04-01 19:02:25,536 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,536 - service_import - INFO - 创建服务记录: S80683D8E
+2025-04-01 19:02:25,537 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,538 - service_import - INFO - 创建服务记录: S68E853BB
+2025-04-01 19:02:25,539 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,539 - service_import - INFO - 创建服务记录: SC892FDB1
+2025-04-01 19:02:25,540 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,541 - service_import - INFO - 创建服务记录: S5A89A913
+2025-04-01 19:02:25,541 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,542 - service_import - INFO - 创建服务记录: SFE2B31AF
+2025-04-01 19:02:25,542 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 陈莉 - 197.5元 - 未指定
+2025-04-01 19:02:25,543 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,543 - service_import - INFO - 创建服务记录: SD84E4899
+2025-04-01 19:02:25,544 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:02:25,544 - service_import - INFO - 创建服务记录: S8889AF5E
+2025-04-01 19:02:25,545 - service_import - INFO - 创建服务项目: 冰肌焕颜护理 - 王芳 - 480.0元 - 未指定
+2025-04-01 19:02:25,553 - service_import - INFO - 导入结果汇总:
+2025-04-01 19:02:25,553 - service_import - INFO - 成功导入服务记录: 30条
+2025-04-01 19:02:25,553 - service_import - INFO - 成功导入服务项目: 41条
+2025-04-01 19:02:25,553 - service_import - INFO - 错误数量: 0
+2025-04-01 19:22:00,692 - service_import - INFO - 开始导入Excel服务记录: 模拟-客户信息档案.xlsx
+2025-04-01 19:22:00,893 - service_import - INFO - 原始消耗表形状: (32, 27)
+2025-04-01 19:22:00,893 - service_import - INFO - 使用第2行开始作为数据，第1行作为标题
+2025-04-01 19:22:00,893 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,895 - service_import - INFO - 创建服务记录: S6817B64C
+2025-04-01 19:22:00,897 - service_import - INFO - 创建服务项目: 颈部导入 - 张伟 - 200.0元 - 未指定
+2025-04-01 19:22:00,897 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,898 - service_import - INFO - 创建服务记录: S5C8C2259
+2025-04-01 19:22:00,899 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,899 - service_import - INFO - 创建服务记录: S992F2712
+2025-04-01 19:22:00,899 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:22:00,899 - service_import - INFO - 创建服务项目: 冰肌焕颜护理 - 李婷 - 480.0元 - 未指定
+2025-04-01 19:22:00,899 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,900 - service_import - INFO - 创建服务记录: S1F29BA4E
+2025-04-01 19:22:00,900 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:22:00,900 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,900 - service_import - INFO - 创建服务记录: S5E933BAF
+2025-04-01 19:22:00,902 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,903 - service_import - INFO - 创建服务记录: S61224415
+2025-04-01 19:22:00,903 - service_import - INFO - 创建服务项目: 帝王艾灸调理 - 王芳 - 533.0元 - 未指定
+2025-04-01 19:22:00,903 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,903 - service_import - INFO - 创建服务记录: S4ED7A794
+2025-04-01 19:22:00,904 - service_import - INFO - 创建服务项目: 头皮护理 - 王芳 - 350.0元 - 未指定
+2025-04-01 19:22:00,904 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,904 - service_import - INFO - 创建服务记录: S2ED419F7
+2025-04-01 19:22:00,906 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,906 - service_import - INFO - 创建服务记录: SEE0B70E6
+2025-04-01 19:22:00,906 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:22:00,907 - service_import - INFO - 创建服务项目: 颈部导入 - 王芳 - 480.0元 - 未指定
+2025-04-01 19:22:00,907 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:22:00,907 - service_import - INFO - 创建服务记录: S603E782A
+2025-04-01 19:22:00,907 - service_import - INFO - 创建服务项目: 帝王艾灸调理 - 王芳 - 533.0元 - 未指定
+2025-04-01 19:22:00,907 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,907 - service_import - INFO - 创建服务记录: S7B49F2E1
+2025-04-01 19:22:00,908 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 王芳 - 197.5元 - 未指定
+2025-04-01 19:22:00,908 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,908 - service_import - INFO - 创建服务记录: SF153E757
+2025-04-01 19:22:00,909 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,909 - service_import - INFO - 创建服务记录: SBC65F721
+2025-04-01 19:22:00,909 - service_import - INFO - 创建服务项目: 帝王艾灸调理 - 陈莉 - 533.0元 - 未指定
+2025-04-01 19:22:00,910 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,911 - service_import - INFO - 创建服务记录: S6AB65D2C
+2025-04-01 19:22:00,912 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,912 - service_import - INFO - 创建服务记录: SB7E5BA95
+2025-04-01 19:22:00,913 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,913 - service_import - INFO - 创建服务记录: S8B6581E6
+2025-04-01 19:22:00,913 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 陈莉 - 197.5元 - 未指定
+2025-04-01 19:22:00,913 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,914 - service_import - INFO - 创建服务记录: SD4194CEB
+2025-04-01 19:22:00,914 - service_import - INFO - 创建服务项目: 黄金射频紧致疗程 - 张伟 - 1360.0元 - 未指定
+2025-04-01 19:22:00,914 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,914 - service_import - INFO - 创建服务记录: SC1DF5498
+2025-04-01 19:22:00,915 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,915 - service_import - INFO - 创建服务记录: S96F8E0E6
+2025-04-01 19:22:00,916 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 陈莉 - 197.5元 - 未指定
+2025-04-01 19:22:00,916 - service_import - INFO - 创建服务项目: 头皮护理 - 王芳 - 350.0元 - 未指定
+2025-04-01 19:22:00,916 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:22:00,916 - service_import - INFO - 创建服务记录: S94B5EBBF
+2025-04-01 19:22:00,924 - service_import - INFO - 已导入 20 条服务记录，28 个服务项目
+2025-04-01 19:22:00,924 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,926 - service_import - INFO - 创建服务记录: S421EADCA
+2025-04-01 19:22:00,926 - service_import - INFO - 创建服务项目: 极光净透泡泡 - 张莉 - 293.0元 - 未指定
+2025-04-01 19:22:00,926 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,926 - service_import - INFO - 创建服务记录: SD6C0A19A
+2025-04-01 19:22:00,927 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,928 - service_import - INFO - 创建服务记录: S8C854378
+2025-04-01 19:22:00,929 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,930 - service_import - INFO - 创建服务记录: S37E25D10
+2025-04-01 19:22:00,931 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,931 - service_import - INFO - 创建服务记录: SC6D7F08D
+2025-04-01 19:22:00,932 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,932 - service_import - INFO - 创建服务记录: S18B66D35
+2025-04-01 19:22:00,933 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,933 - service_import - INFO - 创建服务记录: SD622CFC5
+2025-04-01 19:22:00,934 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,934 - service_import - INFO - 创建服务记录: S6A798516
+2025-04-01 19:22:00,935 - service_import - INFO - 创建服务项目: 草本熏蒸SPA - 陈莉 - 197.5元 - 未指定
+2025-04-01 19:22:00,935 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,936 - service_import - INFO - 创建服务记录: SFF854EC5
+2025-04-01 19:22:00,937 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:22:00,937 - service_import - INFO - 创建服务记录: S5A9789C7
+2025-04-01 19:22:00,938 - service_import - INFO - 创建服务项目: 冰肌焕颜护理 - 王芳 - 480.0元 - 未指定
+2025-04-01 19:22:00,945 - service_import - INFO - 导入结果汇总:
+2025-04-01 19:22:00,945 - service_import - INFO - 成功导入服务记录: 30条
+2025-04-01 19:22:00,945 - service_import - INFO - 成功导入服务项目: 41条
+2025-04-01 19:22:00,945 - service_import - INFO - 错误数量: 0
+2025-04-01 19:29:58,339 - service_import - INFO - 开始导入Excel服务记录: 模拟-客户信息档案.xlsx
+2025-04-01 19:29:58,543 - service_import - INFO - 原始消耗表形状: (32, 27)
+2025-04-01 19:29:58,543 - service_import - INFO - 使用第2行开始作为数据，第1行作为标题
+2025-04-01 19:29:58,543 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,545 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-07-12 14:00:00
+2025-04-01 19:29:58,545 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,545 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-07-19 15:20:00
+2025-04-01 19:29:58,545 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,546 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-08-05 10:00:00
+2025-04-01 19:29:58,546 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,546 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-08-12 11:15:00
+2025-04-01 19:29:58,546 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,547 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-08-18 14:00:00
+2025-04-01 19:29:58,547 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,547 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-09-02 09:30:00
+2025-04-01 19:29:58,547 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,548 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-09-09 15:00:00
+2025-04-01 19:29:58,548 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,548 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-09-20 14:20:00
+2025-04-01 19:29:58,549 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,549 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-10-05 10:45:00
+2025-04-01 19:29:58,549 - service_import - INFO - 处理客户: C001 - 林晓薇
+2025-04-01 19:29:58,549 - service_import - WARNING - 跳过已存在的服务记录: C001 - 2023-10-18 16:00:00
+2025-04-01 19:29:58,550 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,550 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-07-05 09:30:00
+2025-04-01 19:29:58,550 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,550 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-07-19 10:15:00
+2025-04-01 19:29:58,550 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,551 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-08-10 09:45:00
+2025-04-01 19:29:58,551 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,551 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-08-17 14:30:00
+2025-04-01 19:29:58,551 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,552 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-09-05 14:00:00
+2025-04-01 19:29:58,552 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,552 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-09-20 10:30:00
+2025-04-01 19:29:58,552 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,553 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-10-03 09:00:00
+2025-04-01 19:29:58,553 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,553 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-10-15 15:15:00
+2025-04-01 19:29:58,554 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,554 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-10-25 13:00:00
+2025-04-01 19:29:58,554 - service_import - INFO - 处理客户: C002 - 张美玲
+2025-04-01 19:29:58,554 - service_import - WARNING - 跳过已存在的服务记录: C002 - 2023-11-02 11:00:00
+2025-04-01 19:29:58,555 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,555 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-08-05 20:15:00
+2025-04-01 19:29:58,555 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,555 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-08-12 19:30:00
+2025-04-01 19:29:58,556 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,556 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-09-02 20:45:00
+2025-04-01 19:29:58,556 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,556 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-09-16 21:00:00
+2025-04-01 19:29:58,556 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,557 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-09-30 18:30:00
+2025-04-01 19:29:58,557 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,557 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-10-12 19:15:00
+2025-04-01 19:29:58,557 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,558 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-10-25 20:30:00
+2025-04-01 19:29:58,558 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,558 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-11-05 21:00:00
+2025-04-01 19:29:58,558 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,559 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-11-18 18:45:00
+2025-04-01 19:29:58,559 - service_import - INFO - 处理客户: C003 - 王思媛
+2025-04-01 19:29:58,559 - service_import - WARNING - 跳过已存在的服务记录: C003 - 2023-12-01 19:00:00
+2025-04-01 19:29:58,559 - service_import - INFO - 导入结果汇总:
+2025-04-01 19:29:58,559 - service_import - INFO - 成功导入服务记录: 0条
+2025-04-01 19:29:58,560 - service_import - INFO - 成功导入服务项目: 0条
+2025-04-01 19:29:58,560 - service_import - INFO - 错误数量: 0

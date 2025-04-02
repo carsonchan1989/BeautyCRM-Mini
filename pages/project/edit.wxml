@@ -1,0 +1,42 @@
+<view class="container">
+  <view class="form">
+    <view class="form-item">
+      <text class="label">项目名称</text>
+      <input class="input" type="text" placeholder="请输入项目名称" value="{{projectData.name}}" bindinput="onInputName"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目描述</text>
+      <textarea class="textarea" placeholder="请输入项目描述" value="{{projectData.description}}" bindinput="onInputDescription"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目价格</text>
+      <input class="input" type="digit" placeholder="请输入项目价格" value="{{projectData.price}}" bindinput="onInputPrice"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目分类</text>
+      <picker bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}">
+        <view class="picker">
+          {{categories[categoryIndex] || '请选择项目分类'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">时长(分钟)</text>
+      <input class="input" type="number" placeholder="请输入项目时长" value="{{projectData.duration}}" bindinput="onInputDuration"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">注意事项</text>
+      <textarea class="textarea" placeholder="请输入注意事项" value="{{projectData.notes}}" bindinput="onInputNotes"/>
+    </view>
+  </view>
+
+  <view class="button-group">
+    <button class="btn-save" bindtap="saveProject">保存</button>
+    <button class="btn-cancel" bindtap="cancelEdit">取消</button>
+  </view>
+</view> 

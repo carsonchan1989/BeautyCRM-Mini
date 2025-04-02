@@ -1,0 +1,135 @@
+<view class="container">
+  <!-- 标题栏 -->
+  <view class="header">
+    <view class="back-button" bindtap="goToHome">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">客户管理</view>
+    <view class="add-button" bindtap="addNewCustomer">
+      <text>新增</text>
+    </view>
+  </view>
+  
+  <!-- 错误信息 -->
+  <view class="error-message" wx:if="{{errorMessage}}">
+    <icon type="warn" size="18"></icon>
+    <text>{{errorMessage}}</text>
+  </view>
+  
+  <!-- 搜索和筛选 -->
+  <view class="search-filter-bar">
+    <view class="search-box">
+      <icon type="search" size="16" color="#999"/>
+      <input placeholder="搜索姓名或手机号" 
+             value="{{searchValue}}" 
+             bindinput="searchCustomer"/>
+    </view>
+    <view class="filter-button" bindtap="toggleFilterPanel">
+      <text>筛选</text>
+      <text class="filter-icon">↓</text>
+    </view>
+  </view>
+  
+  <!-- 筛选面板 -->
+  <view class="filter-panel" hidden="{{!showFilterPanel}}">
+    <view class="filter-row">
+      <view class="filter-label">性别</view>
+      <picker range="{{genderOptions}}" 
+              value="{{genderOptions.indexOf(filterOptions.gender) || 0}}" 
+              data-field="gender"
+              bindchange="applyFilter">
+        <view class="filter-value">
+          <text>{{filterOptions.gender || '全部'}}</text>
+          <text class="filter-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    
+    <view class="filter-row">
+      <view class="filter-label">会员等级</view>
+      <picker range="{{levelOptions}}" 
+              value="{{levelOptions.indexOf(filterOptions.memberLevel) || 0}}" 
+              data-field="memberLevel"
+              bindchange="applyFilter">
+        <view class="filter-value">
+          <text>{{filterOptions.memberLevel || '全部'}}</text>
+          <text class="filter-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    
+    <view class="filter-row">
+      <view class="filter-label">所属门店</view>
+      <picker range="{{storeOptions}}" 
+              value="{{storeOptions.indexOf(filterOptions.store) || 0}}" 
+              data-field="store"
+              bindchange="applyFilter">
+        <view class="filter-value">
+          <text>{{filterOptions.store || '全部'}}</text>
+          <text class="filter-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    
+    <view class="filter-actions">
+      <button class="reset-button" bindtap="resetFilter">重置</button>
+    </view>
+  </view>
+  
+  <!-- 结果统计 -->
+  <view class="result-count">
+    共 {{customers.length}} 位客户
+    <text wx:if="{{customers.length < allCustomers.length}}">
+      (筛选自{{allCustomers.length}}位)
+    </text>
+  </view>
+  
+  <!-- 客户列表 -->
+  <view class="customer-list">
+    <view class="customer-item" 
+          wx:for="{{customers}}" 
+          wx:key="id">
+      <view class="customer-avatar" bindtap="viewCustomerDetail" data-id="{{item.id}}">
+        <text>{{item.name ? item.name.substring(0, 1) : '客'}}</text>
+      </view>
+      <view class="customer-info" bindtap="viewCustomerDetail" data-id="{{item.id}}">
+        <view class="info-row">
+          <view class="customer-name">{{item.name || '未命名客户'}}</view>
+          <view class="customer-level">{{item.memberLevel || '普通会员'}}</view>
+        </view>
+        <view class="info-row secondary">
+          <view class="customer-gender-age">
+            <text>{{item.gender || '未知'}}</text>
+            <text wx:if="{{item.age}}"> · {{item.age}}岁</text>
+          </view>
+          <view class="customer-store">{{item.store || '总店'}}</view>
+        </view>
+        <view class="info-row">
+          <view class="customer-phone">{{item.phone || '未填写手机号'}}</view>
+        </view>
+      </view>
+      <view class="customer-actions">
+        <view class="action-btn edit-btn" catchtap="editCustomer" data-id="{{item.id}}">
+          <text class="action-icon">✎</text>
+        </view>
+        <view class="action-btn delete-btn" catchtap="deleteCustomer" data-id="{{item.id}}">
+          <text class="action-icon">×</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 无数据提示 -->
+    <view class="empty-tip" wx:if="{{customers.length === 0 && !isLoading}}">
+      <icon type="info" size="60" color="#999"></icon>
+      <text>暂无客户数据</text>
+      <text class="sub-tip">点击右上角"新增"添加客户</text>
+    </view>
+    
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="loading-icon"></view>
+      <text>加载中...</text>
+    </view>
+  </view>
+</view>

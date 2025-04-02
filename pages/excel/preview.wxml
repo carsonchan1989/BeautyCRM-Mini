@@ -1,0 +1,236 @@
+<!-- pages/excel/preview.wxml -->
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="iconfont icon-back"></text>
+    </view>
+    <view class="title">数据预览</view>
+    <view class="action-btn" bindtap="exportExcel">
+      <text class="iconfont icon-export"></text>
+    </view>
+  </view>
+  
+  <view class="tab-container">
+    <view class="tab {{dataType == 'customer' ? 'active' : ''}}" bindtap="switchDataType" data-type="customer">
+      <text>客户信息</text>
+    </view>
+    <view class="tab {{dataType == 'health' ? 'active' : ''}}" bindtap="switchDataType" data-type="health">
+      <text>健康档案</text>
+    </view>
+    <view class="tab {{dataType == 'consumption' ? 'active' : ''}}" bindtap="switchDataType" data-type="consumption">
+      <text>消费记录</text>
+    </view>
+    <view class="tab {{dataType == 'service' ? 'active' : ''}}" bindtap="switchDataType" data-type="service">
+      <text>服务记录</text>
+    </view>
+    <view class="tab {{dataType == 'communication' ? 'active' : ''}}" bindtap="switchDataType" data-type="communication">
+      <text>沟通记录</text>
+    </view>
+  </view>
+  
+  <view class="content">
+    <!-- 加载中 -->
+    <view class="loading-container" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+    
+    <!-- 错误信息 -->
+    <view class="error-container" wx:if="{{errorMessage && !loading}}">
+      <text class="iconfont icon-error"></text>
+      <text class="error-text">{{errorMessage}}</text>
+      <button class="retry-btn" bindtap="refreshData">重试</button>
+    </view>
+    
+    <!-- 客户信息列表 -->
+    <block wx:if="{{dataType == 'customer' && dataList.length > 0 && !loading}}">
+      <scroll-view class="data-list" scroll-y bindscrolltolower="loadMore">
+        <view class="data-item" wx:for="{{dataList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+          <view class="item-avatar">
+            <text class="avatar-text">{{item.name[0] || '客'}}</text>
+          </view>
+          <view class="item-content">
+            <view class="item-title">
+              <text class="name">{{item.name}}</text>
+              <view class="gender {{item.gender == '女' ? 'female' : 'male'}}">{{item.gender}}</view>
+            </view>
+            <view class="item-info">
+              <text class="phone" wx:if="{{item.phone}}">{{item.phone}}</text>
+              <text class="age" wx:if="{{item.age}}">{{item.age}}岁</text>
+            </view>
+            <view class="item-meta">
+              <view class="store" wx:if="{{item.store}}">
+                <text class="iconfont icon-store"></text>
+                <text>{{item.store}}</text>
+              </view>
+              <view class="member-level" wx:if="{{item.member_level}}">
+                <text class="iconfont icon-vip"></text>
+                <text>{{item.member_level}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="item-arrow">
+            <text class="iconfont icon-right"></text>
+          </view>
+        </view>
+        
+        <view class="load-more" wx:if="{{hasMore}}">
+          <text>加载更多</text>
+        </view>
+        <view class="list-end" wx:else>
+          <text>--- 已显示全部 {{dataList.length}}/{{totalCount}} 条数据 ---</text>
+        </view>
+      </scroll-view>
+    </block>
+    
+    <!-- 健康档案列表 -->
+    <block wx:if="{{dataType == 'health' && dataList.length > 0 && !loading}}">
+      <scroll-view class="data-list" scroll-y bindscrolltolower="loadMore">
+        <view class="data-item" wx:for="{{dataList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+          <view class="item-content">
+            <view class="item-title">
+              <text class="name">{{item.customer_name || '未知客户'}}</text>
+            </view>
+            <view class="item-info">
+              <text class="skin-type" wx:if="{{item.skin_type}}">肤质: {{item.skin_type}}</text>
+            </view>
+            <view class="item-meta">
+              <view class="record-date">
+                <text class="iconfont icon-time"></text>
+                <text>{{item.created_at}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="item-arrow">
+            <text class="iconfont icon-right"></text>
+          </view>
+        </view>
+        
+        <view class="load-more" wx:if="{{hasMore}}">
+          <text>加载更多</text>
+        </view>
+        <view class="list-end" wx:else>
+          <text>--- 已显示全部 {{dataList.length}}/{{totalCount}} 条数据 ---</text>
+        </view>
+      </scroll-view>
+    </block>
+    
+    <!-- 消费记录列表 -->
+    <block wx:if="{{dataType == 'consumption' && dataList.length > 0 && !loading}}">
+      <scroll-view class="data-list" scroll-y bindscrolltolower="loadMore">
+        <view class="data-item" wx:for="{{dataList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+          <view class="item-content">
+            <view class="item-title">
+              <text class="name">{{item.customer_name || '未知客户'}}</text>
+              <text class="amount">¥{{item.amount}}</text>
+            </view>
+            <view class="item-info">
+              <text class="project">{{item.project_name}}</text>
+            </view>
+            <view class="item-meta">
+              <view class="consumption-date">
+                <text class="iconfont icon-time"></text>
+                <text>{{item.date}}</text>
+              </view>
+              <view class="payment-method" wx:if="{{item.payment_method}}">
+                <text class="iconfont icon-pay"></text>
+                <text>{{item.payment_method}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="item-arrow">
+            <text class="iconfont icon-right"></text>
+          </view>
+        </view>
+        
+        <view class="load-more" wx:if="{{hasMore}}">
+          <text>加载更多</text>
+        </view>
+        <view class="list-end" wx:else>
+          <text>--- 已显示全部 {{dataList.length}}/{{totalCount}} 条数据 ---</text>
+        </view>
+      </scroll-view>
+    </block>
+    
+    <!-- 服务记录列表 -->
+    <block wx:if="{{dataType == 'service' && dataList.length > 0 && !loading}}">
+      <scroll-view class="data-list" scroll-y bindscrolltolower="loadMore">
+        <view class="data-item" wx:for="{{dataList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+          <view class="item-content">
+            <view class="item-title">
+              <text class="name">{{item.customer_name || '未知客户'}}</text>
+              <text class="amount">¥{{item.service_amount}}</text>
+            </view>
+            <view class="item-info">
+              <text class="project">{{item.service_items}}</text>
+              <text class="beautician" wx:if="{{item.beautician}}">技师: {{item.beautician}}</text>
+            </view>
+            <view class="item-meta">
+              <view class="service-date">
+                <text class="iconfont icon-time"></text>
+                <text>{{item.service_date}}</text>
+              </view>
+              <view class="satisfaction" wx:if="{{item.satisfaction}}">
+                <text class="iconfont icon-star"></text>
+                <text>{{item.satisfaction}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="item-arrow">
+            <text class="iconfont icon-right"></text>
+          </view>
+        </view>
+        
+        <view class="load-more" wx:if="{{hasMore}}">
+          <text>加载更多</text>
+        </view>
+        <view class="list-end" wx:else>
+          <text>--- 已显示全部 {{dataList.length}}/{{totalCount}} 条数据 ---</text>
+        </view>
+      </scroll-view>
+    </block>
+    
+    <!-- 沟通记录列表 -->
+    <block wx:if="{{dataType == 'communication' && dataList.length > 0 && !loading}}">
+      <scroll-view class="data-list" scroll-y bindscrolltolower="loadMore">
+        <view class="data-item" wx:for="{{dataList}}" wx:key="id" bindtap="viewDetail" data-id="{{item.id}}">
+          <view class="item-content">
+            <view class="item-title">
+              <text class="name">{{item.customer_name || '未知客户'}}</text>
+            </view>
+            <view class="item-info">
+              <text class="content">{{item.comm_content}}</text>
+            </view>
+            <view class="item-meta">
+              <view class="comm-date">
+                <text class="iconfont icon-time"></text>
+                <text>{{item.comm_time}}</text>
+              </view>
+              <view class="location" wx:if="{{item.comm_location}}">
+                <text class="iconfont icon-location"></text>
+                <text>{{item.comm_location}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="item-arrow">
+            <text class="iconfont icon-right"></text>
+          </view>
+        </view>
+        
+        <view class="load-more" wx:if="{{hasMore}}">
+          <text>加载更多</text>
+        </view>
+        <view class="list-end" wx:else>
+          <text>--- 已显示全部 {{dataList.length}}/{{totalCount}} 条数据 ---</text>
+        </view>
+      </scroll-view>
+    </block>
+    
+    <!-- 无数据 -->
+    <view class="empty-container" wx:if="{{dataList.length === 0 && !loading && !errorMessage}}">
+      <text class="iconfont icon-empty"></text>
+      <text class="empty-text">暂无数据</text>
+      <button class="refresh-btn" bindtap="refreshData">刷新</button>
+    </view>
+  </view>
+</view>

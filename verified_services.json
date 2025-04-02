@@ -1,0 +1,649 @@
+[
+  {
+    "service_id": "S0071298E",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-07-12 14:00:00",
+    "departure_time": "2023-07-12 16:30:00",
+    "total_amount": 680.0,
+    "total_sessions": 2,
+    "satisfaction": "4.9/5",
+    "service_items": [
+      {
+        "id": 1,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "李婷",
+        "unit_price": 480.0,
+        "is_specified": true
+      },
+      {
+        "id": 2,
+        "project_name": "颈部导入",
+        "beautician_name": "张伟",
+        "unit_price": 200.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S3CBFBEEC",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-07-19 15:20:00",
+    "departure_time": "2023-07-19 17:50:00",
+    "total_amount": 480.0,
+    "total_sessions": 1,
+    "satisfaction": "4.8/5",
+    "service_items": [
+      {
+        "id": 3,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "李婷",
+        "unit_price": 480.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S92BA58BC",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-08-05 10:00:00",
+    "departure_time": "2023-08-05 12:30:00",
+    "total_amount": 1840.0,
+    "total_sessions": 2,
+    "satisfaction": "4.7/5",
+    "service_items": [
+      {
+        "id": 4,
+        "project_name": "黄金射频紧致疗程",
+        "beautician_name": "张伟",
+        "unit_price": 1360.0,
+        "is_specified": false
+      },
+      {
+        "id": 5,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "李婷",
+        "unit_price": 480.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S540D25D9",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-08-12 11:15:00",
+    "departure_time": "2023-08-12 13:45:00",
+    "total_amount": 1360.0,
+    "total_sessions": 1,
+    "satisfaction": "4.9/5",
+    "service_items": [
+      {
+        "id": 6,
+        "project_name": "黄金射频紧致疗程",
+        "beautician_name": "张伟",
+        "unit_price": 1360.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S43D15BE4",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-08-18 14:00:00",
+    "departure_time": "2023-08-18 16:30:00",
+    "total_amount": 730.5,
+    "total_sessions": 2,
+    "satisfaction": "4.8/5",
+    "service_items": [
+      {
+        "id": 7,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "李婷",
+        "unit_price": 533.0,
+        "is_specified": true
+      },
+      {
+        "id": 8,
+        "project_name": "草本熏蒸SPA",
+        "beautician_name": "王芳",
+        "unit_price": 197.5,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S3C21A258",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-09-02 09:30:00",
+    "departure_time": "2023-09-02 12:00:00",
+    "total_amount": 533.0,
+    "total_sessions": 1,
+    "satisfaction": "4.5/5",
+    "service_items": [
+      {
+        "id": 9,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "王芳",
+        "unit_price": 533.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S983ADE8D",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-09-09 15:00:00",
+    "departure_time": "2023-09-09 17:30:00",
+    "total_amount": 830.0,
+    "total_sessions": 2,
+    "satisfaction": "4.6/5",
+    "service_items": [
+      {
+        "id": 10,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "李婷",
+        "unit_price": 480.0,
+        "is_specified": true
+      },
+      {
+        "id": 11,
+        "project_name": "头皮护理",
+        "beautician_name": "王芳",
+        "unit_price": 350.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "SCC69677D",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-09-20 14:20:00",
+    "departure_time": "2023-09-20 16:50:00",
+    "total_amount": 677.5,
+    "total_sessions": 2,
+    "satisfaction": "4.7/5",
+    "service_items": [
+      {
+        "id": 12,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "李婷",
+        "unit_price": 480.0,
+        "is_specified": true
+      },
+      {
+        "id": 13,
+        "project_name": "草本熏蒸SPA",
+        "beautician_name": "张伟",
+        "unit_price": 197.5,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S61BF06E3",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-10-05 10:45:00",
+    "departure_time": "2023-10-05 13:15:00",
+    "total_amount": 1840.0,
+    "total_sessions": 2,
+    "satisfaction": "4.8/5",
+    "service_items": [
+      {
+        "id": 14,
+        "project_name": "黄金射频紧致疗程",
+        "beautician_name": "张伟",
+        "unit_price": 1360.0,
+        "is_specified": false
+      },
+      {
+        "id": 15,
+        "project_name": "颈部导入",
+        "beautician_name": "王芳",
+        "unit_price": 480.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "SB589A968",
+    "customer_id": "C001",
+    "customer_name": "林晓薇",
+    "service_date": "2023-10-18 16:00:00",
+    "departure_time": "2023-10-18 18:30:00",
+    "total_amount": 533.0,
+    "total_sessions": 1,
+    "satisfaction": "4.5/5",
+    "service_items": [
+      {
+        "id": 16,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "王芳",
+        "unit_price": 533.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S298D4547",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-07-05 09:30:00",
+    "departure_time": "2023-07-05 11:40:00",
+    "total_amount": 197.5,
+    "total_sessions": 1,
+    "satisfaction": "4.7/5",
+    "service_items": [
+      {
+        "id": 17,
+        "project_name": "草本熏蒸SPA",
+        "beautician_name": "王芳",
+        "unit_price": 197.5,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "SB0A37625",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-07-19 10:15:00",
+    "departure_time": "2023-07-19 12:30:00",
+    "total_amount": 198.0,
+    "total_sessions": 1,
+    "satisfaction": "4.8/5",
+    "service_items": [
+      {
+        "id": 18,
+        "project_name": "经络排毒塑身",
+        "beautician_name": "王芳",
+        "unit_price": 198.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "SDB4FE781",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-08-10 09:45:00",
+    "departure_time": "2023-08-10 12:00:00",
+    "total_amount": 730.5,
+    "total_sessions": 2,
+    "satisfaction": "5.0/5",
+    "service_items": [
+      {
+        "id": 19,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "陈莉",
+        "unit_price": 533.0,
+        "is_specified": false
+      },
+      {
+        "id": 20,
+        "project_name": "草本熏蒸SPA",
+        "beautician_name": "王芳",
+        "unit_price": 197.5,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S74A7A884",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-08-17 14:30:00",
+    "departure_time": "2023-08-17 16:50:00",
+    "total_amount": 533.0,
+    "total_sessions": 1,
+    "satisfaction": "5.0/5",
+    "service_items": [
+      {
+        "id": 21,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "王芳",
+        "unit_price": 533.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "SAF0F174F",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-09-05 14:00:00",
+    "departure_time": "2023-09-05 16:20:00",
+    "total_amount": 198.0,
+    "total_sessions": 1,
+    "satisfaction": "4.9/5",
+    "service_items": [
+      {
+        "id": 22,
+        "project_name": "经络排毒塑身",
+        "beautician_name": "王芳",
+        "unit_price": 198.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S5FA0D28F",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-09-20 10:30:00",
+    "departure_time": "2023-09-20 12:50:00",
+    "total_amount": 197.5,
+    "total_sessions": 1,
+    "satisfaction": "4.6/5",
+    "service_items": [
+      {
+        "id": 23,
+        "project_name": "草本熏蒸SPA",
+        "beautician_name": "陈莉",
+        "unit_price": 197.5,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S3C465D65",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-10-03 09:00:00",
+    "departure_time": "2023-10-03 11:30:00",
+    "total_amount": 1360.0,
+    "total_sessions": 1,
+    "satisfaction": "4.8/5",
+    "service_items": [
+      {
+        "id": 24,
+        "project_name": "黄金射频紧致疗程",
+        "beautician_name": "张伟",
+        "unit_price": 1360.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S6B26F6AE",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-10-15 15:15:00",
+    "departure_time": "2023-10-15 17:45:00",
+    "total_amount": 533.0,
+    "total_sessions": 1,
+    "satisfaction": "5.0/5",
+    "service_items": [
+      {
+        "id": 25,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "王芳",
+        "unit_price": 533.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "SB8986775",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-10-25 13:00:00",
+    "departure_time": "2023-10-25 15:20:00",
+    "total_amount": 547.5,
+    "total_sessions": 2,
+    "satisfaction": "4.7/5",
+    "service_items": [
+      {
+        "id": 26,
+        "project_name": "草本熏蒸SPA",
+        "beautician_name": "陈莉",
+        "unit_price": 197.5,
+        "is_specified": false
+      },
+      {
+        "id": 27,
+        "project_name": "头皮护理",
+        "beautician_name": "王芳",
+        "unit_price": 350.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S95FEE79D",
+    "customer_id": "C002",
+    "customer_name": "张美玲",
+    "service_date": "2023-11-02 11:00:00",
+    "departure_time": "2023-11-02 13:30:00",
+    "total_amount": 198.0,
+    "total_sessions": 1,
+    "satisfaction": "4.9/5",
+    "service_items": [
+      {
+        "id": 28,
+        "project_name": "经络排毒塑身",
+        "beautician_name": "王芳",
+        "unit_price": 198.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "SB7D24A40",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-08-05 20:15:00",
+    "departure_time": "2023-08-05 21:45:00",
+    "total_amount": 293.0,
+    "total_sessions": 1,
+    "satisfaction": "3.0/5",
+    "service_items": [
+      {
+        "id": 29,
+        "project_name": "极光净透泡泡",
+        "beautician_name": "张莉",
+        "unit_price": 293.0,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "SC106761D",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-08-12 19:30:00",
+    "departure_time": "2023-08-12 21:00:00",
+    "total_amount": 480.0,
+    "total_sessions": 1,
+    "satisfaction": "4.0/5",
+    "service_items": [
+      {
+        "id": 30,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "周杰",
+        "unit_price": 480.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S11BAB4D0",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-09-02 20:45:00",
+    "departure_time": "2023-09-02 22:15:00",
+    "total_amount": 1840.0,
+    "total_sessions": 2,
+    "satisfaction": "4.0/5",
+    "service_items": [
+      {
+        "id": 31,
+        "project_name": "黄金射频紧致疗程",
+        "beautician_name": "周杰",
+        "unit_price": 1360.0,
+        "is_specified": true
+      },
+      {
+        "id": 32,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "张莉",
+        "unit_price": 480.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "SE1F68EBE",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-09-16 21:00:00",
+    "departure_time": "2023-09-16 23:00:00",
+    "total_amount": 533.0,
+    "total_sessions": 1,
+    "satisfaction": "4.5/5",
+    "service_items": [
+      {
+        "id": 33,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "周杰",
+        "unit_price": 533.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S511BB1D6",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-09-30 18:30:00",
+    "departure_time": "2023-09-30 20:00:00",
+    "total_amount": 293.0,
+    "total_sessions": 1,
+    "satisfaction": "4.8/5",
+    "service_items": [
+      {
+        "id": 34,
+        "project_name": "极光净透泡泡",
+        "beautician_name": "周杰",
+        "unit_price": 293.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S9B3E4A20",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-10-12 19:15:00",
+    "departure_time": "2023-10-12 21:45:00",
+    "total_amount": 1360.0,
+    "total_sessions": 1,
+    "satisfaction": "4.2/5",
+    "service_items": [
+      {
+        "id": 35,
+        "project_name": "黄金射频紧致疗程",
+        "beautician_name": "周杰",
+        "unit_price": 1360.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "SB37403F8",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-10-25 20:30:00",
+    "departure_time": "2023-10-25 22:00:00",
+    "total_amount": 480.0,
+    "total_sessions": 1,
+    "satisfaction": "4.6/5",
+    "service_items": [
+      {
+        "id": 36,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "周杰",
+        "unit_price": 480.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S938BF1C7",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-11-05 21:00:00",
+    "departure_time": "2023-11-05 23:30:00",
+    "total_amount": 730.5,
+    "total_sessions": 2,
+    "satisfaction": "4.7/5",
+    "service_items": [
+      {
+        "id": 37,
+        "project_name": "帝王艾灸调理",
+        "beautician_name": "周杰",
+        "unit_price": 533.0,
+        "is_specified": true
+      },
+      {
+        "id": 38,
+        "project_name": "草本熏蒸SPA",
+        "beautician_name": "陈莉",
+        "unit_price": 197.5,
+        "is_specified": false
+      }
+    ]
+  },
+  {
+    "service_id": "S5BEBA47C",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-11-18 18:45:00",
+    "departure_time": "2023-11-18 20:15:00",
+    "total_amount": 293.0,
+    "total_sessions": 1,
+    "satisfaction": "4.3/5",
+    "service_items": [
+      {
+        "id": 39,
+        "project_name": "极光净透泡泡",
+        "beautician_name": "周杰",
+        "unit_price": 293.0,
+        "is_specified": true
+      }
+    ]
+  },
+  {
+    "service_id": "S10F71EB5",
+    "customer_id": "C003",
+    "customer_name": "王思媛",
+    "service_date": "2023-12-01 19:00:00",
+    "departure_time": "2023-12-01 21:30:00",
+    "total_amount": 1840.0,
+    "total_sessions": 2,
+    "satisfaction": "4.9/5",
+    "service_items": [
+      {
+        "id": 40,
+        "project_name": "黄金射频紧致疗程",
+        "beautician_name": "周杰",
+        "unit_price": 1360.0,
+        "is_specified": true
+      },
+      {
+        "id": 41,
+        "project_name": "冰肌焕颜护理",
+        "beautician_name": "王芳",
+        "unit_price": 480.0,
+        "is_specified": false
+      }
+    ]
+  }
+]

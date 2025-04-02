@@ -1,0 +1,480 @@
+<view class="container">
+  <!-- 加载状态显示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading"></view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 主内容区域 -->
+  <view class="content" wx:else>
+    <view class="header">
+      <text class="title">{{isEdit ? '编辑客户' : '新增客户'}}</text>
+    </view>
+
+    <!-- 标签页导航 -->
+    <view class="tabs">
+      <view class="tab {{currentTab === 'basic' ? 'active' : ''}}" 
+            bindtap="switchTab" data-tab="basic">基本信息</view>
+      <view class="tab {{currentTab === 'family' ? 'active' : ''}}" 
+            bindtap="switchTab" data-tab="family">家庭居住</view>
+      <view class="tab {{currentTab === 'personality' ? 'active' : ''}}" 
+            bindtap="switchTab" data-tab="personality">个性习惯</view>
+      <view class="tab {{currentTab === 'health' ? 'active' : ''}}" 
+            bindtap="switchTab" data-tab="health">健康记录</view>
+      <view class="tab {{currentTab === 'work' ? 'active' : ''}}" 
+            bindtap="switchTab" data-tab="work">职业收入</view>
+    </view>
+
+    <form bindsubmit="submitForm">
+      <!-- 基本信息标签页 -->
+      <view class="tab-content" hidden="{{currentTab !== 'basic'}}">
+        <view class="form-item">
+          <text class="label">姓名 <text class="required">*</text></text>
+          <input class="input {{errors.name ? 'error' : ''}}" 
+                 placeholder="请输入客户姓名" 
+                 value="{{customer.name}}" 
+                 data-field="name" 
+                 bindinput="handleInput" />
+          <text class="error-message" wx:if="{{errors.name}}">{{errors.name}}</text>
+        </view>
+
+        <view class="form-item">
+          <text class="label">性别</text>
+          <radio-group class="radio-group" data-field="gender" bindchange="handleRadioChange">
+            <label class="radio" wx:for="{{genderOptions}}" wx:key="*this">
+              <radio value="{{item}}" checked="{{customer.gender === item}}" />
+              <text>{{item}}</text>
+            </label>
+          </radio-group>
+        </view>
+
+        <view class="form-item">
+          <text class="label">年龄</text>
+          <input class="input {{errors.age ? 'error' : ''}}" 
+                 type="number" 
+                 placeholder="请输入年龄" 
+                 value="{{customer.age}}" 
+                 data-field="age" 
+                 bindinput="handleInput" />
+          <text class="error-message" wx:if="{{errors.age}}">{{errors.age}}</text>
+        </view>
+
+        <view class="form-item">
+          <text class="label">所属门店</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{storeOptions}}" 
+                  value="{{storeOptions.indexOf(customer.store)}}" 
+                  data-field="store" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.store}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- 家庭居住标签页 -->
+      <view class="tab-content" hidden="{{currentTab !== 'family'}}">
+        <view class="form-item">
+          <text class="label">家乡</text>
+          <input class="input" 
+                 placeholder="请输入家乡" 
+                 value="{{customer.hometown}}" 
+                 data-field="hometown" 
+                 bindinput="handleInput" />
+        </view>
+
+        <view class="form-item">
+          <text class="label">居住地</text>
+          <input class="input" 
+                 placeholder="请输入居住地" 
+                 value="{{customer.residence}}" 
+                 data-field="residence" 
+                 bindinput="handleInput" />
+        </view>
+
+        <view class="form-item">
+          <text class="label">居住年限</text>
+          <input class="input" 
+                 placeholder="请输入居住年限" 
+                 value="{{customer.residence_years}}" 
+                 data-field="residence_years" 
+                 bindinput="handleInput" />
+        </view>
+
+        <view class="form-item">
+          <text class="label">家庭结构</text>
+          <input class="input" 
+                 placeholder="例如: 核心家庭/大家庭等" 
+                 value="{{customer.family_structure}}" 
+                 data-field="family_structure" 
+                 bindinput="handleInput" />
+        </view>
+
+        <view class="form-item">
+          <text class="label">家庭年龄分布</text>
+          <textarea class="textarea" 
+                    placeholder="例如: 丈夫45岁，子女20岁等" 
+                    value="{{customer.family_age_distribution}}" 
+                    data-field="family_age_distribution" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">居住条件</text>
+          <textarea class="textarea" 
+                    placeholder="例如: 独栋别墅/高层公寓等" 
+                    value="{{customer.living_condition}}" 
+                    data-field="living_condition" 
+                    bindinput="handleInput"></textarea>
+        </view>
+      </view>
+
+      <!-- 个性习惯标签页 -->
+      <view class="tab-content" hidden="{{currentTab !== 'personality'}}">
+        <view class="form-item">
+          <text class="label">性格标签</text>
+          <textarea class="textarea" 
+                    placeholder="例如: 开朗/内向/追求完美等" 
+                    value="{{customer.personality_tags}}" 
+                    data-field="personality_tags" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">消费决策方式</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{consumptionDecisionOptions}}" 
+                  value="{{consumptionDecisionOptions.indexOf(customer.consumption_decision)}}" 
+                  data-field="consumption_decision" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.consumption_decision || '请选择'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="label">风险敏感度</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{riskSensitivityOptions}}" 
+                  value="{{riskSensitivityOptions.indexOf(customer.risk_sensitivity)}}" 
+                  data-field="risk_sensitivity" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.risk_sensitivity || '请选择'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="label">兴趣爱好</text>
+          <textarea class="textarea" 
+                    placeholder="例如: 旅游/阅读/运动等" 
+                    value="{{customer.hobbies}}" 
+                    data-field="hobbies" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">日常作息</text>
+          <textarea class="textarea" 
+                    placeholder="例如: 早睡早起/夜猫子等" 
+                    value="{{customer.routine}}" 
+                    data-field="routine" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">饮食偏好</text>
+          <textarea class="textarea" 
+                    placeholder="例如: 素食/低碳水/无糖等" 
+                    value="{{customer.diet_preference}}" 
+                    data-field="diet_preference" 
+                    bindinput="handleInput"></textarea>
+        </view>
+      </view>
+
+      <!-- 健康记录标签页 -->
+      <view class="tab-content" hidden="{{currentTab !== 'health'}}">
+        <!-- 皮肤状况 -->
+        <view class="section-title">皮肤状况</view>
+        
+        <view class="form-item">
+          <text class="label">肤质类型</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{skinTypeOptions}}" 
+                  value="{{skinTypeOptions.indexOf(customer.skin_type)}}" 
+                  data-field="skin_type" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.skin_type || '请选择'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="label">水油平衡</text>
+          <textarea class="textarea" 
+                    placeholder="请描述皮肤水油平衡状况" 
+                    value="{{customer.skin_oil_balance}}" 
+                    data-field="skin_oil_balance" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">毛孔与黑头</text>
+          <textarea class="textarea" 
+                    placeholder="请描述毛孔和黑头情况" 
+                    value="{{customer.pore_condition}}" 
+                    data-field="pore_condition" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">皱纹与纹理</text>
+          <textarea class="textarea" 
+                    placeholder="请描述皮肤皱纹和纹理情况" 
+                    value="{{customer.wrinkle_texture}}" 
+                    data-field="wrinkle_texture" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">色素沉着</text>
+          <textarea class="textarea" 
+                    placeholder="请描述色素沉着情况" 
+                    value="{{customer.pigmentation}}" 
+                    data-field="pigmentation" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">光老化与炎症</text>
+          <textarea class="textarea" 
+                    placeholder="请描述光老化和炎症情况" 
+                    value="{{customer.photoaging}}" 
+                    data-field="photoaging" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <!-- 中医体质 -->
+        <view class="section-title">中医体质</view>
+
+        <view class="form-item">
+          <text class="label">体质类型</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{tcmConstitutionOptions}}" 
+                  value="{{tcmConstitutionOptions.indexOf(customer.tcm_constitution)}}" 
+                  data-field="tcm_constitution" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.tcm_constitution || '请选择'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="label">舌象特征</text>
+          <textarea class="textarea" 
+                    placeholder="请描述舌象特征" 
+                    value="{{customer.tongue_diagnosis}}" 
+                    data-field="tongue_diagnosis" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">脉象数据</text>
+          <textarea class="textarea" 
+                    placeholder="请描述脉象数据" 
+                    value="{{customer.pulse_diagnosis}}" 
+                    data-field="pulse_diagnosis" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <!-- 生活习惯 -->
+        <view class="section-title">生活习惯</view>
+
+        <view class="form-item">
+          <text class="label">作息规律</text>
+          <textarea class="textarea" 
+                    placeholder="请描述作息规律" 
+                    value="{{customer.daily_schedule}}" 
+                    data-field="daily_schedule" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">运动频率</text>
+          <textarea class="textarea" 
+                    placeholder="请描述运动频率" 
+                    value="{{customer.exercise_frequency}}" 
+                    data-field="exercise_frequency" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">饮食禁忌</text>
+          <textarea class="textarea" 
+                    placeholder="请描述饮食禁忌" 
+                    value="{{customer.diet_taboo}}" 
+                    data-field="diet_taboo" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <!-- 护理需求 -->
+        <view class="section-title">护理需求</view>
+
+        <view class="form-item">
+          <text class="label">时间灵活度</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{timeFlexibilityOptions}}" 
+                  value="{{timeFlexibilityOptions.indexOf(customer.time_flexibility)}}" 
+                  data-field="time_flexibility" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.time_flexibility || '请选择'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="label">手法力度偏好</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{massagePreferenceOptions}}" 
+                  value="{{massagePreferenceOptions.indexOf(customer.massage_preference)}}" 
+                  data-field="massage_preference" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.massage_preference || '请选择'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="label">环境氛围</text>
+          <textarea class="textarea" 
+                    placeholder="请描述期望的环境氛围" 
+                    value="{{customer.environment_preference}}" 
+                    data-field="environment_preference" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <!-- 美容健康目标 -->
+        <view class="section-title">美容健康目标</view>
+
+        <view class="form-item">
+          <text class="label">短期美丽目标</text>
+          <textarea class="textarea" 
+                    placeholder="请描述短期美丽目标" 
+                    value="{{customer.short_term_beauty}}" 
+                    data-field="short_term_beauty" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">长期美丽目标</text>
+          <textarea class="textarea" 
+                    placeholder="请描述长期美丽目标" 
+                    value="{{customer.long_term_beauty}}" 
+                    data-field="long_term_beauty" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">短期健康目标</text>
+          <textarea class="textarea" 
+                    placeholder="请描述短期健康目标" 
+                    value="{{customer.short_term_health}}" 
+                    data-field="short_term_health" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">长期健康目标</text>
+          <textarea class="textarea" 
+                    placeholder="请描述长期健康目标" 
+                    value="{{customer.long_term_health}}" 
+                    data-field="long_term_health" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <!-- 健康记录 -->
+        <view class="section-title">健康记录</view>
+
+        <view class="form-item">
+          <text class="label">医美操作史</text>
+          <textarea class="textarea" 
+                    placeholder="请描述医美操作史" 
+                    value="{{customer.medical_cosmetic_history}}" 
+                    data-field="medical_cosmetic_history" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">大健康服务史</text>
+          <textarea class="textarea" 
+                    placeholder="请描述大健康服务史" 
+                    value="{{customer.health_service_history}}" 
+                    data-field="health_service_history" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">过敏史</text>
+          <textarea class="textarea" 
+                    placeholder="请描述过敏史" 
+                    value="{{customer.allergy_history}}" 
+                    data-field="allergy_history" 
+                    bindinput="handleInput"></textarea>
+        </view>
+
+        <view class="form-item">
+          <text class="label">重大疾病历史</text>
+          <textarea class="textarea" 
+                    placeholder="请描述重大疾病历史" 
+                    value="{{customer.major_disease_history}}" 
+                    data-field="major_disease_history" 
+                    bindinput="handleInput"></textarea>
+        </view>
+      </view>
+
+      <!-- 职业收入标签页 -->
+      <view class="tab-content" hidden="{{currentTab !== 'work'}}">
+        <view class="form-item">
+          <text class="label">职业</text>
+          <input class="input" 
+                 placeholder="请输入职业" 
+                 value="{{customer.occupation}}" 
+                 data-field="occupation" 
+                 bindinput="handleInput" />
+        </view>
+
+        <view class="form-item">
+          <text class="label">工作单位类型</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{workUnitTypeOptions}}" 
+                  value="{{workUnitTypeOptions.indexOf(customer.work_unit_type)}}" 
+                  data-field="work_unit_type" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.work_unit_type || '请选择'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <text class="label">年收入</text>
+          <picker class="picker" 
+                  mode="selector" 
+                  range="{{annualIncomeOptions}}" 
+                  value="{{annualIncomeOptions.indexOf(customer.annual_income)}}" 
+                  data-field="annual_income" 
+                  bindchange="handlePickerChange">
+            <view class="picker-text">{{customer.annual_income || '请选择'}}</view>
+          </picker>
+        </view>
+      </view>
+
+      <!-- 按钮区域 -->
+      <view class="buttons">
+        <button class="btn btn-cancel" bindtap="cancelForm">取消</button>
+        <button class="btn btn-submit" 
+                form-type="submit" 
+                disabled="{{submitting}}">{{submitting ? '保存中...' : '保存'}}</button>
+      </view>
+    </form>
+  </view>
+</view>

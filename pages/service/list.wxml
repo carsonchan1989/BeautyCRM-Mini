@@ -1,0 +1,106 @@
+<!-- service/list.wxml - 服务记录列表页 -->
+
+<view class="container">
+  <view class="header">
+    <view class="title">服务记录管理</view>
+    <view class="add-btn" bindtap="addService">新增服务</view>
+  </view>
+  
+  <!-- 搜索过滤区域 -->
+  <view class="search-container">
+    <view class="search-item">
+      <view class="search-label">客户搜索:</view>
+      <input class="search-input" placeholder="输入客户姓名" bindinput="searchCustomerByName" value="{{searchForm.customerName}}" />
+      <view class="clear-btn" wx:if="{{searchCustomer}}" bindtap="clearCustomerFilter">清除</view>
+    </view>
+    
+    <view class="search-item">
+      <view class="search-label">服务日期:</view>
+      <view class="date-picker" bindtap="showDatePicker">
+        <text wx:if="{{searchDate}}">{{searchDate}}</text>
+        <text wx:else class="placeholder">选择日期</text>
+      </view>
+      <view class="clear-btn" wx:if="{{searchDate}}" bindtap="clearDateFilter">清除</view>
+    </view>
+    
+    <!-- 客户搜索结果下拉列表 -->
+    <view class="customer-dropdown" wx:if="{{customers.length > 0}}">
+      <view class="dropdown-item" 
+            wx:for="{{customers}}" 
+            wx:key="id" 
+            data-id="{{item.id}}" 
+            data-name="{{item.name}}" 
+            bindtap="selectCustomer">
+        {{item.name}} - {{item.id}}
+      </view>
+    </view>
+  </view>
+  
+  <!-- 日期选择器 -->
+  <picker mode="date" wx:if="{{showDatePicker}}" bindchange="bindDateChange">
+    <view class="picker-backdrop"></view>
+  </picker>
+  
+  <!-- 加载中提示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading"></view>
+  </view>
+  
+  <!-- 服务记录列表 -->
+  <view class="service-list" wx:if="{{services.length > 0}}">
+    <view class="service-item" 
+          wx:for="{{services}}" 
+          wx:key="id" 
+          bindtap="viewServiceDetail" 
+          data-id="{{item.id}}">
+      <view class="service-header">
+        <view class="service-date">{{item.service_date}}</view>
+        <view class="customer-name">{{item.customer_name}}</view>
+      </view>
+      
+      <view class="service-content">
+        <view class="service-details">
+          <block wx:if="{{item.service_items.length > 0}}">
+            <view class="service-projects">
+              <view class="project" wx:for="{{item.service_items}}" wx:for-item="project" wx:key="id">
+                {{project.service_name}}
+              </view>
+            </view>
+          </block>
+          <view class="no-projects" wx:else>无服务项目</view>
+        </view>
+        
+        <view class="service-info">
+          <view class="info-item">
+            <text class="label">总金额:</text>
+            <text class="value">¥{{item.total_amount || '0'}}</text>
+          </view>
+          <view class="info-item" wx:if="{{item.beautician}}">
+            <text class="label">美容师:</text>
+            <text class="value">{{item.beautician}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="service-action">
+        <view class="action-btn edit" catchtap="editService" data-id="{{item.id}}">编辑</view>
+        <view class="action-btn delete" catchtap="deleteService" data-id="{{item.id}}">删除</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空状态提示 -->
+  <view class="empty-container" wx:if="{{!loading && services.length === 0}}">
+    <image class="empty-image" src="/assets/icons/empty.png" mode="aspectFit"></image>
+    <view class="empty-text">暂无服务记录</view>
+    <view class="empty-tips" wx:if="{{searchCustomer || searchDate}}">请尝试清除筛选条件</view>
+    <view class="empty-tips" wx:else>点击上方"新增服务"按钮添加</view>
+  </view>
+  
+  <!-- 分页控制 -->
+  <view class="pagination" wx:if="{{totalCount > pageSize}}">
+    <view class="page-btn {{currentPage === 1 ? 'disabled' : ''}}" bindtap="prevPage">上一页</view>
+    <view class="page-info">{{currentPage}}/{{Math.ceil(totalCount/pageSize)}}</view>
+    <view class="page-btn {{currentPage * pageSize >= totalCount ? 'disabled' : ''}}" bindtap="nextPage">下一页</view>
+  </view>
+</view>

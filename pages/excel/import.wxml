@@ -1,0 +1,163 @@
+<!-- pages/excel/import.wxml -->
+<view class="container">
+  <view class="header">
+    <view class="back-btn" bindtap="goBack">
+      <text class="iconfont icon-back"></text>
+    </view>
+    <view class="title">Excel数据导入</view>
+    <view class="action-btn" bindtap="toggleSettings">
+      <text class="iconfont icon-settings"></text>
+    </view>
+  </view>
+  
+  <view class="content">
+    <!-- 设置面板 -->
+    <view class="section settings-section" wx:if="{{showSettings}}">
+      <view class="section-title">导入设置</view>
+      <view class="settings-item">
+        <text class="label">调试模式:</text>
+        <switch checked="{{debugMode}}" bindchange="toggleDebugMode" color="#1aad19"/>
+      </view>
+      <view class="settings-help">开启调试模式可以查看更多技术信息，帮助排查问题</view>
+      
+      <view class="settings-title">支持的工作表:</view>
+      <view class="sheet-list">
+        <view class="sheet-item" wx:for="{{validSheetNames}}" wx:key="index">
+          <text class="sheet-label">{{item.label}}:</text>
+          <text class="sheet-matches">{{item.matches.join(', ')}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section file-section">
+      <view class="section-title">选择Excel文件</view>
+      
+      <view class="file-upload" bindtap="chooseExcel">
+        <text class="iconfont icon-excel"></text>
+        <text>点击选择Excel文件</text>
+      </view>
+
+      <view class="file-list" wx:if="{{fileList.length > 0}}">
+        <view class="file-item" wx:for="{{fileList}}" wx:key="index">
+          <view class="file-info">
+            <view class="file-name">{{item.name}}</view>
+            <view class="file-meta">
+              <text class="file-size">{{item.size}}</text>
+              <text class="file-time">{{item.time}}</text>
+            </view>
+          </view>
+          <view class="file-actions">
+            <view class="delete-btn" catchtap="clearFile">
+              <text class="iconfont icon-delete"></text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="error-message" wx:if="{{errorMessage}}">
+        <text class="iconfont icon-error"></text>
+        <text>{{errorMessage}}</text>
+      </view>
+    </view>
+
+    <view class="section upload-section" wx:if="{{fileList.length > 0}}">
+      <view class="button-group">
+        <button class="secondary-btn" bindtap="preCheckExcel" disabled="{{uploading || analyzing}}">
+          预检查文件
+        </button>
+        <button class="primary-btn" bindtap="uploadAndAnalyze" disabled="{{uploading || analyzing}}">
+          开始导入数据
+        </button>
+      </view>
+
+      <view class="progress-container" wx:if="{{uploading}}">
+        <view class="progress-label">文件上传中 ({{uploadProgress}}%)</view>
+        <progress percent="{{uploadProgress}}" active stroke-width="3" activeColor="#1aad19"/>
+      </view>
+
+      <view class="progress-container" wx:if="{{analyzing}}">
+        <view class="progress-label">数据分析中 ({{analyzeProgress}}%)</view>
+        <progress percent="{{analyzeProgress}}" active stroke-width="3" activeColor="#10aeff"/>
+      </view>
+    </view>
+
+    <view class="section result-section" wx:if="{{importResult}}">
+      <view class="section-title">导入结果</view>
+
+      <view class="result-card">
+        <view class="result-header">
+          <text class="iconfont icon-success"></text>
+          <text>{{importResult.preCheckResult ? '预检查通过' : '导入成功'}}</text>
+        </view>
+
+        <view class="result-details">
+          <view class="result-item">
+            <text class="label">文件名:</text>
+            <text class="value">{{importResult.filename}}</text>
+          </view>
+          <view class="result-item">
+            <text class="label">处理时间:</text>
+            <text class="value">{{importResult.time}}</text>
+          </view>
+          <view class="divider"></view>
+          
+          <block wx:if="{{importResult.preCheckResult}}">
+            <view class="result-item">
+              <text class="label">工作表:</text>
+              <text class="value">{{importResult.stats.totalSheets || 0}}个</text>
+            </view>
+            <view class="result-item" wx:if="{{importResult.sheets && importResult.sheets.length > 0}}">
+              <text class="label">检测到的表:</text>
+              <text class="value">{{importResult.sheets.join(', ')}}</text>
+            </view>
+            <view class="result-message">{{importResult.message}}</view>
+          </block>
+          <block wx:else>
+            <view class="result-item">
+              <text class="label">客户记录:</text>
+              <text class="value">{{importResult.stats.customers || 0}}条</text>
+            </view>
+            <view class="result-item">
+              <text class="label">健康档案:</text>
+              <text class="value">{{importResult.stats.health_records || 0}}条</text>
+            </view>
+            <view class="result-item">
+              <text class="label">消费记录:</text>
+              <text class="value">{{importResult.stats.consumptions || 0}}条</text>
+            </view>
+            <view class="result-item">
+              <text class="label">服务记录:</text>
+              <text class="value">{{importResult.stats.services || 0}}条</text>
+            </view>
+            <view class="result-item">
+              <text class="label">沟通记录:</text>
+              <text class="value">{{importResult.stats.communications || 0}}条</text>
+            </view>
+          </block>
+        </view>
+
+        <view class="result-actions">
+          <block wx:if="{{!importResult.preCheckResult}}">
+            <button class="primary-btn" bindtap="viewPreview">查看数据预览</button>
+          </block>
+          <block wx:else>
+            <button class="primary-btn" bindtap="uploadAndAnalyze">确认导入</button>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 调试信息区域 -->
+    <view class="section debug-section" wx:if="{{debugMode && Object.keys(debugInfo).length > 0}}">
+      <view class="section-title">调试信息</view>
+      <view class="debug-info">
+        <block wx:for="{{Object.entries(debugInfo)}}" wx:key="index" wx:for-item="entry">
+          <view class="debug-item">
+            <text class="debug-label">{{entry[0]}}:</text>
+            <text class="debug-value">{{JSON.stringify(entry[1])}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+  </view>
+</view>

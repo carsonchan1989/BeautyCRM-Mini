@@ -1,0 +1,76 @@
+<view class="container">
+  <view class="header">
+    <text class="title">{{isEdit ? '编辑项目' : '新增项目'}}</text>
+  </view>
+
+  <view class="form-container">
+    <view class="form-item">
+      <text class="label">项目名称</text>
+      <input class="input" 
+             value="{{name}}"
+             placeholder="请输入项目名称"
+             data-field="name"
+             bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目类别</text>
+      <picker class="picker"
+              mode="selector"
+              range="{{categories}}"
+              value="{{selectedCategory}}"
+              bindchange="onCategoryChange">
+        <view class="picker-inner">
+          <text>{{category || '请选择项目类别'}}</text>
+          <text class="picker-arrow">></text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目功效</text>
+      <textarea class="textarea"
+                value="{{effects}}"
+                placeholder="请输入项目功效"
+                data-field="effects"
+                bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">原理描述</text>
+      <textarea class="textarea"
+                value="{{description}}"
+                placeholder="请输入原理描述"
+                data-field="description"
+                bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">疗程价格</text>
+      <input class="input"
+             type="digit"
+             value="{{price}}"
+             placeholder="请输入价格"
+             data-field="price"
+             bindinput="onInput" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">疗程次数</text>
+      <input class="input"
+             type="number"
+             value="{{sessions}}"
+             placeholder="请输入次数"
+             data-field="sessions"
+             bindinput="onInput" />
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="btn-submit"
+            loading="{{loading}}"
+            bindtap="onSubmit">
+      {{isEdit ? '保存修改' : '创建项目'}}
+    </button>
+  </view>
+</view>

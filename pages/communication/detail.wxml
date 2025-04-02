@@ -1,0 +1,106 @@
+<!-- communication/detail.wxml - 沟通记录详情页面 -->
+
+<view class="container">
+  <!-- 加载中提示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading"></view>
+  </view>
+  
+  <block wx:if="{{!loading && communication}}">
+    <view class="header">
+      <view class="back-btn" bindtap="navigateBack">
+        <view class="back-icon"></view>
+        <text>返回</text>
+      </view>
+      <view class="title">沟通详情</view>
+      <view class="action-group">
+        <view class="action-btn edit" bindtap="editCommunication">编辑</view>
+        <view class="action-btn delete" bindtap="deleteCommunication">删除</view>
+      </view>
+    </view>
+    
+    <view class="comm-card">
+      <view class="card-section">
+        <view class="section-title">基本信息</view>
+        <view class="info-row">
+          <view class="info-label">沟通时间</view>
+          <view class="info-value">{{communication.communication_date}}</view>
+        </view>
+        <view class="info-row">
+          <view class="info-label">客户信息</view>
+          <view class="info-value customer-info" bindtap="viewCustomer">
+            <text>{{customer.name || communication.customer_name || '未知客户'}}</text>
+            <text class="customer-id" wx:if="{{communication.customer_id}}">(ID: {{communication.customer_id}})</text>
+            <view class="view-link">查看详情</view>
+          </view>
+        </view>
+        <view class="info-row" wx:if="{{communication.communication_type}}">
+          <view class="info-label">沟通方式</view>
+          <view class="info-value">{{communication.communication_type}}</view>
+        </view>
+        <view class="info-row" wx:if="{{communication.staff_name}}">
+          <view class="info-label">接待人员</view>
+          <view class="info-value">{{communication.staff_name}}</view>
+        </view>
+      </view>
+      
+      <view class="card-section">
+        <view class="section-title">沟通内容</view>
+        <view class="comm-content" wx:if="{{communication.communication_content}}">
+          {{communication.communication_content}}
+        </view>
+        <view class="empty-tip" wx:else>
+          暂无沟通内容记录
+        </view>
+      </view>
+      
+      <view class="card-section" wx:if="{{communication.customer_feedback}}">
+        <view class="section-title">客户反馈</view>
+        <view class="comm-content feedback">
+          {{communication.customer_feedback}}
+        </view>
+      </view>
+      
+      <view class="card-section" wx:if="{{communication.follow_up_action}}">
+        <view class="section-title">后续跟进</view>
+        <view class="comm-content follow-up">
+          {{communication.follow_up_action}}
+        </view>
+      </view>
+      
+      <view class="card-section">
+        <view class="section-title">创建与更新信息</view>
+        <view class="info-row">
+          <view class="info-label">创建时间</view>
+          <view class="info-value">{{communication.created_at}}</view>
+        </view>
+        <view class="info-row" wx:if="{{communication.updated_at && communication.updated_at !== communication.created_at}}">
+          <view class="info-label">更新时间</view>
+          <view class="info-value">{{communication.updated_at}}</view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 快速操作 -->
+    <view class="quick-actions" wx:if="{{customer}}">
+      <view class="section-title">快速操作</view>
+      <view class="action-buttons">
+        <view class="action-button call" bindtap="makeCall" data-phone="{{customer.phone}}" wx:if="{{customer.phone}}">
+          <view class="action-icon call-icon"></view>
+          <view class="action-text">拨打电话</view>
+        </view>
+        <view class="action-button add-comm" bindtap="addCommunication">
+          <view class="action-icon add-icon"></view>
+          <view class="action-text">新增沟通</view>
+        </view>
+      </view>
+    </view>
+  </block>
+  
+  <!-- 记录不存在提示 -->
+  <view class="not-found" wx:if="{{!loading && !communication}}">
+    <image class="not-found-image" src="/assets/icons/not-found.png" mode="aspectFit"></image>
+    <view class="not-found-text">沟通记录不存在或已被删除</view>
+    <view class="back-to-list" bindtap="navigateBack">返回列表</view>
+  </view>
+</view>

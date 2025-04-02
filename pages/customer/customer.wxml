@@ -1,0 +1,116 @@
+<view class="container">
+  <!-- 标题栏 -->
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">客户详情</view>
+    <view class="edit-button" bindtap="editCustomer" wx:if="{{customer}}">
+      <text>编辑</text>
+    </view>
+  </view>
+  
+  <!-- 错误信息 -->
+  <view class="error-message" wx:if="{{errorMessage}}">
+    <icon type="warn" size="18"></icon>
+    <text>{{errorMessage}}</text>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text>加载中...</text>
+  </view>
+  
+  <!-- 客户信息卡片 -->
+  <view class="customer-card" wx:if="{{customer && !isLoading}}">
+    <view class="customer-header">
+      <view class="avatar-box">
+        <text class="avatar-text">{{customer.name ? customer.name.substring(0, 1) : '客'}}</text>
+      </view>
+      <view class="customer-basic">
+        <view class="customer-name">{{customer.name || '未命名客户'}}</view>
+        <view class="customer-tags">
+          <text class="customer-tag">{{customer.gender || '未知'}}</text>
+          <text class="customer-tag" wx:if="{{customer.age}}">{{customer.age}}岁</text>
+          <text class="customer-tag member-tag">{{customer.memberLevel || '普通会员'}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="info-section">
+      <view class="section-title">基本信息</view>
+      <view class="info-grid">
+        <view class="info-item">
+          <text class="info-label">手机号</text>
+          <text class="info-value">{{customer.phone || '未填写'}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">所属门店</text>
+          <text class="info-value">{{customer.store || '总店'}}</text>
+        </view>
+        <view class="info-item" wx:if="{{customer.birthday}}">
+          <text class="info-label">生日</text>
+          <text class="info-value">{{customer.birthday}}</text>
+        </view>
+        <view class="info-item" wx:if="{{customer.memberCardNo}}">
+          <text class="info-label">会员卡号</text>
+          <text class="info-value">{{customer.memberCardNo}}</text>
+        </view>
+        <view class="info-item" wx:if="{{customer.address}}">
+          <text class="info-label">地址</text>
+          <text class="info-value address">{{customer.address}}</text>
+        </view>
+      </view>
+      
+      <view class="info-remarks" wx:if="{{customer.remarks}}">
+        <text class="remarks-label">备注：</text>
+        <text class="remarks-content">{{customer.remarks}}</text>
+      </view>
+    </view>
+    
+    <view class="action-buttons">
+      <button class="action-button report" bindtap="generateReport">
+        <text class="button-icon">📊</text>
+        <text>生成分析报告</text>
+      </button>
+      <button class="action-button consumption" bindtap="addConsumption">
+        <text class="button-icon">+</text>
+        <text>添加消费记录</text>
+      </button>
+    </view>
+  </view>
+  
+  <!-- 消费记录列表 -->
+  <view class="consumption-list" wx:if="{{customer && !isLoading}}">
+    <view class="list-header">
+      <text class="list-title">消费记录</text>
+      <text class="list-count">共{{consumptions.length}}条</text>
+    </view>
+    
+    <view class="list-content">
+      <view class="consumption-item" 
+            wx:for="{{consumptions}}" 
+            wx:key="index"
+            bindtap="viewConsumptionDetail"
+            data-index="{{index}}">
+        <view class="consumption-date">{{item.date}}</view>
+        <view class="consumption-info">
+          <view class="consumption-project">{{item.projectName}}</view>
+          <view class="consumption-detail">
+            <text class="technician" wx:if="{{item.technician}}">技师: {{item.technician}}</text>
+            <text class="payment" wx:if="{{item.paymentMethod}}">{{item.paymentMethod}}</text>
+          </view>
+        </view>
+        <view class="consumption-amount">¥{{item.amount}}</view>
+      </view>
+      
+      <!-- 空消费记录提示 -->
+      <view class="empty-tip" wx:if="{{consumptions.length === 0}}">
+        <icon type="info" size="40" color="#999"></icon>
+        <text>暂无消费记录</text>
+      </view>
+    </view>
+  </view>
+</view>

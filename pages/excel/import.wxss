@@ -1,0 +1,367 @@
+/* pages/excel/import.wxss */
+.container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn, .action-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333333;
+  flex: 1;
+  text-align: center;
+}
+
+.content {
+  flex: 1;
+  padding: 30rpx;
+}
+
+.section {
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  margin-bottom: 30rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 20rpx;
+  border-left: 8rpx solid #1aad19;
+  padding-left: 20rpx;
+}
+
+/* 设置面板 */
+.settings-section {
+  background-color: #f9f9f9;
+  border: 1px dashed #dddddd;
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.settings-help {
+  font-size: 24rpx;
+  color: #999999;
+  margin-bottom: 20rpx;
+}
+
+.settings-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin: 20rpx 0 10rpx;
+}
+
+.sheet-list {
+  background-color: #ffffff;
+  border-radius: 8rpx;
+  padding: 15rpx;
+}
+
+.sheet-item {
+  margin-bottom: 10rpx;
+}
+
+.sheet-label {
+  font-weight: bold;
+  margin-right: 10rpx;
+}
+
+.sheet-matches {
+  color: #666666;
+  font-size: 24rpx;
+}
+
+/* 文件上传区域 */
+.file-upload {
+  width: 100%;
+  height: 180rpx;
+  border: 2rpx dashed #dddddd;
+  border-radius: 8rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20rpx;
+  background-color: #f9f9f9;
+}
+
+.file-upload .iconfont {
+  font-size: 60rpx;
+  color: #1aad19;
+  margin-bottom: 10rpx;
+}
+
+.file-upload text:last-child {
+  font-size: 28rpx;
+  color: #666666;
+}
+
+.file-list {
+  margin-top: 20rpx;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-name {
+  font-size: 28rpx;
+  color: #333333;
+  margin-bottom: 10rpx;
+  font-weight: bold;
+}
+
+.file-meta {
+  display: flex;
+  align-items: center;
+}
+
+.file-size {
+  font-size: 24rpx;
+  color: #666666;
+  margin-right: 20rpx;
+}
+
+.file-time {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.file-actions {
+  display: flex;
+  align-items: center;
+}
+
+.delete-btn {
+  width: 60rpx;
+  height: 60rpx;
+  background-color: #f2f2f2;
+  border-radius: 30rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-btn .iconfont {
+  font-size: 32rpx;
+  color: #ff5252;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+  padding: 15rpx;
+  background-color: #fff2f0;
+  border-radius: 8rpx;
+}
+
+.error-message .iconfont {
+  font-size: 32rpx;
+  color: #ff5252;
+  margin-right: 10rpx;
+}
+
+.error-message text:last-child {
+  font-size: 26rpx;
+  color: #ff5252;
+  flex: 1;
+}
+
+/* 上传进度 */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.button-group button {
+  flex: 1;
+  margin: 0 10rpx;
+}
+
+.button-group button:first-child {
+  margin-left: 0;
+}
+
+.button-group button:last-child {
+  margin-right: 0;
+}
+
+.primary-btn {
+  background-color: #1aad19;
+  color: #ffffff;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  padding: 15rpx 0;
+}
+
+.secondary-btn {
+  background-color: #f2f2f2;
+  color: #333333;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  padding: 15rpx 0;
+}
+
+.progress-container {
+  margin-top: 20rpx;
+}
+
+.progress-label {
+  font-size: 26rpx;
+  color: #666666;
+  margin-bottom: 10rpx;
+}
+
+/* 结果卡片 */
+.result-card {
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.result-header {
+  background-color: #1aad19;
+  padding: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-header .iconfont {
+  font-size: 36rpx;
+  color: #ffffff;
+  margin-right: 10rpx;
+}
+
+.result-header text:last-child {
+  font-size: 32rpx;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.result-details {
+  padding: 20rpx;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15rpx;
+}
+
+.result-item .label {
+  font-size: 28rpx;
+  color: #666666;
+}
+
+.result-item .value {
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: bold;
+}
+
+.divider {
+  height: 1rpx;
+  background-color: #eeeeee;
+  margin: 15rpx 0;
+}
+
+.result-message {
+  font-size: 26rpx;
+  color: #1aad19;
+  padding: 15rpx;
+  text-align: center;
+  margin-top: 10rpx;
+  background-color: #f0fff0;
+  border-radius: 8rpx;
+}
+
+.result-actions {
+  padding: 20rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.result-actions .primary-btn {
+  width: 70%;
+}
+
+/* 调试信息区域 */
+.debug-section {
+  background-color: #f0f8ff;
+  border: 1px dashed #add6ff;
+}
+
+.debug-info {
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+  padding: 15rpx;
+  max-height: 600rpx;
+  overflow-y: auto;
+}
+
+.debug-item {
+  margin-bottom: 10rpx;
+  border-bottom: 1px dashed #eeeeee;
+  padding-bottom: 10rpx;
+}
+
+.debug-label {
+  font-size: 24rpx;
+  color: #0066cc;
+  font-weight: bold;
+}
+
+.debug-value {
+  font-size: 24rpx;
+  color: #333333;
+  word-break: break-all;
+  white-space: pre-wrap;
+  display: block;
+  margin-top: 5rpx;
+  background-color: #ffffff;
+  padding: 10rpx;
+  border-radius: 6rpx;
+}

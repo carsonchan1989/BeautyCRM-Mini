@@ -1,0 +1,190 @@
+<view class="container">
+  <!-- 标题栏 -->
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">生成分析报告</view>
+  </view>
+  
+  <!-- 错误信息 -->
+  <view class="error-message" wx:if="{{errorMessage}}">
+    <icon type="warn" size="18"></icon>
+    <text>{{errorMessage}}</text>
+  </view>
+  
+  <!-- 客户信息卡片 -->
+  <view class="customer-card" wx:if="{{customer}}">
+    <view class="customer-info">
+      <view class="avatar">
+        <text>{{customer.name ? customer.name.substring(0, 1) : '客'}}</text>
+      </view>
+      <view class="info">
+        <view class="name">{{customer.name || '未命名客户'}}</view>
+        <view class="tags">
+          <text class="tag">{{customer.gender || '未知'}}</text>
+          <text class="tag" wx:if="{{customer.age}}">{{customer.age}}岁</text>
+          <text class="tag" wx:if="{{customer.memberLevel}}">{{customer.memberLevel}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="customer-summary">
+      <view class="summary-item">
+        <text class="item-label">消费记录</text>
+        <text class="item-value">{{consumptions.length}}条</text>
+      </view>
+      <view class="summary-item">
+        <text class="item-label">最近消费</text>
+        <text class="item-value">{{consumptions[0].date || '无'}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 配置选项卡 -->
+  <view class="config-tabs">
+    <view class="tab {{activeTab === 'basic' ? 'active' : ''}}" 
+          bindtap="switchTab" 
+          data-tab="basic">
+      基础配置
+    </view>
+    <view class="tab {{activeTab === 'advanced' ? 'active' : ''}}" 
+          bindtap="switchTab" 
+          data-tab="advanced">
+      高级配置
+    </view>
+  </view>
+  
+  <!-- 基础配置 -->
+  <view class="config-content" hidden="{{activeTab !== 'basic'}}">
+    <view class="config-card">
+      <view class="card-title">报告内容</view>
+      
+      <view class="config-item">
+        <view class="item-label">包含基本信息</view>
+        <switch class="item-control" 
+                checked="{{reportConfig.includeBasicInfo}}" 
+                data-field="includeBasicInfo"
+                bindchange="updateSwitchConfig"
+                color="#10aeff"/>
+      </view>
+      
+      <view class="config-item">
+        <view class="item-label">包含消费历史</view>
+        <switch class="item-control" 
+                checked="{{reportConfig.includeConsumptionHistory}}" 
+                data-field="includeConsumptionHistory"
+                bindchange="updateSwitchConfig"
+                color="#10aeff"/>
+      </view>
+      
+      <view class="config-item">
+        <view class="item-label">包含肌肤分析</view>
+        <switch class="item-control" 
+                checked="{{reportConfig.includeSkinAnalysis}}" 
+                data-field="includeSkinAnalysis"
+                bindchange="updateSwitchConfig"
+                color="#10aeff"/>
+      </view>
+      
+      <view class="config-item">
+        <view class="item-label">包含个性化建议</view>
+        <switch class="item-control" 
+                checked="{{reportConfig.includeRecommendations}}" 
+                data-field="includeRecommendations"
+                bindchange="updateSwitchConfig"
+                color="#10aeff"/>
+      </view>
+      
+      <view class="config-item">
+        <view class="item-label">报告长度</view>
+        <radio-group class="length-options" 
+                    data-field="maxLength"
+                    bindchange="updateReportConfig">
+          <label class="radio-label">
+            <radio value="short" checked="{{reportConfig.maxLength === 'short'}}" color="#10aeff"/>
+            <text>简短</text>
+          </label>
+          <label class="radio-label">
+            <radio value="medium" checked="{{reportConfig.maxLength === 'medium'}}" color="#10aeff"/>
+            <text>中等</text>
+          </label>
+          <label class="radio-label">
+            <radio value="long" checked="{{reportConfig.maxLength === 'long'}}" color="#10aeff"/>
+            <text>详细</text>
+          </label>
+        </radio-group>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 高级配置 -->
+  <view class="config-content" hidden="{{activeTab !== 'advanced'}}">
+    <view class="config-card">
+      <view class="card-title">AI模型配置</view>
+      
+      <view class="config-item">
+        <view class="item-label">模型选择</view>
+        <picker range="{{['gpt-3.5-turbo', 'gpt-4']}}" 
+                value="{{['gpt-3.5-turbo', 'gpt-4'].indexOf(aiConfig.model)}}" 
+                data-field="model"
+                bindchange="updateAiConfig">
+          <view class="picker-view">
+            <text>{{aiConfig.model}}</text>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+      
+      <view class="config-item">
+        <view class="item-label">温度 ({{aiConfig.temperature}})</view>
+        <slider min="0" max="1" step="0.1" 
+                value="{{aiConfig.temperature}}" 
+                data-field="temperature"
+                bindchange="updateAiConfig"
+                activeColor="#10aeff"
+                show-value="{{false}}"
+                block-size="24"/>
+      </view>
+      
+      <view class="config-item">
+        <view class="item-label">最大Token ({{aiConfig.maxTokens}})</view>
+        <slider min="500" max="4000" step="500" 
+                value="{{aiConfig.maxTokens}}" 
+                data-field="maxTokens"
+                bindchange="updateAiConfig"
+                activeColor="#10aeff"
+                show-value="{{false}}"
+                block-size="24"/>
+      </view>
+      
+      <view class="config-item">
+        <view class="item-label">自定义提示词</view>
+        <textarea class="custom-prompt" 
+                 placeholder="输入自定义提示词（可选）" 
+                 value="{{aiConfig.customPrompt}}"
+                 data-field="customPrompt"
+                 bindinput="updateAiConfig"></textarea>
+      </view>
+      
+      <view class="reset-button" bindtap="resetConfig">
+        <text>重置为默认配置</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 生成按钮和进度 -->
+  <view class="action-section">
+    <block wx:if="{{isGenerating}}">
+      <view class="progress-bar">
+        <view class="progress-inner" style="width: {{generationProgress}}%"></view>
+      </view>
+      <view class="progress-text">正在生成报告 ({{generationProgress}}%)</view>
+    </block>
+    <block wx:else>
+      <button class="generate-button" bindtap="generateReport">
+        生成分析报告
+      </button>
+    </block>
+  </view>
+</view>

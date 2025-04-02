@@ -1,0 +1,624 @@
+{
+  "customers": [
+    {
+      "id": "C001",
+      "name": "林晓薇",
+      "gender": "女",
+      "age": 28,
+      "store": "分店A",
+      "hometown": "浙江杭州",
+      "residence": "上海浦东",
+      "residence_years": "6年",
+      "family_structure": "单身独居",
+      "family_age_distribution": "无",
+      "living_condition": "自有公寓",
+      "personality_tags": "精致悦己型",
+      "consumption_decision": "本人主导",
+      "risk_sensitivity": "低",
+      "hobbies": "护肤、健身",
+      "routine": "23:00-7:00",
+      "diet_preference": "轻食沙拉",
+      "menstrual_record": "记录",
+      "family_medical_history": "无",
+      "occupation": "时尚编辑",
+      "work_unit_type": "外资企业",
+      "annual_income": "35万"
+    },
+    {
+      "id": "C002",
+      "name": "张美玲",
+      "gender": "女",
+      "age": 45,
+      "store": "分店B",
+      "hometown": "广东广州",
+      "residence": "深圳福田",
+      "residence_years": "15年",
+      "family_structure": "三口之家（夫妻+1女）",
+      "family_age_distribution": "45-48岁，12岁",
+      "living_condition": "学区房",
+      "personality_tags": "务实谨慎型",
+      "consumption_decision": "共同决策",
+      "risk_sensitivity": "中",
+      "hobbies": "茶艺、插花",
+      "routine": "22:30-6:30",
+      "diet_preference": "粤菜清淡",
+      "menstrual_record": "无记录",
+      "family_medical_history": "高血压",
+      "occupation": "全职主妇",
+      "work_unit_type": "无",
+      "annual_income": "家庭年收入80万"
+    },
+    {
+      "id": "C003",
+      "name": "王思媛",
+      "gender": "女",
+      "age": 32,
+      "store": "分店C",
+      "hometown": "四川成都",
+      "residence": "北京朝阳",
+      "residence_years": "8年",
+      "family_structure": "新婚无孩",
+      "family_age_distribution": "32-35岁",
+      "living_condition": "租房",
+      "personality_tags": "冲动体验型",
+      "consumption_decision": "本人主导",
+      "risk_sensitivity": "高",
+      "hobbies": "网红探店、SPA",
+      "routine": "01:00-9:00",
+      "diet_preference": "火锅重辣",
+      "menstrual_record": "记录",
+      "family_medical_history": "糖尿病",
+      "occupation": "自媒体博主",
+      "work_unit_type": "自由职业",
+      "annual_income": "50万"
+    }
+  ],
+  "health_records": [
+    {
+      "customer_id": "C001",
+      "name": "林晓薇",
+      "skin_type": "混合偏油",
+      "oil_water_balance": "T区油U区干",
+      "pores_blackheads": "鼻翼黑头明显",
+      "wrinkles_texture": "眼周细纹",
+      "pigmentation": "轻微晒斑",
+      "photoaging_inflammation": "光老化II级",
+      "tcm_constitution": "湿热质",
+      "tongue_features": "舌红苔黄",
+      "pulse_data": "滑数",
+      "sleep_routine": "23:00-7:00",
+      "exercise_pattern": "每周3次瑜伽",
+      "diet_restrictions": "忌辛辣、嗜咖啡",
+      "care_time_flexibility": "周末灵活",
+      "massage_pressure_preference": "轻柔",
+      "environment_requirements": "香薰音乐",
+      "short_term_beauty_goal": "淡化黑头",
+      "long_term_beauty_goal": "抗初老",
+      "short_term_health_goal": "改善失眠",
+      "long_term_health_goal": "调节亚健康",
+      "medical_cosmetic_history": "无",
+      "wellness_service_history": "年度体检",
+      "major_disease_history": "无",
+      "allergies": "花粉过敏"
+    },
+    {
+      "customer_id": "C002",
+      "name": "张美玲",
+      "skin_type": "干性敏感",
+      "oil_water_balance": "全脸缺水",
+      "pores_blackheads": "无明显黑头",
+      "wrinkles_texture": "法令纹深",
+      "pigmentation": "无",
+      "photoaging_inflammation": "炎症反复",
+      "tcm_constitution": "气虚质",
+      "tongue_features": "舌淡苔白",
+      "pulse_data": "细弱",
+      "sleep_routine": "22:30-6:30",
+      "exercise_pattern": "每日散步",
+      "diet_restrictions": "忌海鲜、喜煲汤",
+      "care_time_flexibility": "工作日下午",
+      "massage_pressure_preference": "中度",
+      "environment_requirements": "私密安静",
+      "short_term_beauty_goal": "提升紧致",
+      "long_term_beauty_goal": "延缓衰老",
+      "short_term_health_goal": "调理气血",
+      "long_term_health_goal": "预防三高",
+      "medical_cosmetic_history": "无",
+      "wellness_service_history": "中医调理",
+      "major_disease_history": "高血压",
+      "allergies": "酒精过敏"
+    },
+    {
+      "customer_id": "C003",
+      "name": "王思媛",
+      "skin_type": "油痘肌",
+      "oil_water_balance": "全脸油光",
+      "pores_blackheads": "粗大毛孔",
+      "wrinkles_texture": "无皱纹",
+      "pigmentation": "痘印",
+      "photoaging_inflammation": "炎症活跃",
+      "tcm_constitution": "痰湿质",
+      "tongue_features": "舌胖齿痕",
+      "pulse_data": "濡缓",
+      "sleep_routine": "01:00-9:00",
+      "exercise_pattern": "无规律",
+      "diet_restrictions": "嗜辣、冷饮",
+      "care_time_flexibility": "夜间优先",
+      "massage_pressure_preference": "强效",
+      "environment_requirements": "网红打卡风",
+      "short_term_beauty_goal": "控油祛痘",
+      "long_term_beauty_goal": "肤质维稳",
+      "short_term_health_goal": "减肥5kg",
+      "long_term_health_goal": "改善宫寒",
+      "medical_cosmetic_history": "水光针",
+      "wellness_service_history": "无",
+      "major_disease_history": "糖尿病",
+      "allergies": "青霉素过敏"
+    }
+  ],
+  "consumptions": [
+    {
+      "customer_id": "C001",
+      "name": "林晓薇",
+      "date": "2023-07-10T00:00:00",
+      "project_name": "冰肌焕颜护理",
+      "amount": 2880.0,
+      "payment_method": "支付宝",
+      "total_sessions": 6,
+      "completion_date": "2023-12-31T00:00:00",
+      "satisfaction": "4.9/5"
+    },
+    {
+      "customer_id": "C001",
+      "name": "林晓薇",
+      "date": "2023-08-05T00:00:00",
+      "project_name": "黄金射频紧致疗程",
+      "amount": 6800.0,
+      "payment_method": "信用卡",
+      "total_sessions": 5,
+      "completion_date": "2023-11-20T00:00:00",
+      "satisfaction": "4.7/5"
+    },
+    {
+      "customer_id": "C001",
+      "name": "林晓薇",
+      "date": "2023-09-15T00:00:00",
+      "project_name": "帝王艾灸调理",
+      "amount": 3200.0,
+      "payment_method": "储值卡",
+      "total_sessions": 6,
+      "completion_date": "2024-02-28T00:00:00",
+      "satisfaction": "4.5/5"
+    },
+    {
+      "customer_id": "C002",
+      "name": "张美玲",
+      "date": "2023-07-01T00:00:00",
+      "project_name": "草本熏蒸SPA",
+      "amount": 1580.0,
+      "payment_method": "现金",
+      "total_sessions": 8,
+      "completion_date": "2023-12-10T00:00:00",
+      "satisfaction": "4.6/5"
+    },
+    {
+      "customer_id": "C002",
+      "name": "张美玲",
+      "date": "2023-08-25T00:00:00",
+      "project_name": "经络排毒塑身",
+      "amount": 1980.0,
+      "payment_method": "储值卡",
+      "total_sessions": 10,
+      "completion_date": "2024-03-05T00:00:00",
+      "satisfaction": "4.8/5"
+    },
+    {
+      "customer_id": "C002",
+      "name": "张美玲",
+      "date": "2023-10-10T00:00:00",
+      "project_name": "帝王艾灸调理",
+      "amount": 3200.0,
+      "payment_method": "微信支付",
+      "total_sessions": 6,
+      "completion_date": "2024-01-15T00:00:00",
+      "satisfaction": "5.0/5"
+    },
+    {
+      "customer_id": "C003",
+      "name": "王思媛",
+      "date": "2023-08-01T00:00:00",
+      "project_name": "极光净透泡泡",
+      "amount": 880.0,
+      "payment_method": "支付宝",
+      "total_sessions": 3,
+      "completion_date": "2023-09-10T00:00:00",
+      "satisfaction": "3.0/5"
+    },
+    {
+      "customer_id": "C003",
+      "name": "王思媛",
+      "date": "2023-09-20T00:00:00",
+      "project_name": "冰肌焕颜护理",
+      "amount": 2880.0,
+      "payment_method": "信用卡",
+      "total_sessions": 6,
+      "completion_date": "2024-06-30T00:00:00",
+      "satisfaction": "4.2/5"
+    },
+    {
+      "customer_id": "C003",
+      "name": "王思媛",
+      "date": "2023-10-05T00:00:00",
+      "project_name": "黄金射频紧致疗程",
+      "amount": 6800.0,
+      "payment_method": "花呗分期",
+      "total_sessions": 5,
+      "completion_date": "2024-04-20T00:00:00",
+      "satisfaction": "4.0/5"
+    }
+  ],
+  "services": [
+    {
+      "customer_id": "C001",
+      "service_date": "2023-07-12T14:00:00",
+      "departure_time": "2023-07-12T16:30:00",
+      "total_amount": 680.0,
+      "satisfaction": "4.9/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-07-19T15:20:00",
+      "departure_time": "2023-07-19T17:50:00",
+      "total_amount": 480.0,
+      "satisfaction": "4.8/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-08-05T10:00:00",
+      "departure_time": "2023-08-05T12:30:00",
+      "total_amount": 1840.0,
+      "satisfaction": "4.7/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-08-12T11:15:00",
+      "departure_time": "2023-08-12T13:45:00",
+      "total_amount": 1360.0,
+      "satisfaction": "4.9/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-08-18T14:00:00",
+      "departure_time": "2023-08-18T16:30:00",
+      "total_amount": 730.5,
+      "satisfaction": "4.8/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-09-02T09:30:00",
+      "departure_time": "2023-09-02T12:00:00",
+      "total_amount": 533.0,
+      "satisfaction": "4.5/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-09-09T15:00:00",
+      "departure_time": "2023-09-09T17:30:00",
+      "total_amount": 830.0,
+      "satisfaction": "4.6/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-09-20T14:20:00",
+      "departure_time": "2023-09-20T16:50:00",
+      "total_amount": 677.5,
+      "satisfaction": "4.7/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-10-05T10:45:00",
+      "departure_time": "2023-10-05T13:15:00",
+      "total_amount": 1840.0,
+      "satisfaction": "4.8/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C001",
+      "service_date": "2023-10-18T16:00:00",
+      "departure_time": "2023-10-18T18:30:00",
+      "total_amount": 533.0,
+      "satisfaction": "4.5/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-07-05T09:30:00",
+      "departure_time": "2023-07-05T11:40:00",
+      "total_amount": 197.5,
+      "satisfaction": "4.7/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-07-19T10:15:00",
+      "departure_time": "2023-07-19T12:30:00",
+      "total_amount": 198.0,
+      "satisfaction": "4.8/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-08-10T09:45:00",
+      "departure_time": "2023-08-10T12:00:00",
+      "total_amount": 730.5,
+      "satisfaction": "5.0/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-08-17T14:30:00",
+      "departure_time": "2023-08-17T16:50:00",
+      "total_amount": 533.0,
+      "satisfaction": "5.0/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-09-05T14:00:00",
+      "departure_time": "2023-09-05T16:20:00",
+      "total_amount": 198.0,
+      "satisfaction": "4.9/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-09-20T10:30:00",
+      "departure_time": "2023-09-20T12:50:00",
+      "total_amount": 197.5,
+      "satisfaction": "4.6/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-10-03T09:00:00",
+      "departure_time": "2023-10-03T11:30:00",
+      "total_amount": 1360.0,
+      "satisfaction": "4.8/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-10-15T15:15:00",
+      "departure_time": "2023-10-15T17:45:00",
+      "total_amount": 533.0,
+      "satisfaction": "5.0/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-10-25T13:00:00",
+      "departure_time": "2023-10-25T15:20:00",
+      "total_amount": 547.5,
+      "satisfaction": "4.7/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C002",
+      "service_date": "2023-11-02T11:00:00",
+      "departure_time": "2023-11-02T13:30:00",
+      "total_amount": 198.0,
+      "satisfaction": "4.9/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-08-05T20:15:00",
+      "departure_time": "2023-08-05T21:45:00",
+      "total_amount": 293.0,
+      "satisfaction": "3.0/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-08-12T19:30:00",
+      "departure_time": "2023-08-12T21:00:00",
+      "total_amount": 480.0,
+      "satisfaction": "4.0/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-09-02T20:45:00",
+      "departure_time": "2023-09-02T22:15:00",
+      "total_amount": 1840.0,
+      "satisfaction": "4.0/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-09-16T21:00:00",
+      "departure_time": "2023-09-16T23:00:00",
+      "total_amount": 533.0,
+      "satisfaction": "4.5/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-09-30T18:30:00",
+      "departure_time": "2023-09-30T20:00:00",
+      "total_amount": 293.0,
+      "satisfaction": "4.8/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-10-12T19:15:00",
+      "departure_time": "2023-10-12T21:45:00",
+      "total_amount": 1360.0,
+      "satisfaction": "4.2/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-10-25T20:30:00",
+      "departure_time": "2023-10-25T22:00:00",
+      "total_amount": 480.0,
+      "satisfaction": "4.6/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-11-05T21:00:00",
+      "departure_time": "2023-11-05T23:30:00",
+      "total_amount": 730.5,
+      "satisfaction": "4.7/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-11-18T18:45:00",
+      "departure_time": "2023-11-18T20:15:00",
+      "total_amount": 293.0,
+      "satisfaction": "4.3/5",
+      "total_sessions": null,
+      "service_items": []
+    },
+    {
+      "customer_id": "C003",
+      "service_date": "2023-12-01T19:00:00",
+      "departure_time": "2023-12-01T21:30:00",
+      "total_amount": 1840.0,
+      "satisfaction": "4.9/5",
+      "total_sessions": null,
+      "service_items": []
+    }
+  ],
+  "communications": [
+    {
+      "customer_id": "C001",
+      "communication_date": "2023-07-05T10:15:00",
+      "communication_location": "分店A前台",
+      "communication_content": "首次咨询冰肌焕颜护理，要求对比不同补水项目差异"
+    },
+    {
+      "customer_id": "C001",
+      "communication_date": "2023-08-02T16:30:00",
+      "communication_location": "线上企业微信",
+      "communication_content": "确认黄金射频疗程包含的术后修复服务细节"
+    },
+    {
+      "customer_id": "C001",
+      "communication_date": "2023-08-18T11:00:00",
+      "communication_location": "分店A VIP室",
+      "communication_content": "反馈第3次射频后下颌线提升明显，预约增加颈部护理"
+    },
+    {
+      "customer_id": "C001",
+      "communication_date": "2023-09-05T14:20:00",
+      "communication_location": "电话回访",
+      "communication_content": "确认耗卡余额并推荐双十一储值活动"
+    },
+    {
+      "customer_id": "C001",
+      "communication_date": "2023-09-28T15:40:00",
+      "communication_location": "分店A美容室",
+      "communication_content": "投诉美容师未按预约时间服务，要求补偿1次免费护理"
+    },
+    {
+      "customer_id": "C002",
+      "communication_date": "2023-06-10T09:00:00",
+      "communication_location": "分店B茶室",
+      "communication_content": "初次到店考察环境，重点询问艾灸疗程对高血压人群的安全性"
+    },
+    {
+      "customer_id": "C002",
+      "communication_date": "2023-07-22T14:50:00",
+      "communication_location": "分店B VIP室",
+      "communication_content": "携带中医体检报告定制熏蒸配方，要求避开含酒精成分"
+    },
+    {
+      "customer_id": "C002",
+      "communication_date": "2023-08-15T10:30:00",
+      "communication_location": "线上小程序",
+      "communication_content": "修改原定排毒塑身预约时间，因女儿家长会冲突"
+    },
+    {
+      "customer_id": "C002",
+      "communication_date": "2023-09-10T16:00:00",
+      "communication_location": "分店B休息区",
+      "communication_content": "表扬王芳技师穴位按压精准，指定后续服务"
+    },
+    {
+      "customer_id": "C002",
+      "communication_date": "2023-10-05T11:20:00",
+      "communication_location": "电话回访",
+      "communication_content": "反馈艾灸后睡眠质量提升，续订冬季温补套餐"
+    },
+    {
+      "customer_id": "C003",
+      "communication_date": "2023-07-28T21:30:00",
+      "communication_location": "抖音私信",
+      "communication_content": "咨询网红泡泡清洁项目是否适合直播拍摄"
+    },
+    {
+      "customer_id": "C003",
+      "communication_date": "2023-08-05T19:45:00",
+      "communication_location": "分店C网红打卡区",
+      "communication_content": "要求调整护理房灯光亮度以适应自拍需求"
+    },
+    {
+      "customer_id": "C003",
+      "communication_date": "2023-08-25T22:00:00",
+      "communication_location": "微信客服",
+      "communication_content": "投诉清洁后爆痘，店长提供免费皮肤检测安抚"
+    },
+    {
+      "customer_id": "C003",
+      "communication_date": "2023-09-12T18:30:00",
+      "communication_location": "分店C VIP室",
+      "communication_content": "指定男性美容师服务，称\"女生手法力度不够\""
+    },
+    {
+      "customer_id": "C003",
+      "communication_date": "2023-10-08T20:15:00",
+      "communication_location": "线上问卷",
+      "communication_content": "差评后接受补偿方案，用免费护理置换小红书推广合作"
+    }
+  ]
+}

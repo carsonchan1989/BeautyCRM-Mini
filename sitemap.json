@@ -1,0 +1,7 @@
+{
+  "desc": "美容客户分析小助手的sitemap",
+  "rules": [{
+    "action": "allow",
+    "page": "*"
+  }]
+}

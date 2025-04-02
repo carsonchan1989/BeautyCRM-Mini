@@ -1,0 +1,355 @@
+/* pages/report/report.wxss */
+
+/* 主容器 */
+.container {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 头部 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+.back-icon {
+  margin-right: 5rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.history-button {
+  font-size: 28rpx;
+  color: #10aeff;
+}
+
+/* 错误信息 */
+.error-message {
+  background-color: #ffebeb;
+  color: #e64340;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.error-message icon {
+  margin-right: 10rpx;
+}
+
+/* 内容区 */
+.content {
+  display: flex;
+  height: calc(100vh - 150rpx);
+}
+
+/* 客户列表面板 */
+.customer-panel {
+  width: 320rpx;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+  margin-right: 20rpx;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.panel-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.search-box icon {
+  margin-right: 10rpx;
+  color: #999;
+}
+
+.search-box input {
+  flex: 1;
+  height: 60rpx;
+  font-size: 26rpx;
+}
+
+.customer-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.customer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.customer-item.selected {
+  background-color: #e6f3fb;
+}
+
+.customer-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.customer-name {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 5rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-detail {
+  font-size: 24rpx;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customer-detail text {
+  margin-right: 10rpx;
+}
+
+.customer-tag {
+  font-size: 22rpx;
+  color: #10aeff;
+  background-color: #e6f3fb;
+  padding: 4rpx 10rpx;
+  border-radius: 4rpx;
+  white-space: nowrap;
+}
+
+/* 报告面板 */
+.report-panel {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 10rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 客户详情卡片 */
+.customer-detail-card {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.detail-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #10aeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.avatar-text {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.detail-basic {
+  flex: 1;
+}
+
+.detail-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.detail-tag {
+  font-size: 22rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 4rpx 10rpx;
+  border-radius: 4rpx;
+  margin-right: 10rpx;
+  margin-bottom: 5rpx;
+}
+
+.detail-content {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.detail-item {
+  display: flex;
+  margin-bottom: 10rpx;
+}
+
+.detail-label {
+  width: 150rpx;
+  color: #666;
+}
+
+.detail-value {
+  flex: 1;
+}
+
+/* 消费记录摘要 */
+.consumption-summary {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.summary-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.summary-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.consumption-list {
+  margin-bottom: 10rpx;
+}
+
+.consumption-item {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+  font-size: 26rpx;
+}
+
+.consumption-date {
+  width: 180rpx;
+  color: #666;
+}
+
+.consumption-project {
+  flex: 1;
+  color: #333;
+}
+
+.consumption-amount {
+  color: #ff9500;
+  font-weight: bold;
+}
+
+.more-link {
+  text-align: center;
+  font-size: 26rpx;
+  color: #10aeff;
+  padding: 10rpx 0;
+}
+
+/* 分析按钮 */
+.generate-button {
+  margin: 40rpx 20rpx;
+  background-color: #10aeff;
+  color: #fff;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+}
+
+/* 未选择客户提示 */
+.select-tip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 30rpx;
+}
+
+.select-tip icon {
+  margin-bottom: 20rpx;
+}
+
+.sub-tip {
+  font-size: 24rpx;
+  margin-top: 10rpx;
+}
+
+/* 空状态和加载状态 */
+.empty-tip, .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.empty-tip icon, .loading-state icon {
+  margin-bottom: 20rpx;
+}
+
+.loading-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #f5f5f5;
+  border-top: 4rpx solid #10aeff;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

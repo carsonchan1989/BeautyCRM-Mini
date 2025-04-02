@@ -1,0 +1,83 @@
+<view class="container">
+  <view class="form">
+    <view class="form-item">
+      <text class="label">项目名称</text>
+      <input class="input" type="text" placeholder="请输入项目名称" value="{{projectData.name}}" bindinput="onInputName"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目描述</text>
+      <textarea class="textarea" placeholder="请输入项目描述" value="{{projectData.description}}" bindinput="onInputDescription"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目价格</text>
+      <input class="input" type="digit" placeholder="请输入项目价格" value="{{projectData.price}}" bindinput="onInputPrice"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">项目分类</text>
+      <picker bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}">
+        <view class="picker">
+          {{categories[categoryIndex] || '请选择项目分类'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">时长(分钟)</text>
+      <input class="input" type="number" placeholder="请输入项目时长" value="{{projectData.duration}}" bindinput="onInputDuration"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">注意事项</text>
+      <textarea class="textarea" placeholder="请输入注意事项" value="{{projectData.notes}}" bindinput="onInputNotes"/>
+    </view>
+  </view>
+
+  <view class="divider">
+    <view class="divider-line"></view>
+    <text class="divider-text">或者批量导入</text>
+    <view class="divider-line"></view>
+  </view>
+
+  <view class="excel-upload">
+    <view class="upload-title">通过Excel导入项目</view>
+    <view class="upload-desc">支持批量导入项目数据，请按模板格式准备Excel文件</view>
+    
+    <view class="upload-actions">
+      <button class="btn-upload" bindtap="chooseExcelFile">选择Excel文件</button>
+      <button class="btn-template" bindtap="downloadTemplate">下载模板</button>
+    </view>
+    
+    <view class="upload-status" wx:if="{{excelFile}}">
+      <view class="file-name">{{excelFile.name}}</view>
+      <view class="file-size">{{excelFileSize}}</view>
+      <button class="btn-preview" bindtap="previewExcelData">预览数据</button>
+    </view>
+  </view>
+
+  <view class="preview-data" wx:if="{{previewData.length > 0}}">
+    <view class="preview-title">数据预览 (共{{previewData.length}}条)</view>
+    <view class="preview-table">
+      <view class="preview-header">
+        <view class="header-item">项目名称</view>
+        <view class="header-item">分类</view>
+        <view class="header-item">价格</view>
+      </view>
+      <view class="preview-body">
+        <view class="preview-row" wx:for="{{previewData}}" wx:key="index">
+          <view class="row-item">{{item.name}}</view>
+          <view class="row-item">{{item.category}}</view>
+          <view class="row-item">¥{{item.price}}</view>
+        </view>
+      </view>
+    </view>
+    <button class="btn-import" bindtap="importExcelData">确认导入</button>
+  </view>
+
+  <view class="button-group">
+    <button class="btn-save" bindtap="saveProject">保存</button>
+    <button class="btn-cancel" bindtap="cancelEdit">取消</button>
+  </view>
+</view> 

@@ -1,0 +1,298 @@
+/* service/detail.wxss - 服务记录详情页样式 */
+
+.container {
+  padding: 20rpx;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+/* 头部样式 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.back-icon {
+  width: 16rpx;
+  height: 16rpx;
+  border-top: 4rpx solid #666;
+  border-left: 4rpx solid #666;
+  transform: rotate(-45deg);
+  margin-right: 10rpx;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+  text-align: center;
+}
+
+.action-group {
+  display: flex;
+}
+
+.action-btn {
+  padding: 8rpx 20rpx;
+  font-size: 26rpx;
+  border-radius: 6rpx;
+  margin-left: 15rpx;
+}
+
+.edit {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+}
+
+.delete {
+  background-color: #fff1f0;
+  color: #f5222d;
+  border: 1px solid #ffa39e;
+}
+
+/* 服务记录卡片样式 */
+.service-card {
+  background-color: white;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 30rpx;
+}
+
+.card-section {
+  padding: 30rpx;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.card-section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 20rpx;
+  border-left: 6rpx solid #1aad19;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  width: 180rpx;
+  color: #666;
+}
+
+.info-value {
+  flex: 1;
+  color: #333;
+}
+
+.customer-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.customer-id {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 10rpx;
+}
+
+.view-link {
+  color: #1890ff;
+  margin-left: 20rpx;
+  font-size: 24rpx;
+}
+
+.amount {
+  font-weight: bold;
+  color: #f56c6c;
+}
+
+/* 服务项目列表样式 */
+.service-items {
+  margin-top: 20rpx;
+}
+
+.service-item {
+  background-color: #fafafa;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+  border-left: 4rpx solid #1aad19;
+}
+
+.service-item:last-child {
+  margin-bottom: 0;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.item-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.item-amount {
+  font-size: 28rpx;
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+.item-content {
+  font-size: 26rpx;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.item-info {
+  margin-right: 30rpx;
+  margin-bottom: 10rpx;
+}
+
+.label {
+  color: #666;
+  margin-right: 8rpx;
+}
+
+.value {
+  color: #333;
+}
+
+.item-tag {
+  background-color: #f0f9eb;
+  color: #67c23a;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  font-size: 22rpx;
+}
+
+/* 消耗记录列表样式 */
+.consumption-list {
+  margin-top: 20rpx;
+}
+
+.consumption-item {
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  margin-bottom: 16rpx;
+  border-left: 4rpx solid #409eff;
+}
+
+.consumption-item:last-child {
+  margin-bottom: 0;
+}
+
+.consumption-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+  font-size: 26rpx;
+}
+
+.consumption-service {
+  font-weight: bold;
+  color: #333;
+}
+
+.consumption-time {
+  color: #999;
+  font-size: 24rpx;
+}
+
+.consumption-content {
+  font-size: 24rpx;
+}
+
+.consumption-info {
+  margin-right: 20rpx;
+}
+
+/* 空提示样式 */
+.empty-tip {
+  color: #999;
+  font-size: 28rpx;
+  font-style: italic;
+  text-align: center;
+  padding: 30rpx 0;
+}
+
+/* 加载中样式 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300rpx;
+}
+
+.loading {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #1aad19;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 记录不存在提示 */
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.not-found-image {
+  width: 240rpx;
+  height: 240rpx;
+  margin-bottom: 40rpx;
+}
+
+.not-found-text {
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+
+.back-to-list {
+  background-color: #1aad19;
+  color: white;
+  padding: 16rpx 40rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}

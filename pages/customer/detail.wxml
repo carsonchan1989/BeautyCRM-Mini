@@ -1,0 +1,338 @@
+<!-- pages/customer/detail.wxml -->
+<view class="container">
+  <!-- 头部标题栏 -->
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">客户详情</view>
+    <view class="action-button" bindtap="goToReport">
+      <text>生成报告</text>
+    </view>
+  </view>
+
+  <!-- 加载中提示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+
+  <!-- 客户详情内容 -->
+  <view class="content" wx:if="{{!loading && customer}}">
+    <!-- 客户基本信息摘要 -->
+    <view class="customer-summary">
+      <view class="avatar">
+        <text>{{customer.name.substring(0,1)}}</text>
+      </view>
+      <view class="info">
+        <view class="name">{{customer.name}} <text class="gender">{{customer.gender}}</text></view>
+        <view class="secondary-info">{{customer.age}}岁 <text wx:if="{{customer.store}}">{{customer.store}}</text></view>
+      </view>
+      <view class="edit-button" bindtap="editCustomer">编辑</view>
+    </view>
+
+    <!-- 选项卡 -->
+    <view class="tabs">
+      <view 
+        wx:for="{{tabList}}" 
+        wx:key="id" 
+        class="tab-item {{activeTab === item.id ? 'active' : ''}}"
+        bindtap="switchTab"
+        data-id="{{item.id}}">
+        {{item.name}}
+      </view>
+    </view>
+
+    <!-- 选项卡内容 -->
+    <view class="tab-content">
+      <!-- 基本信息 -->
+      <view class="tab-pane" wx:if="{{activeTab === 'basic'}}">
+        <view class="info-section">
+          <view class="section-title">个人资料</view>
+          <view class="info-item" wx:if="{{customer.hometown}}">
+            <view class="label">籍贯</view>
+            <view class="value">{{customer.hometown}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.residence}}">
+            <view class="label">现居地</view>
+            <view class="value">{{customer.residence}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.residence_years}}">
+            <view class="label">居住时长</view>
+            <view class="value">{{customer.residence_years}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.occupation}}">
+            <view class="label">职业</view>
+            <view class="value">{{customer.occupation}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.annual_income}}">
+            <view class="label">年收入</view>
+            <view class="value">{{customer.annual_income}}</view>
+          </view>
+        </view>
+
+        <view class="info-section">
+          <view class="section-title">家庭情况</view>
+          <view class="info-item" wx:if="{{customer.family_structure}}">
+            <view class="label">家庭成员</view>
+            <view class="value">{{customer.family_structure}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.family_age_distribution}}">
+            <view class="label">年龄分布</view>
+            <view class="value">{{customer.family_age_distribution}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.living_condition}}">
+            <view class="label">居住情况</view>
+            <view class="value">{{customer.living_condition}}</view>
+          </view>
+        </view>
+
+        <view class="info-section">
+          <view class="section-title">性格与习惯</view>
+          <view class="info-item" wx:if="{{customer.personality_tags}}">
+            <view class="label">性格标签</view>
+            <view class="value">{{customer.personality_tags}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.consumption_decision}}">
+            <view class="label">消费决策</view>
+            <view class="value">{{customer.consumption_decision}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.hobbies}}">
+            <view class="label">兴趣爱好</view>
+            <view class="value">{{customer.hobbies}}</view>
+          </view>
+          <view class="info-item" wx:if="{{customer.routine}}">
+            <view class="label">作息规律</view>
+            <view class="value">{{customer.routine}}</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 健康档案 -->
+      <view class="tab-pane" wx:if="{{activeTab === 'health'}}">
+        <view class="empty-tip" wx:if="{{!healthData}}">
+          <text>暂无健康档案信息</text>
+        </view>
+        
+        <view wx:else>
+          <view class="info-section">
+            <view class="section-title">皮肤状况</view>
+            <view class="info-item" wx:if="{{healthData.skin_type}}">
+              <view class="label">肤质类型</view>
+              <view class="value">{{healthData.skin_type}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.oil_water_balance}}">
+              <view class="label">水油平衡</view>
+              <view class="value">{{healthData.oil_water_balance}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.pores_blackheads}}">
+              <view class="label">毛孔与黑头</view>
+              <view class="value">{{healthData.pores_blackheads}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.wrinkles_texture}}">
+              <view class="label">皱纹与纹理</view>
+              <view class="value">{{healthData.wrinkles_texture}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.pigmentation}}">
+              <view class="label">色素沉着</view>
+              <view class="value">{{healthData.pigmentation}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.photoaging_inflammation}}">
+              <view class="label">光老化与炎症</view>
+              <view class="value">{{healthData.photoaging_inflammation}}</view>
+            </view>
+          </view>
+
+          <view class="info-section">
+            <view class="section-title">中医体质</view>
+            <view class="info-item" wx:if="{{healthData.tcm_constitution}}">
+              <view class="label">体质类型</view>
+              <view class="value">{{healthData.tcm_constitution}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.tongue_features}}">
+              <view class="label">舌象特征</view>
+              <view class="value">{{healthData.tongue_features}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.pulse_data}}">
+              <view class="label">脉象数据</view>
+              <view class="value">{{healthData.pulse_data}}</view>
+            </view>
+          </view>
+          
+          <view class="info-section">
+            <view class="section-title">生活习惯</view>
+            <view class="info-item" wx:if="{{healthData.sleep_routine}}">
+              <view class="label">作息规律</view>
+              <view class="value">{{healthData.sleep_routine}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.exercise_pattern}}">
+              <view class="label">运动频率及类型</view>
+              <view class="value">{{healthData.exercise_pattern}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.diet_restrictions}}">
+              <view class="label">饮食禁忌/偏好</view>
+              <view class="value">{{healthData.diet_restrictions}}</view>
+            </view>
+          </view>
+          
+          <view class="info-section">
+            <view class="section-title">护理需求与偏好</view>
+            <view class="info-item" wx:if="{{healthData.care_time_flexibility}}">
+              <view class="label">护理时间灵活度</view>
+              <view class="value">{{healthData.care_time_flexibility}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.massage_pressure_preference}}">
+              <view class="label">手法力度偏好</view>
+              <view class="value">{{healthData.massage_pressure_preference}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.environment_requirements}}">
+              <view class="label">环境氛围要求</view>
+              <view class="value">{{healthData.environment_requirements}}</view>
+            </view>
+          </view>
+          
+          <view class="info-section">
+            <view class="section-title">美容和健康目标</view>
+            <view class="info-item" wx:if="{{healthData.short_term_beauty_goal}}">
+              <view class="label">短期美丽目标</view>
+              <view class="value">{{healthData.short_term_beauty_goal}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.long_term_beauty_goal}}">
+              <view class="label">长期美丽目标</view>
+              <view class="value">{{healthData.long_term_beauty_goal}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.short_term_health_goal}}">
+              <view class="label">短期健康目标</view>
+              <view class="value">{{healthData.short_term_health_goal}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.long_term_health_goal}}">
+              <view class="label">长期健康目标</view>
+              <view class="value">{{healthData.long_term_health_goal}}</view>
+            </view>
+          </view>
+
+          <view class="info-section">
+            <view class="section-title">健康记录</view>
+            <view class="info-item" wx:if="{{healthData.medical_cosmetic_history}}">
+              <view class="label">医美操作史</view>
+              <view class="value">{{healthData.medical_cosmetic_history}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.wellness_service_history}}">
+              <view class="label">大健康服务史</view>
+              <view class="value">{{healthData.wellness_service_history}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.allergies}}">
+              <view class="label">过敏史</view>
+              <view class="value">{{healthData.allergies}}</view>
+            </view>
+            <view class="info-item" wx:if="{{healthData.major_disease_history}}">
+              <view class="label">重大疾病史</view>
+              <view class="value">{{healthData.major_disease_history}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 消费记录 -->
+      <view class="tab-pane" wx:if="{{activeTab === 'consumption'}}">
+        <view class="empty-tip" wx:if="{{consumptionData.length === 0}}">
+          <text>暂无消费记录</text>
+        </view>
+        
+        <view class="records-list" wx:else>
+          <view class="record-item" wx:for="{{consumptionData}}" wx:key="id">
+            <view class="record-header">
+              <view class="record-title">{{item.project_name}}</view>
+              <view class="record-amount">￥{{item.amount}}</view>
+            </view>
+            <view class="record-details">
+              <view class="record-time">{{item.date}}</view>
+              <view class="record-extra" wx:if="{{item.payment_method}}">
+                支付方式: {{item.payment_method}}
+              </view>
+              <view class="record-extra" wx:if="{{item.total_sessions}}">
+                总次数: {{item.total_sessions}}次
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 服务记录 -->
+      <view class="tab-pane" wx:if="{{activeTab === 'service'}}">
+        <view class="empty-tip" wx:if="{{serviceData.length === 0}}">
+          <text>暂无服务记录</text>
+        </view>
+        
+        <view class="records-list" wx:else>
+          <view class="record-item" wx:for="{{serviceData}}" wx:key="service_id" bindtap="viewServiceDetail" data-id="{{item.service_id}}">
+            <view class="record-header">
+              <view class="record-title">服务记录</view>
+              <view class="record-amount" wx:if="{{item.total_amount}}">
+                ¥{{item.total_amount}}
+              </view>
+            </view>
+            <view class="record-details">
+              <view class="record-time">{{item.service_date}}</view>
+              <view class="record-extra" wx:if="{{item.operator}}">
+                操作人员: {{item.operator}}
+              </view>
+              <view class="record-extra" wx:if="{{item.payment_method}}">
+                支付方式: {{item.payment_method}}
+              </view>
+              <view class="record-content" wx:if="{{item.remark}}">
+                备注: {{item.remark}}
+              </view>
+              <!-- 服务项目列表 -->
+              <view class="service-items" wx:if="{{item.service_items && item.service_items.length > 0}}">
+                <view class="service-item-title">服务项目：</view>
+                <view class="service-item" wx:for="{{item.service_items}}" wx:for-item="subItem" wx:key="id">
+                  <text>{{subItem.project_name}} </text>
+                  <text wx:if="{{subItem.beautician_name}}">({{subItem.beautician_name}})</text>
+                  <text wx:if="{{subItem.unit_price}}"> ¥{{subItem.unit_price}}</text>
+                  <text wx:if="{{subItem.quantity > 1}}">×{{subItem.quantity}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 沟通记录 -->
+      <view class="tab-pane" wx:if="{{activeTab === 'communication'}}">
+        <view class="empty-tip" wx:if="{{communicationData.length === 0}}">
+          <text>暂无沟通记录</text>
+        </view>
+        
+        <view class="records-list" wx:else>
+          <view class="record-item" wx:for="{{communicationData}}" wx:key="id" bindtap="viewCommunicationDetail" data-id="{{item.id}}">
+            <view class="record-header">
+              <view class="record-title">
+                <text wx:if="{{item.communication_type}}">{{item.communication_type}}</text>
+                <text wx:else>沟通记录</text>
+              </view>
+              <view class="record-staff" wx:if="{{item.staff_name}}">{{item.staff_name}}</view>
+            </view>
+            <view class="record-time">{{item.communication_date}}</view>
+            <view class="record-content" wx:if="{{item.communication_content}}">
+              {{item.communication_content}}
+            </view>
+            <view class="record-content" wx:if="{{item.customer_feedback}}">
+              客户反馈: {{item.customer_feedback}}
+            </view>
+            <view class="record-content" wx:if="{{item.follow_up_action}}">
+              跟进计划: {{item.follow_up_action}}
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据为空提示 -->
+  <view class="empty-data" wx:if="{{!loading && !customer}}">
+    <text>未找到客户数据</text>
+    <view class="back-link" bindtap="goBack">返回客户列表</view>
+  </view>
+</view>

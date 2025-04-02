@@ -1,0 +1,119 @@
+<!-- service/detail.wxml - 服务记录详情页面 -->
+
+<view class="container">
+  <!-- 加载中提示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading"></view>
+  </view>
+  
+  <block wx:if="{{!loading && service}}">
+    <view class="header">
+      <view class="back-btn" bindtap="navigateBack">
+        <view class="back-icon"></view>
+        <text>返回</text>
+      </view>
+      <view class="title">服务详情</view>
+      <view class="action-group">
+        <view class="action-btn edit" bindtap="editService">编辑</view>
+        <view class="action-btn delete" bindtap="deleteService">删除</view>
+      </view>
+    </view>
+    
+    <view class="service-card">
+      <view class="card-section">
+        <view class="section-title">基本信息</view>
+        <view class="info-row">
+          <view class="info-label">服务日期</view>
+          <view class="info-value">{{service.service_date}}</view>
+        </view>
+        <view class="info-row">
+          <view class="info-label">客户信息</view>
+          <view class="info-value customer-info" bindtap="viewCustomer">
+            <text>{{service.customer_name}}</text>
+            <text class="customer-id">(ID: {{service.customer_id}})</text>
+            <view class="view-link">查看详情</view>
+          </view>
+        </view>
+        <view class="info-row" wx:if="{{service.departure_time}}">
+          <view class="info-label">离店时间</view>
+          <view class="info-value">{{service.departure_time}}</view>
+        </view>
+        <view class="info-row">
+          <view class="info-label">总金额</view>
+          <view class="info-value amount">¥{{service.total_amount || '0'}}</view>
+        </view>
+        <view class="info-row" wx:if="{{service.satisfaction}}">
+          <view class="info-label">满意度</view>
+          <view class="info-value">{{service.satisfaction}}</view>
+        </view>
+      </view>
+      
+      <view class="card-section">
+        <view class="section-title">服务项目 ({{service.service_items.length || 0}})</view>
+        <view class="empty-tip" wx:if="{{!service.service_items || service.service_items.length === 0}}">
+          暂无服务项目记录
+        </view>
+        <view class="service-items" wx:else>
+          <view class="service-item" wx:for="{{service.service_items}}" wx:key="id">
+            <view class="item-header">
+              <view class="item-name">{{item.service_name}}</view>
+              <view class="item-amount">¥{{item.amount || '0'}}</view>
+            </view>
+            <view class="item-content">
+              <view class="item-info" wx:if="{{item.beautician}}">
+                <text class="label">美容师:</text>
+                <text class="value">{{item.beautician}}</text>
+              </view>
+              <view class="item-info" wx:if="{{item.note}}">
+                <text class="label">备注:</text>
+                <text class="value">{{item.note}}</text>
+              </view>
+              <view class="item-tag" wx:if="{{item.is_specified}}">已指定</view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="card-section" wx:if="{{service.service_items && service.service_items.some(item => item.consumed_sessions && item.consumed_sessions.length > 0)}}">
+        <view class="section-title">消耗记录</view>
+        <view class="consumption-list">
+          <block wx:for="{{service.service_items}}" wx:key="id" wx:for-item="item">
+            <block wx:if="{{item.consumed_sessions && item.consumed_sessions.length > 0}}">
+              <view class="consumption-item" wx:for="{{item.consumed_sessions}}" wx:for-item="session" wx:key="id">
+                <view class="consumption-header">
+                  <text class="consumption-service">{{item.service_name}}</text>
+                  <text class="consumption-time">{{session.consumed_at}}</text>
+                </view>
+                <view class="consumption-content">
+                  <view class="consumption-info">
+                    <text class="label">消耗次数:</text>
+                    <text class="value">{{session.session_number || 1}}</text>
+                  </view>
+                </view>
+              </view>
+            </block>
+          </block>
+        </view>
+      </view>
+      
+      <view class="card-section">
+        <view class="section-title">创建与更新信息</view>
+        <view class="info-row">
+          <view class="info-label">创建时间</view>
+          <view class="info-value">{{service.created_at}}</view>
+        </view>
+        <view class="info-row" wx:if="{{service.updated_at && service.updated_at !== service.created_at}}">
+          <view class="info-label">更新时间</view>
+          <view class="info-value">{{service.updated_at}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+  
+  <!-- 记录不存在提示 -->
+  <view class="not-found" wx:if="{{!loading && !service}}">
+    <image class="not-found-image" src="/assets/icons/not-found.png" mode="aspectFit"></image>
+    <view class="not-found-text">服务记录不存在或已被删除</view>
+    <view class="back-to-list" bindtap="navigateBack">返回列表</view>
+  </view>
+</view>

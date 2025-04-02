@@ -1,0 +1,80 @@
+.container {
+  padding: 20rpx;
+}
+
+.header {
+  margin-bottom: 40rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.content {
+  background: white;
+  border-radius: 12rpx;
+  padding: 30rpx;
+}
+
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.tips {
+  background: #F8F9FA;
+  padding: 20rpx;
+  border-radius: 8rpx;
+}
+
+.tips text {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.8;
+}
+
+.btn-template {
+  background: #4CAF50;
+  color: white;
+  font-size: 28rpx;
+  width: 100%;
+}
+
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.btn-choose {
+  background: #007AFF;
+  color: white;
+  font-size: 28rpx;
+  width: 100%;
+}
+
+.file-name {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.btn-import {
+  background: #FF6B6B;
+  color: white;
+  font-size: 28rpx;
+  width: 100%;
+}
+
+.btn-import[disabled] {
+  background: #ccc;
+  color: #999;
+}

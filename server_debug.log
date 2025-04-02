@@ -1,0 +1,12 @@
+2025-04-02 14:48:22,612 - root - INFO - 尝试导入 create_app
+2025-04-02 14:48:23,218 - numexpr.utils - INFO - Note: NumExpr detected 24 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2025-04-02 14:48:23,218 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-04-02 14:48:23,385 - root - ERROR - 发生错误: No module named 'models'
+Traceback (most recent call last):
+  File "D:\BeautyCRM-Mini\debug_server.py", line 21, in <module>
+    from server.app import create_app
+  File "D:\BeautyCRM-Mini\server\app.py", line 14, in <module>
+    from server.api.consumption_routes import consumption_bp
+  File "D:\BeautyCRM-Mini\server\api\consumption_routes.py", line 13, in <module>
+    from models import db, Customer, Consumption, Service
+ModuleNotFoundError: No module named 'models'

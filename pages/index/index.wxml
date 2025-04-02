@@ -1,0 +1,70 @@
+<view class="container">
+  <!-- 标题区域 -->
+  <view class="header">
+    <view class="title">美容客户管理</view>
+    <view class="subtitle">美容专家的智能助手</view>
+  </view>
+  
+  <!-- 数据统计区域 -->
+  <view class="stats-section">
+    <view class="section-title">
+      <text>数据统计</text>
+      <text class="refresh-text" bindtap="refreshStats">刷新</text>
+    </view>
+    <view class="stats-grid">
+      <view class="stats-item" bindtap="navigateToCustomerList">
+        <text class="stats-number">{{customerCount || 0}}</text>
+        <text class="stats-label">客户数量</text>
+      </view>
+      <view class="stats-item" bindtap="navigateToProjectManagement">
+        <text class="stats-number">{{projectCount || 0}}</text>
+        <text class="stats-label">项目数量</text>
+      </view>
+    </view>
+    <text class="last-update">最后更新: {{lastUpdate || ''}}</text>
+  </view>
+  
+  <!-- 功能区域 -->
+  <view class="function-grid">
+    <view class="function-item" bindtap="navigateToProjectManagement">
+      <view class="function-icon">📋</view>
+      <text class="function-label">项目管理</text>
+    </view>
+    <view class="function-item" bindtap="navigateToExcelImport">
+      <view class="function-icon">📥</view>
+      <text class="function-label">档案导入</text>
+    </view>
+    <view class="function-item" bindtap="navigateToAnalysis">
+      <view class="function-icon">📊</view>
+      <text class="function-label">智能分析</text>
+    </view>
+    <view class="function-item" bindtap="navigateToHistory">
+      <view class="function-icon">📜</view>
+      <text class="function-label">历史报告</text>
+    </view>
+  </view>
+  
+  <!-- 快捷操作区域 -->
+  <view class="quick-actions">
+    <view class="section-title">快捷操作</view>
+    <view class="action-list">
+      <view class="action-item" bindtap="navigateToAddCustomer">
+        <text class="action-icon">➕</text>
+        <text class="action-label">新增客户</text>
+      </view>
+      <view class="action-item" bindtap="navigateToExcelImport">
+        <text class="action-icon">📎</text>
+        <text class="action-label">Excel导入</text>
+      </view>
+      <view class="action-item" bindtap="navigateToCreateReport">
+        <text class="action-icon">📝</text>
+        <text class="action-label">生成报告</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 版本信息 -->
+  <view class="version-info">
+    美容客户分析小助手 v1.0.0
+  </view>
+</view>

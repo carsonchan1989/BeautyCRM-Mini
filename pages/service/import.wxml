@@ -1,0 +1,42 @@
+<view class="container">
+  <view class="header">
+    <text class="title">导入项目</text>
+  </view>
+
+  <view class="content">
+    <view class="section">
+      <text class="section-title">导入说明</text>
+      <view class="tips">
+        <text>1. 请下载并使用标准模板填写项目信息</text>
+        <text>2. 支持.xlsx格式的Excel文件</text>
+        <text>3. 文件大小不超过10MB</text>
+        <text>4. 必填字段：项目名称、项目类别、项目功效、原理描述、疗程价格、次数</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <button class="btn-template" bindtap="onDownloadTemplate">
+        下载导入模板
+      </button>
+    </view>
+
+    <view class="section">
+      <text class="section-title">选择文件</text>
+      <view class="file-upload">
+        <button class="btn-choose" bindtap="onChooseFile">
+          选择Excel文件
+        </button>
+        <text class="file-name" wx:if="{{fileName}}">已选择：{{fileName}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <button class="btn-import" 
+              bindtap="onUpload" 
+              loading="{{uploading}}" 
+              disabled="{{!tempFilePath || uploading}}">
+        开始导入
+      </button>
+    </view>
+  </view>
+</view>

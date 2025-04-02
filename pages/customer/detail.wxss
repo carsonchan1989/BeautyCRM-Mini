@@ -1,0 +1,323 @@
+/* pages/customer/detail.wxss */
+.container {
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部标题栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  position: relative;
+  border-bottom: 1px solid #eee;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  flex: 1;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #0066cc;
+}
+
+.back-icon {
+  font-size: 40rpx;
+  margin-right: 4rpx;
+}
+
+.action-button {
+  color: #0066cc;
+  font-size: 28rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 30rpx;
+  background-color: rgba(0, 102, 204, 0.1);
+}
+
+/* 加载中提示 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #f5f5f5;
+  border-top: 6rpx solid #0066cc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 客户详情内容 */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 客户摘要信息 */
+.customer-summary {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background-color: #0066cc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.avatar text {
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: 500;
+}
+
+.info {
+  flex: 1;
+}
+
+.name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+
+.gender {
+  font-size: 24rpx;
+  color: #666;
+  margin-left: 10rpx;
+  font-weight: normal;
+}
+
+.secondary-info {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.edit-button {
+  color: #0066cc;
+  font-size: 28rpx;
+  padding: 10rpx 20rpx;
+  border: 1px solid #0066cc;
+  border-radius: 30rpx;
+}
+
+/* 选项卡 */
+.tabs {
+  display: flex;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #0066cc;
+  font-weight: 500;
+}
+
+.tab-item.active:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40%;
+  height: 6rpx;
+  background-color: #0066cc;
+  border-radius: 3rpx;
+}
+
+/* 选项卡内容 */
+.tab-content {
+  flex: 1;
+  padding: 20rpx 0;
+}
+
+.tab-pane {
+  padding: 0 20rpx;
+}
+
+/* 信息区块 */
+.info-section {
+  background-color: #fff;
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-left: 20rpx;
+  border-left: 6rpx solid #0066cc;
+}
+
+.info-item {
+  display: flex;
+  padding: 16rpx 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  width: 180rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.value {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 记录列表 */
+.records-list {
+  margin-top: 10rpx;
+}
+
+.record-item {
+  background-color: #fff;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.record-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.record-amount {
+  font-size: 28rpx;
+  color: #ff6600;
+  font-weight: bold;
+}
+
+.record-staff {
+  font-size: 28rpx;
+  color: #0066cc;
+}
+
+.record-details {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.record-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.record-extra {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.record-content {
+  font-size: 28rpx;
+  color: #333;
+  margin-top: 10rpx;
+  line-height: 1.5;
+}
+
+/* 服务项目列表 */
+.service-items {
+  margin-top: 15rpx;
+  background-color: #f9f9f9;
+  padding: 15rpx;
+  border-radius: 8rpx;
+}
+
+.service-item-title {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.service-item {
+  padding: 8rpx 0;
+  font-size: 26rpx;
+  color: #333;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* 空状态提示 */
+.empty-tip {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.empty-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+  color: #999;
+  font-size: 30rpx;
+}
+
+.back-link {
+  margin-top: 20rpx;
+  color: #0066cc;
+  font-size: 28rpx;
+}
