@@ -660,9 +660,17 @@ class ExcelProcessor:
                     # 创建服务项目列表
                     service_items = []
                     
+                    # 记录所有项目栏位的值
+                    logger.info(f"项目组数据: 项目1={row[7] if 7 < len(row) else 'N/A'}, 项目2={row[11] if 11 < len(row) else 'N/A'}, 项目3={row[15] if 15 < len(row) else 'N/A'}")
+                    
                     # 处理项目组
                     for group in project_groups:
                         try:
+                            # 确保索引在有效范围内
+                            if group["name"] >= len(row):
+                                logger.warning(f"项目名称索引 {group['name']} 超出行长度 {len(row)}")
+                                continue
+                            
                             project_name_val = row[group["name"]]
                             
                             # 跳过空项目
@@ -670,43 +678,54 @@ class ExcelProcessor:
                                 continue
                             
                             project_name = str(project_name_val).strip()
+                            logger.info(f"发现项目名称: {project_name}")
                             
                             # 获取美容师
                             beautician_name = ""
-                            beautician_val = row[group["beautician"]]
-                            if not pd.isna(beautician_val):
-                                beautician_name = str(beautician_val).strip()
+                            if group["beautician"] < len(row):
+                                beautician_val = row[group["beautician"]]
+                                if not pd.isna(beautician_val):
+                                    beautician_name = str(beautician_val).strip()
                             
                             # 获取金额
                             unit_price = 0.0
-                            price_val = row[group["amount"]]
-                            if not pd.isna(price_val):
-                                try:
-                                    unit_price = float(price_val)
-                                except:
-                                    logger.warning(f"解析项目金额出错 [{price_val}]")
+                            if group["amount"] < len(row):
+                                price_val = row[group["amount"]]
+                                if not pd.isna(price_val):
+                                    try:
+                                        unit_price = float(price_val)
+                                    except:
+                                        logger.warning(f"解析项目金额出错 [{price_val}]")
                             
                             # 获取是否指定
                             is_specified = False
-                            specified_val = row[group["specified"]]
-                            if not pd.isna(specified_val):
-                                if isinstance(specified_val, str):
-                                    is_specified = specified_val.strip() in ['✓', '√', '是', 'Yes', 'yes', 'TRUE', 'true', 'True', '1', 'Y', 'y']
-                                else:
-                                    is_specified = bool(specified_val)
+                            if group["specified"] < len(row):
+                                specified_val = row[group["specified"]]
+                                if not pd.isna(specified_val):
+                                    if isinstance(specified_val, str):
+                                        is_specified = specified_val.strip() in ['✓', '√', '是', 'Yes', 'yes', 'TRUE', 'true', 'True', '1', 'Y', 'y']
+                                    else:
+                                        is_specified = bool(specified_val)
                             
-                            service_items.append({
-                                'project_name': project_name,
+                            # 使用有意义的字段名存储项目数据
+                            service_item = {
+                                'project_name': project_name,  # 明确使用project_name作为项目名称字段
                                 'beautician_name': beautician_name,
                                 'unit_price': unit_price,
                                 'is_specified': is_specified
-                            })
+                            }
+                            
+                            service_items.append(service_item)
                             
                             imported_items += 1
                             logger.info(f"创建服务项目: {project_name} - {beautician_name} - {unit_price}元 - {'指定' if is_specified else '未指定'}")
                         except Exception as e:
                             logger.warning(f"处理项目组时出错: {str(e)}")
+                            logger.warning(f"行内容: {row}")
                             continue
+                    
+                    # 记录服务项目总数
+                    logger.info(f"解析出服务项目数: {len(service_items)}")
                     
                     # 如果没有找到有效的项目数，则使用实际项目数
                     if total_sessions == 0 and service_items:

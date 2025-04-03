@@ -9,6 +9,7 @@ import json
 from flask import Blueprint, request, jsonify, send_file, current_app
 from datetime import datetime
 from werkzeug.utils import secure_filename
+import uuid
 
 from utils.excel_processor import ExcelProcessor
 # 修复导入路径问题，直接从models模块导入
@@ -381,6 +382,11 @@ def import_to_database(data):
             # 提取服务项目列表
             service_items_list = service_data.pop('service_items', []) if isinstance(service_data.get('service_items'), list) else []
             
+            # 记录服务项目数据
+            logger.info(f"服务项目列表大小: {len(service_items_list)}")
+            if service_items_list:
+                logger.info(f"服务项目样例: {service_items_list[0]}")
+            
             # 过滤服务记录主表字段
             filtered_data = {k: v for k, v in service_data.items() if k in service_fields}
             logger.info(f"过滤后的服务记录数据: {filtered_data.keys()}")
@@ -393,61 +399,101 @@ def import_to_database(data):
             # 检查是否已存在相同服务记录（相同客户、相同日期、相同金额）
             existing_service = Service.query.filter_by(
                 customer_id=filtered_data['customer_id'],
-                service_date=filtered_data['service_date'],
-                total_amount=filtered_data.get('total_amount')
+                service_date=filtered_data['service_date']
             ).first()
             
             if existing_service:
-                logger.info(f"跳过重复服务记录: 客户{filtered_data['customer_id']}，日期{filtered_data['service_date']}，金额{filtered_data.get('total_amount')}")
-                # 更新现有记录的总项目数
-                if 'total_project_count' in service_data:
-                    existing_service.total_project_count = service_data['total_project_count']
-                    db.session.flush()
+                logger.info(f"发现已存在的服务记录: {existing_service.service_id}")
                 
-                # 如果现有记录没有服务项目，添加项目
-                if len(existing_service.service_items) == 0:
+                # 检查是否需要添加新的服务项目 - 比较项目内容是否已存在
+                if service_items_list:
+                    existing_items = {(item.project_name, item.beautician_name): item 
+                                     for item in existing_service.service_items}
+                    
                     for item_data in service_items_list:
                         try:
-                            # 创建服务项目记录时进行字段映射
+                            # 确保所有必要字段存在
+                            if 'project_name' not in item_data or not item_data['project_name']:
+                                logger.warning(f"服务项目数据缺少project_name字段，跳过: {item_data}")
+                                continue
+                            
+                            # 创建查找键
+                            item_key = (item_data['project_name'], item_data.get('beautician_name', ''))
+                            
+                            # 检查是否已存在相同服务项目
+                            if item_key in existing_items:
+                                logger.info(f"服务项目已存在，跳过: {item_data['project_name']} - {item_data.get('beautician_name', '')}")
+                                continue
+                            
+                            # 创建新的服务项目
                             service_item_data = {
                                 'service_id': existing_service.service_id,
-                                'project_name': item_data.get('service_items', ''),
-                                'beautician_name': item_data.get('beautician'),
-                                'card_deduction': item_data.get('service_amount'),
-                                'is_satisfied': True  # 默认满意
+                                'project_name': item_data['project_name'],
+                                'beautician_name': item_data.get('beautician_name', ''),
+                                'unit_price': item_data.get('unit_price', 0),
+                                'is_specified': item_data.get('is_specified', False)
                             }
+                            
                             service_item = ServiceItem(**service_item_data)
                             db.session.add(service_item)
+                            logger.info(f"为现有服务记录添加新项目: {item_data['project_name']} - {item_data.get('beautician_name', '')}")
+                            
                         except Exception as e:
                             logger.error(f"为现有记录添加服务项目时出错: {str(e)}")
                             logger.error(f"原始项目数据: {item_data}")
+                
             else:
                 # 添加总项目数
                 if 'total_project_count' in service_data:
                     filtered_data['total_project_count'] = service_data['total_project_count']
                 
+                # 生成服务记录ID (如果没有提供)
+                if 'service_id' not in filtered_data or not filtered_data['service_id']:
+                    service_id = f"S{uuid.uuid4().hex[:10].upper()}"
+                    filtered_data['service_id'] = service_id
+                
+                # 复制客户姓名到service记录
+                if 'name' in service_data and not filtered_data.get('customer_name'):
+                    filtered_data['customer_name'] = service_data['name']
+                
                 # 创建新服务记录
                 service = Service(**filtered_data)
                 db.session.add(service)
-                db.session.flush()  # 获取自动生成的ID
+                db.session.flush()  # 确保获取到新ID
                 
-                # 添加服务项目子表记录
-                for item_data in service_items_list:
-                    try:
-                        # 创建服务项目记录时进行字段映射
-                        service_item_data = {
-                            'service_id': service.service_id,
-                            'project_name': item_data.get('service_items', ''),
-                            'beautician_name': item_data.get('beautician'),
-                            'card_deduction': item_data.get('service_amount'),
-                            'is_satisfied': True  # 默认满意
-                        }
-                        service_item = ServiceItem(**service_item_data)
-                        db.session.add(service_item)
-                    except Exception as e:
-                        logger.error(f"添加服务项目时出错: {str(e)}")
-                        logger.error(f"原始项目数据: {item_data}")
-                        logger.error(f"映射后项目数据: {service_item_data}")
+                # 添加关联的服务项目
+                if service_items_list:
+                    logger.info(f"为新服务记录添加 {len(service_items_list)} 个服务项目")
+                    
+                    for item_data in service_items_list:
+                        try:
+                            # 确保所有必要字段存在
+                            if 'project_name' not in item_data or not item_data['project_name']:
+                                logger.warning(f"服务项目数据缺少project_name字段，跳过: {item_data}")
+                                continue
+                            
+                            logger.info(f"处理服务项目: {item_data}")
+                            
+                            # 创建新的服务项目
+                            service_item_data = {
+                                'service_id': service.service_id,
+                                'project_name': item_data['project_name'],
+                                'beautician_name': item_data.get('beautician_name', ''),
+                                'unit_price': item_data.get('unit_price', 0),
+                                'is_specified': item_data.get('is_specified', False)
+                            }
+                            
+                            service_item = ServiceItem(**service_item_data)
+                            db.session.add(service_item)
+                            logger.info(f"创建新服务项目: {item_data['project_name']} - {item_data.get('beautician_name', '')}")
+                            
+                        except Exception as e:
+                            logger.error(f"创建服务项目时出错: {str(e)}")
+                            logger.error(f"原始项目数据: {item_data}")
+                        
+                    # 更新服务记录的总项目数
+                    if not service.total_sessions and service_items_list:
+                        service.total_sessions = len(service_items_list)
                 
                 result['services'] += 1
         
