@@ -55,11 +55,19 @@ def get_unique_key_for_consumption(consumption):
 def get_unique_key_for_service(service):
     """为服务记录创建唯一键"""
     date_str = service['service_date'] if 'service_date' in service else ''
-    items = service['service_items'] if 'service_items' in service else ''
-    beautician = service['beautician'] if 'beautician' in service else ''
-    amount = str(service['service_amount']) if 'service_amount' in service and service['service_amount'] is not None else ''
-    is_specified = "1" if service.get('is_specified', False) else "0"
-    return f"{date_str}_{items}_{beautician}_{amount}_{is_specified}"
+    service_id = service.get('service_id', '')  # 使用service_id作为唯一标识
+    if service_id:
+        return f"{service_id}"  # 如果有service_id，直接使用它作为唯一键
+    
+    # 兼容旧结构，使用组合字段作为唯一键
+    items = service.get('service_items', [])
+    # 如果service_items是列表，使用第一个项目的名称，否则直接使用
+    item_name = items[0]['project_name'] if isinstance(items, list) and len(items) > 0 else ''
+    beautician = items[0].get('beautician_name', '') if isinstance(items, list) and len(items) > 0 else ''
+    amount = str(service.get('total_amount', 0))
+    is_specified = "1" if items and isinstance(items, list) and len(items) > 0 and items[0].get('is_specified', False) else "0"
+    
+    return f"{date_str}_{item_name}_{beautician}_{amount}_{is_specified}"
 
 def get_unique_key_for_communication(comm):
     """为沟通记录生成唯一键"""
@@ -221,6 +229,12 @@ def export_data_to_markdown():
                 key = get_unique_key_for_service(service)
                 if key not in seen_service_keys:
                     seen_service_keys.add(key)
+                    # 确保服务项目为列表而不是默认为空列表
+                    if 'service_items' not in service:
+                        service['service_items'] = []
+                    # 确保service_items是一个列表
+                    if not isinstance(service['service_items'], list):
+                        service['service_items'] = [service['service_items']]
                     valid_service_records.append(service)
         
         # 按服务日期排序
@@ -400,69 +414,127 @@ def export_data_to_markdown():
             # 消费记录
             if consumption_records:
                 f.write("### 消费记录\n\n")
-                f.write("| 消费时间 | 项目名称 | 消费金额 | 支付方式 |\n")
-                f.write("|----------|----------|----------|----------|")
+                f.write("| 序号 | 消费时间 | 项目名称 | 消费金额 | 支付方式 | 总次数 | 耗卡完成时间 | 满意度 |\n")
+                f.write("|------|----------|----------|----------|----------|--------|--------------|--------|")
                 
-                for record in consumption_records:
-                    consumption_date = record.get('consumption_date', '')
+                for idx, record in enumerate(consumption_records, 1):
+                    # 获取并格式化日期字段，只保留年月日
+                    consumption_date_raw = record.get('date', '')
+                    completion_date_raw = record.get('completion_date', '')
+                    
+                    # 尝试将日期时间字符串转换为只有日期的格式
+                    try:
+                        if consumption_date_raw and isinstance(consumption_date_raw, str):
+                            # 尝试解析日期时间字符串
+                            if ' ' in consumption_date_raw:  # 如果包含时间部分
+                                consumption_date = consumption_date_raw.split(' ')[0]  # 只取日期部分
+                            else:
+                                consumption_date = consumption_date_raw
+                        else:
+                            consumption_date = consumption_date_raw
+                    except Exception:
+                        consumption_date = consumption_date_raw
+                        
+                    try:
+                        if completion_date_raw and isinstance(completion_date_raw, str):
+                            # 尝试解析日期时间字符串
+                            if ' ' in completion_date_raw:  # 如果包含时间部分
+                                completion_date = completion_date_raw.split(' ')[0]  # 只取日期部分
+                            else:
+                                completion_date = completion_date_raw
+                        else:
+                            completion_date = completion_date_raw
+                    except Exception:
+                        completion_date = completion_date_raw
+                    
                     project_name = record.get('project_name', '')
                     amount = record.get('amount', '')
                     payment_method = record.get('payment_method', '')
+                    total_sessions = record.get('total_sessions', '')
+                    satisfaction = record.get('satisfaction', '')
                     
-                    f.write(f"\n| {consumption_date} | {project_name} | {amount} | {payment_method} |")
+                    f.write(f"\n| {idx} | {consumption_date} | {project_name} | {amount} | {payment_method} | {total_sessions} | {completion_date} | {satisfaction} |")
                 
                 f.write("\n\n")
             
             # 服务记录
             if service_records:
                 f.write("### 服务记录\n\n")
-                f.write("| 到店时间 | 离店时间 | 总耗卡金额 | 服务满意度 | 项目详情 |\n")
-                f.write("|----------|----------|------------|------------|----------|")
                 
-                for record in service_records:
+                for idx, record in enumerate(service_records, 1):
                     service_date = record.get('service_date', '')
-                    departure_time = record.get('departure_time', '')
                     total_amount = record.get('total_amount', 0)
+                    total_sessions = record.get('total_sessions', 0)
                     satisfaction = record.get('satisfaction', '')
                     service_items = record.get('service_items', [])
-                    total_project_count = record.get('total_project_count')
                     
-                    # 生成项目详情，先显示总项目数
-                    item_details = []
-                    if total_project_count is not None:
-                        item_details.append(f"总项目数: {total_project_count}")
+                    # 格式化满意度显示
+                    if satisfaction:
+                        # 尝试将满意度转为数字格式（如果是数字）
+                        try:
+                            sat_value = float(satisfaction)
+                            satisfaction_display = f"{sat_value}/5"
+                        except (ValueError, TypeError):
+                            satisfaction_display = satisfaction
+                    else:
+                        satisfaction_display = "未评价"
                     
-                    # 添加每个项目的详情
+                    # 输出服务记录主信息，注意序号显示方式
+                    f.write(f"服务记录 {idx}：服务时间 {service_date}, 总耗卡金额: {total_amount}, 总耗卡次数: {total_sessions}, 满意度: {satisfaction_display}\n")
+                    
+                    # 添加服务项目结构的调试日志
+                    print(f"DEBUG - 服务项目结构: {service_items}")
+                    
+                    # 输出服务项目详情
                     if service_items:
-                        for item in service_items:
-                            item_details.append(
-                                f"{item.get('project_name', '')} - {item.get('beautician_name', '')}"
-                                f" - {item.get('card_deduction', 0)}元"
-                                f" - {'✓满意' if item.get('is_satisfied', True) else '不满意'}"
-                            )
+                        # 检查service_items的类型
+                        if isinstance(service_items, list):
+                            # 新结构：service_items是对象列表
+                            for item_idx, item in enumerate(service_items, 1):
+                                # 打印服务项目详情的调试信息
+                                print(f"DEBUG - 服务项目详情: {item}")
+                                
+                                # 获取项目数据，优先使用真实数据
+                                project_name = item.get('project_name', '')
+                                beautician_name = item.get('beautician_name', '')
+                                amount = item.get('card_deduction', 0) or item.get('unit_price', 0)
+                                is_specified = item.get('is_specified', False)
+                                
+                                # 显示真实数据而不是默认"无详情"
+                                project_display = project_name if project_name else "无项目名称"
+                                beautician_display = beautician_name if beautician_name else "无美容师"
+                                amount_display = amount if amount else "无金额"
+                                
+                                # 指定状态转为中文
+                                specified_text = "是" if is_specified else "否"
+                                
+                                f.write(f"  - 项目{item_idx}: {project_display}, 美容师: {beautician_display}, 金额: {amount_display}, 是否指定: {specified_text}\n")
+                        else:
+                            # 兼容旧结构：service_items可能是字符串
+                            project_name = service_items if isinstance(service_items, str) else "无项目名称"
+                            beautician_name = record.get('beautician', '无美容师')
+                            amount = record.get('service_amount', '无金额')
+                            is_specified = record.get('is_specified', False)
+                            specified_text = "是" if is_specified else "否"
+                            
+                            f.write(f"  - 项目1: {project_name}, 美容师: {beautician_name}, 金额: {amount}, 是否指定: {specified_text}\n")
+                    else:
+                        f.write("  - 无项目详情\n")
                     
-                    if not item_details:  # 如果没有项目详情
-                        item_details = ["无项目"]
-                    
-                    # 合并所有项目详情
-                    item_details_text = "<br>".join(item_details)
-                    
-                    f.write(f"\n| {service_date} | {departure_time} | {total_amount} | {satisfaction} | {item_details_text} |")
-                
-                f.write("\n\n")
+                    f.write("\n")
             
             # 沟通记录
             if communication_records:
                 f.write("### 沟通记录\n\n")
-                f.write("| 沟通时间 | 沟通地点 | 沟通内容 |\n")
-                f.write("|----------|----------|----------|")
+                f.write("| 序号 | 沟通时间 | 沟通地点 | 沟通内容 |\n")
+                f.write("|------|----------|----------|----------|")
                 
-                for record in communication_records:
+                for idx, record in enumerate(communication_records, 1):
                     communication_time = record.get('communication_date', '')
                     location = record.get('communication_location', '')
                     content = record.get('communication_content', '')
                     
-                    f.write(f"\n| {communication_time} | {location} | {content} |")
+                    f.write(f"\n| {idx} | {communication_time} | {location} | {content} |")
                 
                 f.write("\n\n")
             

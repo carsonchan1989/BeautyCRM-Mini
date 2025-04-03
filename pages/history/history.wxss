@@ -190,3 +190,22 @@
   font-size: 24rpx;
   margin: 30rpx 0;
 }
+
+/* 报告标签 */
+.report-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10rpx;
+}
+
+.tag {
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  margin-right: 10rpx;
+  color: #fff;
+}
+
+.html-tag {
+  background-color: #1890ff;
+}

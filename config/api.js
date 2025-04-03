@@ -42,11 +42,11 @@ module.exports = {
 
     // 服务记录相关API
     service: {
-      list: '/services/list',
-      detail: (id) => `/services/${id}`,
-      create: '/services/create',
-      update: (id) => `/services/${id}`,
-      delete: (id) => `/services/${id}`,
+      list: '/service/list',
+      detail: (id) => `/service/${id}`,
+      create: '/service/create',
+      update: (id) => `/service/${id}`,
+      delete: (id) => `/service/${id}`,
     },
 
     // 沟通记录相关API

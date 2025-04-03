@@ -120,12 +120,31 @@ def create_consumption():
                 'success': False,
                 'message': f"找不到ID为 {data.get('customer_id')} 的客户"
             }), 404
+        
+        # 处理时间字段
+        start_time = datetime.strptime(data.get('start_time'), '%Y-%m-%d %H:%M:%S')
+        end_time = datetime.strptime(data.get('end_time'), '%Y-%m-%d %H:%M:%S') if data.get('end_time') else None
+            
+        # 检查是否已存在相同的消费记录
+        existing_consumption = Consumption.query.filter_by(
+            customer_id=data.get('customer_id'),
+            start_time=start_time,
+            project_name=data.get('project_name')
+        ).first()
+        
+        if existing_consumption:
+            logger.warning(f"尝试创建重复的消耗记录：客户={data.get('customer_id')}, 时间={start_time}, 项目={data.get('project_name')}")
+            return jsonify({
+                'success': False,
+                'message': "已存在相同的消耗记录",
+                'data': existing_consumption.to_dict()
+            }), 409  # 409 Conflict
             
         # 创建消耗记录
         consumption = Consumption(
             customer_id=data.get('customer_id'),
-            start_time=datetime.strptime(data.get('start_time'), '%Y-%m-%d %H:%M:%S'),
-            end_time=datetime.strptime(data.get('end_time'), '%Y-%m-%d %H:%M:%S') if data.get('end_time') else None,
+            start_time=start_time,
+            end_time=end_time,
             project_name=data.get('project_name'),
             project_category=data.get('project_category'),
             amount=data.get('amount'),

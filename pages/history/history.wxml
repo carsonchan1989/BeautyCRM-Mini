@@ -18,47 +18,43 @@
   </view>
   
   <!-- 报告列表 -->
-  <view class="report-list">
-    <view class="report-item" 
-          wx:for="{{reports}}" 
-          wx:key="key"
-          bindtap="viewReportDetail"
-          data-id="{{item.customerId}}"
-          data-date="{{item.date}}">
-      <view class="report-info">
-        <view class="customer-info">
-          <text class="customer-name">{{item.customerName}}</text>
-          <view class="customer-tags">
-            <text class="customer-tag">{{item.customerGender}}</text>
-            <text class="customer-tag" wx:if="{{item.customerAge}}">{{item.customerAge}}岁</text>
-            <text class="customer-tag" wx:if="{{item.customerLevel}}">{{item.customerLevel}}</text>
+  <view class="report-list" wx:if="{{reports.length > 0}}">
+    <block wx:for="{{reports}}" wx:key="index">
+      <view class="report-item">
+        <view class="report-info" bindtap="viewReportDetail" data-id="{{item.customerId}}" data-date="{{item.date}}" data-is-html="{{item.isHtmlFormat}}">
+          <view class="customer-info">
+            <text class="customer-name">{{item.customerName}}</text>
+            <text class="customer-details">{{item.customerGender}} {{item.customerAge}}岁 {{item.customerLevel}}</text>
           </view>
+          
+          <view class="report-date">{{item.date}}</view>
+          
+          <view class="report-tags">
+            <view class="tag html-tag" wx:if="{{item.isHtmlFormat}}">HTML</view>
+          </view>
+          
+          <view class="report-summary">{{item.report}}</view>
         </view>
-        <view class="report-date">生成日期: {{item.date}}</view>
-        <view class="report-preview">{{item.report.substring(0, 100) + '...'}}</view>
-      </view>
-      <view class="report-actions">
-        <view class="action-view">查看</view>
-        <view class="action-delete" 
-              catchtap="deleteReport" 
-              data-id="{{item.customerId}}">
-          删除
+        
+        <view class="report-actions">
+          <button class="action-btn view-btn" bindtap="viewReportDetail" data-id="{{item.customerId}}" data-date="{{item.date}}" data-is-html="{{item.isHtmlFormat}}">查看</button>
+          <button class="action-btn delete-btn" bindtap="deleteReport" data-id="{{item.customerId}}" data-key="{{item.key}}" data-is-html="{{item.isHtmlFormat}}">删除</button>
         </view>
       </view>
-    </view>
-    
-    <!-- 空列表提示 -->
-    <view class="empty-tip" wx:if="{{reports.length === 0 && !isLoading}}">
-      <icon type="info" size="60" color="#999"></icon>
-      <text>暂无历史报告</text>
-      <text class="sub-tip">点击右上角"新建"生成报告</text>
-    </view>
-    
-    <!-- 加载状态 -->
-    <view class="loading-state" wx:if="{{isLoading}}">
-      <view class="loading-icon"></view>
-      <text>加载中...</text>
-    </view>
+    </block>
+  </view>
+  
+  <!-- 空列表提示 -->
+  <view class="empty-tip" wx:if="{{reports.length === 0 && !isLoading}}">
+    <icon type="info" size="60" color="#999"></icon>
+    <text>暂无历史报告</text>
+    <text class="sub-tip">点击右上角"新建"生成报告</text>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text>加载中...</text>
   </view>
   
   <!-- 底部提示 -->

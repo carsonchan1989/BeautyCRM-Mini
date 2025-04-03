@@ -1,0 +1,64 @@
+<view class="container">
+  <!-- 标题栏 -->
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">查看提示词导出</view>
+  </view>
+  
+  <!-- 错误信息 -->
+  <view class="error-message" wx:if="{{errorMessage}}">
+    <icon type="warn" size="18"></icon>
+    <text>{{errorMessage}}</text>
+  </view>
+  
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <text>正在加载文件列表...</text>
+  </view>
+  
+  <!-- 内容区域 -->
+  <view class="content" wx:if="{{!isLoading}}">
+    <!-- 文件列表 -->
+    <view class="file-list">
+      <view class="section-title">导出的提示词文件</view>
+      
+      <view class="no-files" wx:if="{{files.length === 0}}">
+        <text>还没有导出的提示词文件</text>
+        <text class="tip">生成报告时会自动导出提示词</text>
+      </view>
+      
+      <view class="file-item {{selectedFile === item.name ? 'active' : ''}}" 
+            wx:for="{{files}}" 
+            wx:key="name"
+            bindtap="viewFile"
+            data-filename="{{item.name}}"
+            data-path="{{item.path}}">
+        <view class="file-name">{{item.name}}</view>
+        <view class="file-actions">
+          <view class="action" 
+                catchtap="deleteFile" 
+                data-filename="{{item.name}}">删除</view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 文件内容 -->
+    <view class="file-content" wx:if="{{selectedFile}}">
+      <view class="content-header">
+        <view class="content-title">{{selectedFile}}</view>
+        <view class="content-action" bindtap="copyContent">复制内容</view>
+      </view>
+      
+      <scroll-view scroll-y class="content-body">
+        <text class="markdown-content">{{fileContent}}</text>
+      </scroll-view>
+    </view>
+    
+    <view class="placeholder" wx:else>
+      <text>选择左侧文件查看内容</text>
+    </view>
+  </view>
+</view>

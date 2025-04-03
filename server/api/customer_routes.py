@@ -218,6 +218,21 @@ def manage_consumption(customer_id):
             if 'completion_date' in data and isinstance(data['completion_date'], str) and data['completion_date']:
                 data['completion_date'] = datetime.strptime(data['completion_date'], '%Y-%m-%d %H:%M:%S')
 
+            # 检查是否已存在相同的消费记录
+            existing_consumption = Consumption.query.filter_by(
+                customer_id=data['customer_id'],
+                date=data['date'],
+                project_name=data.get('project_name'),
+                amount=data.get('amount')
+            ).first()
+            
+            if existing_consumption:
+                return jsonify({
+                    'success': False, 
+                    'message': '已存在相同的消费记录',
+                    'data': existing_consumption.to_dict()
+                }), 409  # 409 Conflict
+
             consumption = Consumption(**data)
             db.session.add(consumption)
             db.session.commit()
@@ -283,6 +298,20 @@ def create_customer_service(customer_id):
         # 提取服务项目数据
         service_items_data = data.pop('service_items', [])
         
+        # 检查是否已存在相同的服务记录
+        existing_service = Service.query.filter_by(
+            customer_id=data['customer_id'],
+            service_date=data['service_date'],
+            operator=data.get('operator')
+        ).first()
+        
+        if existing_service:
+            return jsonify({
+                'success': False, 
+                'message': '已存在相同的服务记录',
+                'data': existing_service.to_dict()
+            }), 409  # 409 Conflict
+        
         # 创建服务记录
         service = Service(**data)
         db.session.add(service)
@@ -325,6 +354,19 @@ def manage_communication(customer_id):
                 # 兼容处理，将comm_time转换为communication_date
                 data['communication_date'] = datetime.strptime(data['comm_time'], '%Y-%m-%d %H:%M:%S')
                 del data['comm_time']
+
+            # 检查是否已存在相同的沟通记录
+            existing_communication = Communication.query.filter_by(
+                customer_id=data['customer_id'],
+                communication_date=data['communication_date']
+            ).first()
+            
+            if existing_communication and existing_communication.communication_content == data.get('communication_content'):
+                return jsonify({
+                    'success': False, 
+                    'message': '已存在相同的沟通记录',
+                    'data': existing_communication.to_dict()
+                }), 409  # 409 Conflict
 
             communication = Communication(**data)
             db.session.add(communication)

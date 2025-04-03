@@ -2,6 +2,8 @@
  * 报告生成器
  * 调用大模型API生成客户分析报告
  */
+const apiConfig = require('../config/api');
+
 class ReportGenerator {
   constructor(options = {}) {
     this.logger = options.logger || {
@@ -11,34 +13,62 @@ class ReportGenerator {
       debug: console.debug
     };
     
+    // 使用固定的模型名称
+    const MODEL_NAME = "Pro/deepseek-ai/DeepSeek-R1";
+    
     // 大模型API配置
     this.apiConfig = {
-      url: options.apiUrl || 'https://api.example.com/v1/generate',
-      apiKey: options.apiKey || '',
-      model: options.model || 'gpt-3.5-turbo',
-      temperature: options.temperature || 0.5,
+      url: options.apiUrl || 'https://api.siliconflow.cn/v1',
+      apiKey: options.apiKey || 'sk-zenjhfgpeauztirirbzjshbvzuvqhqidkfkqwtmmenennmaa',
+      model: MODEL_NAME, // 使用固定的模型名称
+      temperature: options.temperature || 0.7,
       maxTokens: options.maxTokens || 2000
     };
+    
+    // API模型实际已验证可用，记录配置
+    this.logger.info('初始化ReportGenerator，API配置:', {
+      url: this.apiConfig.url,
+      model: MODEL_NAME // 使用固定的模型名称
+    });
     
     // 报告模板
     this.templates = {
       customer: {
-        prompt: `请根据以下客户信息生成一份详细的分析报告：
-        
-客户基本信息：
+        prompt: `我是一名美容养生店店长，请根据上述客户信息及数据，按照客户分析报告的框架，生成{{customerId}}客户的客户分析报告。要求：
+1)结合对人性的理解以及大数据的分析； 
+2)分析尽量详细，显示思考过程，不低于200字； 
+3)根据这些分析，结合店内项目库，思考客户可能存在的需求，并提示可以满足这些需求的项目是什么； 
+4)围绕这些需求如何进行销售，并编写相关沟通要点和销售话术，话术尽量涵盖不同沟通场景及切入点，单条话术不低于50字，话术不低于3条。
+5)生成html格式的客户报告返回
+6)根据以下客户分析报告模板生成内容:
+{{customerId}}
+客户分析报告
+ 
+
+1. 客户基本情况分析
 {{customerInfo}}
 
-消费记录：
+2. 客户消耗行为分析
 {{consumptionRecords}}
 
-请按照以下结构输出分析报告：
-1. 客户概况：总结客户的基本信息和消费习惯
-2. 消费分析：分析客户的消费金额、频率、项目偏好等
-3. 客户画像：根据上述信息，描绘客户的性格特点、消费习惯、生活方式等
-4. 推荐方案：根据客户画像，推荐适合该客户的产品和服务
-5. 客户维护建议：如何维护和提升该客户的满意度和忠诚度
+3. 客户消费行为分析
 
-请使用专业的美容行业术语，报告风格要专业但易于理解。`
+4. 客户服务偏好与健康数据深化分析
+
+5. 客户沟通记录分析
+
+6. 客户需求总结
+需求类型	显性需求	隐性需求
+美容需求	
+健康需求	
+情感需求	
+
+7. 可匹配项目推荐
+
+8. 销售沟通要点与话术
+场景1：
+场景2：
+场景3：`
       }
     };
     
@@ -49,6 +79,16 @@ class ReportGenerator {
     
     // 报告缓存
     this.reportsCache = this._loadReportsFromCache();
+    
+    // 初始化提示词导出工具
+    try {
+      const PromptExporter = require('./exportPrompt');
+      this.promptExporter = new PromptExporter({ logger: this.logger });
+      this.logger.info('提示词导出工具初始化成功');
+    } catch (error) {
+      this.logger.warn('提示词导出工具初始化失败', error);
+      this.promptExporter = null;
+    }
   }
   
   /**
@@ -86,6 +126,255 @@ class ReportGenerator {
   }
   
   /**
+   * 调用大模型API
+   * @param {String} prompt 提示词
+   * @returns {Promise} API调用结果
+   * @private
+   */
+  _callLargeModelAPI(prompt) {
+    return new Promise((resolve, reject) => {
+      const MODEL_NAME = "Pro/deepseek-ai/DeepSeek-R1"; // 固定的模型名称
+      
+      this.logger.info('调用大模型API', { 
+        url: this.apiConfig.url, 
+        model: MODEL_NAME, // 使用固定的模型名称
+        promptLength: prompt.length 
+      });
+      
+      // 检查是否有apiKey
+      if (!this.apiConfig.apiKey) {
+        this.logger.warn('未配置API密钥');
+        return reject(new Error('未配置API密钥，请先设置API密钥'));
+      }
+      
+      // 提取客户ID，用于存储报告
+      let customerId = 'unknown';
+      const idMatch = prompt.match(/生成(.*?)客户的客户分析报告/);
+      if (idMatch && idMatch[1]) {
+        customerId = idMatch[1].trim();
+      }
+      
+      // 调用大模型API (使用已验证可用的DeepSeek API格式)
+      wx.request({
+        url: this.apiConfig.url + '/chat/completions',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiConfig.apiKey}`
+        },
+        data: {
+          model: MODEL_NAME, // 使用固定的模型名称
+          messages: [
+            { role: "system", content: "你是一位专业的美容顾问助手，需要根据客户信息生成专业的分析报告。请务必返回HTML格式的内容。" },
+            { role: "user", content: prompt }
+          ],
+          temperature: this.apiConfig.temperature,
+          max_tokens: this.apiConfig.maxTokens,
+          response_format: { type: "text" }
+        },
+        // 增加超时时间至3分钟(180000毫秒)
+        timeout: 180000,
+        success: (res) => {
+          if (res.statusCode === 200 && res.data && res.data.choices && res.data.choices.length > 0) {
+            const content = res.data.choices[0].message.content;
+            this.logger.info('大模型API调用成功', { 
+              responseLength: content.length,
+              customerId: customerId
+            });
+            
+            // 处理HTML内容
+            let htmlContent = content;
+            
+            // 检查内容是否已经是HTML格式，如果不是则简单转换
+            if (!content.includes('<html') && !content.includes('<body')) {
+              htmlContent = `<div class="report-container">${content.replace(/\n/g, '<br>')}</div>`;
+            }
+            
+            // 将返回的HTML内容保存到本地
+            this._saveReportToStorage(customerId, htmlContent);
+            
+            // 同步报告到缓存系统
+            this._syncReportToCache(customerId, {
+              date: new Date().toISOString().split('T')[0],
+              format: 'html',
+              summary: '通过AI模型生成的客户分析报告'
+            });
+            
+            // 返回HTML内容和普通文本内容
+            resolve({
+              html: htmlContent,
+              text: content,
+              customerId: customerId
+            });
+          } else {
+            this.logger.error('大模型API调用失败', res);
+            reject(new Error('API响应异常: ' + (res.data?.error?.message || '未知错误')));
+          }
+        },
+        fail: (err) => {
+          this.logger.error('大模型API调用失败', err);
+          reject(new Error('API连接失败: ' + (err.errMsg || '网络错误或超时')));
+        }
+      });
+    });
+  }
+  
+  /**
+   * 检查API是否可用
+   * @returns {Promise<boolean>} API是否可用
+   * @private
+   */
+  _checkApiAvailability() {
+    // 固定的模型名称
+    const MODEL_NAME = "Pro/deepseek-ai/DeepSeek-R1";
+    
+    return new Promise((resolve) => {
+      wx.request({
+        url: this.apiConfig.url + '/models',
+        method: 'GET',
+        header: {
+          'Authorization': `Bearer ${this.apiConfig.apiKey}`
+        },
+        success: (res) => {
+          if (res.statusCode === 200) {
+            // 检查返回的模型列表中是否包含我们要使用的模型
+            let modelExists = false;
+            if (res.data && res.data.data) {
+              const modelList = res.data.data;
+              modelExists = modelList.some(model => 
+                model.id === MODEL_NAME || 
+                model.name === MODEL_NAME
+              );
+              
+              if (!modelExists) {
+                this.logger.warn('所需模型不在可用模型列表中', {
+                  requestedModel: MODEL_NAME,
+                  availableModels: modelList.map(m => m.id || m.name)
+                });
+              }
+            }
+            resolve(true); // 即使模型不存在，API服务本身是可用的
+          } else {
+            this.logger.error('API服务不可用', res);
+            resolve(false);
+          }
+        },
+        fail: () => {
+          this.logger.error('API服务连接失败');
+          resolve(false);
+        }
+      });
+    });
+  }
+  
+  /**
+   * 保存HTML报告到本地存储
+   * @param {String} customerId 客户ID
+   * @param {String} htmlContent HTML内容
+   * @private
+   */
+  _saveReportToStorage(customerId, htmlContent) {
+    if (!customerId || !htmlContent) {
+      this.logger.warn('保存报告时缺少必要参数', { customerId });
+      return;
+    }
+    
+    try {
+      // 保存最新报告
+      const latestKey = `html_report_${customerId}_latest`;
+      wx.setStorageSync(latestKey, htmlContent);
+      
+      // 保存带日期的报告版本
+      const date = new Date().toISOString().split('T')[0];
+      const dateKey = `html_report_${customerId}_${date}`;
+      wx.setStorageSync(dateKey, htmlContent);
+      
+      this.logger.info('HTML报告已保存到本地存储', { customerId, date });
+    } catch (error) {
+      this.logger.error('保存HTML报告失败', error);
+    }
+  }
+  
+  /**
+   * 同步HTML报告到报告缓存系统
+   * @param {String} customerId 客户ID 
+   * @param {Object} metadata 报告元数据
+   * @private
+   */
+  _syncReportToCache(customerId, metadata) {
+    if (!customerId) {
+      this.logger.warn('同步报告时缺少客户ID');
+      return;
+    }
+    
+    try {
+      // 加载最新缓存
+      this.reportsCache = this._loadReportsFromCache();
+      
+      // 确保客户在缓存中有记录
+      if (!this.reportsCache[customerId]) {
+        this.reportsCache[customerId] = [];
+      }
+      
+      // 添加HTML报告记录
+      const reportRecord = {
+        date: metadata.date || new Date().toISOString().split('T')[0],
+        format: metadata.format || 'html',
+        type: metadata.type || 'full',
+        summary: metadata.summary || '客户分析报告'
+      };
+      
+      // 检查是否已有相同日期的报告，如果有则更新
+      const existingIndex = this.reportsCache[customerId].findIndex(
+        r => r.date === reportRecord.date && r.format === reportRecord.format
+      );
+      
+      if (existingIndex >= 0) {
+        this.reportsCache[customerId][existingIndex] = reportRecord;
+      } else {
+        this.reportsCache[customerId].push(reportRecord);
+      }
+      
+      // 保存更新后的缓存
+      this._saveReportsToCache(this.reportsCache);
+      
+      this.logger.info('HTML报告已同步到报告缓存系统', { customerId, date: reportRecord.date });
+    } catch (error) {
+      this.logger.error('同步HTML报告到缓存失败', error);
+    }
+  }
+  
+  /**
+   * 获取项目库数据
+   * @returns {Promise} 项目库数据
+   * @private
+   */
+  _getProjectData() {
+    return new Promise((resolve, reject) => {
+      // 使用导入的apiConfig替代原来全局的apiConfig
+      if (!apiConfig || !apiConfig.paths || !apiConfig.paths.project) {
+        this.logger.warn('项目API路径未定义');
+        return resolve([]);
+      }
+      
+      wx.request({
+        url: apiConfig.getUrl(apiConfig.paths.project.list),
+        method: 'GET',
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res.data);
+          } else {
+            reject(new Error('获取项目库数据失败'));
+          }
+        },
+        fail: (err) => {
+          reject(err);
+        }
+      });
+    });
+  }
+  
+  /**
    * 格式化客户信息用于报告生成
    * @param {Object} customer 客户对象
    * @param {Array} consumptions 消费记录数组
@@ -98,41 +387,17 @@ class ReportGenerator {
     }
     
     // 格式化客户基本信息
-    let customerInfo = `ID: ${customer.customerId}\n`;
-    customerInfo += `姓名: ${customer.name || '未知'}\n`;
-    customerInfo += `性别: ${customer.gender || '未知'}\n`;
-    customerInfo += `年龄: ${customer.age || '未知'}\n`;
-    customerInfo += `手机: ${customer.phone || '未知'}\n`;
-    customerInfo += `地址: ${customer.address || '未知'}\n`;
-    customerInfo += `生日: ${customer.birthday || '未知'}\n`;
-    customerInfo += `会员卡号: ${customer.memberCardNo || '未知'}\n`;
-    customerInfo += `会员等级: ${customer.memberLevel || '未知'}\n`;
-    customerInfo += `所属门店: ${customer.store || '未知'}\n`;
+    let customerInfo = `${customer.name || '未知'}（${customer.age || '未知'}岁，${customer.occupation || '未知职业'}，年收入${customer.annual_income || '未知'}）呈现典型的"${customer.personality_tags || '未知'}"人格特征：`;
+    customerInfo += `\n生活状态：${customer.family_structure || '未知'}，${customer.living_condition || '未知'}，作息规律（${customer.routine || '未知'}），偏好${customer.diet_preference || '未知'}，${customer.hobbies || '未知'}，消费决策${customer.consumption_decision || '未知'}，风险敏感度${customer.risk_sensitivity || '未知'}。`;
+    customerInfo += `\n地域背景：${customer.hometown || '未知'}籍现居${customer.residence || '未知'}，居住时长${customer.residence_years || '未知'}，适应快节奏都市生活，对高效便捷服务需求显著。`;
     
     // 添加健康信息
-    if (customer.health) {
-      customerInfo += `\n健康信息:\n`;
-      customerInfo += `健康状况: ${customer.health.condition || '未知'}\n`;
-      customerInfo += `过敏史: ${customer.health.allergies || '未知'}\n`;
-      customerInfo += `慢性病: ${customer.health.chronicDiseases || '未知'}\n`;
-      customerInfo += `病史: ${customer.health.medicalHistory || '未知'}\n`;
-      customerInfo += `体重: ${customer.health.weight || '未知'}\n`;
-      customerInfo += `身高: ${customer.health.height || '未知'}\n`;
-      customerInfo += `血型: ${customer.health.bloodType || '未知'}\n`;
+    if (customer.health_records && customer.health_records.length > 0) {
+      const health = customer.health_records[0];
+      customerInfo += `\n健康数据：${health.skin_type || '未知肤质'}，存在${health.pores_blackheads || '未知'}、${health.wrinkles_texture || '未知'}、${health.photoaging_inflammation || '未知'}问题，中医体质为${health.tcm_constitution || '未知'}（${health.tongue_features || '未知'}），需${health.long_term_health_goal || '未知'}，改善${health.short_term_health_goal || '未知'}。`;
     }
     
-    // 添加生活习惯
-    if (customer.habits) {
-      customerInfo += `\n生活习惯:\n`;
-      customerInfo += `生活习惯: ${customer.habits.lifeHabits || '未知'}\n`;
-      customerInfo += `睡眠习惯: ${customer.habits.sleepPattern || '未知'}\n`;
-      customerInfo += `饮食习惯: ${customer.habits.dietHabits || '未知'}\n`;
-      customerInfo += `运动习惯: ${customer.habits.exercise || '未知'}\n`;
-      customerInfo += `兴趣爱好: ${customer.habits.hobbies || '未知'}\n`;
-    }
-    
-    // 备注信息
-    customerInfo += `\n备注信息: ${customer.remarks || '无'}\n`;
+    customerInfo += `\n人性洞察：高收入独立女性追求"内外兼修"，既需即时可见的美容效果（如${customer.health_records && customer.health_records.length > 0 ? customer.health_records[0].short_term_beauty_goal : '未知'}），也注重长期健康管理，同时渴望通过高品质服务获得身份认同感。`;
     
     // 格式化消费记录
     let consumptionRecords = '';
@@ -142,55 +407,74 @@ class ReportGenerator {
     } else {
       // 排序消费记录(按日期从近到远)
       const sortedConsumptions = [...consumptions].sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
+        // 使用iOS兼容的日期格式化方法
+        const dateA = this._formatDateForIOS(a.date);
+        const dateB = this._formatDateForIOS(b.date);
         return dateB - dateA;
       });
       
       let totalAmount = 0;
+      const projectFrequency = {};
+      const beauticianFrequency = {};
+      let serviceCount = 0;
       
-      // 添加消费记录详情
-      for (let i = 0; i < sortedConsumptions.length; i++) {
-        const record = sortedConsumptions[i];
-        consumptionRecords += `${i+1}. 日期: ${record.date || '未知日期'}, `;
-        consumptionRecords += `项目: ${record.projectName || '未知项目'}, `;
-        consumptionRecords += `金额: ¥${record.amount || 0}, `;
-        consumptionRecords += `支付方式: ${record.paymentMethod || '未知'}, `;
-        consumptionRecords += `技师: ${record.technician || '未知'}, `;
-        consumptionRecords += `满意度: ${record.satisfaction || '未评价'}\n`;
-        
+      // 统计项目和美容师频率
+      for (const record of sortedConsumptions) {
         totalAmount += parseFloat(record.amount) || 0;
+        serviceCount++;
+        
+        const projectName = record.project_name || '未知项目';
+        projectFrequency[projectName] = (projectFrequency[projectName] || 0) + 1;
+        
+        // 如果有服务项目，统计美容师
+        if (record.service_items && record.service_items.length > 0) {
+          for (const item of record.service_items) {
+            const beauticianName = item.beautician_name || '未知';
+            beauticianFrequency[beauticianName] = (beauticianFrequency[beauticianName] || 0) + 1;
+          }
+        }
       }
       
-      // 添加消费统计
-      consumptionRecords += `\n消费统计:\n`;
-      consumptionRecords += `总消费次数: ${sortedConsumptions.length}次\n`;
-      consumptionRecords += `总消费金额: ¥${totalAmount.toFixed(2)}\n`;
-      consumptionRecords += `平均每次消费: ¥${(totalAmount / sortedConsumptions.length).toFixed(2)}\n`;
-      
-      // 计算最常消费的项目
-      const projectCounts = {};
-      sortedConsumptions.forEach(record => {
-        const project = record.projectName || '未知项目';
-        projectCounts[project] = (projectCounts[project] || 0) + 1;
-      });
-      
+      // 找出最常消费的项目
       let mostFrequentProject = '无';
-      let maxCount = 0;
-      
-      Object.keys(projectCounts).forEach(project => {
-        if (projectCounts[project] > maxCount) {
+      let maxProjectCount = 0;
+      for (const project in projectFrequency) {
+        if (projectFrequency[project] > maxProjectCount) {
           mostFrequentProject = project;
-          maxCount = projectCounts[project];
+          maxProjectCount = projectFrequency[project];
         }
-      });
+      }
       
-      consumptionRecords += `最常消费项目: ${mostFrequentProject} (${maxCount}次)\n`;
+      // 找出最常指定的美容师
+      let mostFrequentBeautician = '无';
+      let maxBeauticianCount = 0;
+      for (const beautician in beauticianFrequency) {
+        if (beauticianFrequency[beautician] > maxBeauticianCount) {
+          mostFrequentBeautician = beautician;
+          maxBeauticianCount = beauticianFrequency[beautician];
+        }
+      }
+      
+      // 计算指定美容师的比例
+      const specifiedBeauticianRate = Math.round((maxBeauticianCount / serviceCount) * 100);
+      
+      // 格式化消费行为分析文本
+      consumptionRecords = `耗卡特征：${sortedConsumptions[0].date ? sortedConsumptions[0].date.substring(0, 7) : '未知'}-${sortedConsumptions[sortedConsumptions.length-1].date ? sortedConsumptions[sortedConsumptions.length-1].date.substring(0, 7) : '未知'}到店${serviceCount}次，总耗卡金额${totalAmount.toFixed(2)}元，集中于${mostFrequentProject}（${maxProjectCount}次），单次耗卡金额波动${(totalAmount / serviceCount).toFixed(0)}元。\n\n`;
+      
+      consumptionRecords += `服务偏好：\n`;
+      consumptionRecords += `项目组合：高频叠加${Object.keys(projectFrequency).slice(0, 3).join('、')}，体现多元化需求。\n`;
+      consumptionRecords += `美容师指定：${specifiedBeauticianRate}%耗卡指定${mostFrequentBeautician}，反映对服务稳定性和情感连接的重视。\n`;
+      
+      // 添加满意度评价
+      const satisfactionSum = sortedConsumptions.reduce((sum, record) => sum + (parseFloat(record.satisfaction) || 0), 0);
+      const avgSatisfaction = satisfactionSum / sortedConsumptions.length;
+      consumptionRecords += `满意度：平均评分${avgSatisfaction.toFixed(1)}/5，显示对品牌满意度良好。`;
     }
     
     return {
       customerInfo,
-      consumptionRecords
+      consumptionRecords,
+      customerId: customer.id || 'unknown'
     };
   }
   
@@ -198,56 +482,208 @@ class ReportGenerator {
    * 生成客户分析报告
    * @param {Object} customer 客户对象
    * @param {Array} consumptions 消费记录数组
+   * @param {Object} options 配置选项
    * @returns {Promise} 报告生成结果
    */
-  generateCustomerReport(customer, consumptions) {
-    return new Promise((resolve, reject) => {
-      if (!customer || !customer.customerId) {
+  generateCustomerReport(customer, consumptions, options = {}) {
+    return new Promise(async (resolve, reject) => {
+      if (!customer || !customer.id) {
         this.logger.error('缺少有效的客户信息');
         return reject(new Error('缺少有效的客户信息'));
       }
       
-      // 检查缓存中是否有此客户的报告
-      const cacheKey = `customer_${customer.customerId}_${new Date().toISOString().split('T')[0]}`;
-      if (this.reportsCache[cacheKey]) {
-        this.logger.info('使用缓存的报告', { customerId: customer.customerId });
-        return resolve({
-          report: this.reportsCache[cacheKey],
-          fromCache: true
+      try {
+        // 更新API配置
+        if (options.aiConfig) {
+          this.updateApiConfig(options.aiConfig);
+        }
+        
+        // 检查是否强制刷新
+        const forceRefresh = options.forceRefresh === true;
+        
+        // 检查缓存中是否有此客户的HTML报告
+        const today = new Date(); // 当前日期不需要格式化，直接使用new Date()创建
+        const dateStr = today.getFullYear() + '-' + 
+                       String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(today.getDate()).padStart(2, '0');
+        
+        const htmlCacheKey = `html_report_${customer.id}_latest`;
+        
+        // 如果不是强制刷新且有缓存，则使用缓存
+        if (!forceRefresh) {
+          const cachedHtml = wx.getStorageSync(htmlCacheKey);
+          if (cachedHtml) {
+            this.logger.info('使用缓存的HTML报告', { 
+              customerId: customer.id,
+              cacheDate: dateStr
+            });
+            
+            // 确保缓存的HTML报告也同步到传统缓存系统中
+            this._syncHtmlReportToCache(customer.id, cachedHtml, dateStr);
+            
+            return resolve({
+              html: cachedHtml,
+              text: cachedHtml, // 为了兼容性，也提供text属性
+              customerId: customer.id,
+              fromCache: true
+            });
+          }
+        }
+        
+        // 格式化数据
+        const { customerInfo, consumptionRecords, customerId } = this._formatCustomerData(customer, consumptions);
+        
+        // 获取项目库数据
+        let projectList = [];
+        try {
+          projectList = await this._getProjectData();
+          this.logger.info('获取项目库数据成功', { count: projectList.length });
+        } catch (error) {
+          this.logger.warn('获取项目库数据失败', error);
+        }
+        
+        // 生成报告提示词
+        let prompt = this.templates.customer.prompt
+          .replace('{{customerInfo}}', customerInfo)
+          .replace('{{consumptionRecords}}', consumptionRecords)
+          .replace(/{{customerId}}/g, customerId); // 替换所有出现的customerId
+          
+        // 添加自定义提示词
+        if (options.aiConfig && options.aiConfig.customPrompt) {
+          prompt += '\n\n附加说明：' + options.aiConfig.customPrompt;
+        }
+        
+        // 添加项目库数据
+        if (projectList.length > 0) {
+          prompt += '\n\n店内项目库：\n';
+          for (let i = 0; i < Math.min(projectList.length, 10); i++) {
+            const project = projectList[i];
+            prompt += `${i+1}. ${project.name}: ${project.description || '无描述'}, 价格: ${project.price || '未定价'}\n`;
+          }
+        }
+        
+        this.logger.info('开始生成客户报告', { 
+          customerId: customer.id,
+          name: customer.name,
+          consumptionCount: (consumptions || []).length
+        });
+        
+        // 在调用大模型API之前，添加下面代码以导出提示词：
+        if (options.exportPrompt && this.promptExporter) {
+          try {
+            // 构建文件名
+            const timestamp = new Date().toISOString().split('T')[0];
+            const filename = `customer_${customer.id}_${timestamp}.md`;
+            
+            // 导出提示词，不再传递fullPrompt
+            const exportResult = await this.promptExporter.exportPromptToFile({
+              customer,
+              consumptions,
+              projects: projectList,
+              prompt: prompt,
+              customPrompt: options.aiConfig?.customPrompt
+            }, filename);
+            
+            this.logger.info('提示词导出完成', exportResult);
+            
+            if (options.showExportTip) {
+              wx.showToast({
+                title: '提示词导出成功',
+                icon: 'success',
+                duration: 2000
+              });
+            }
+          } catch (error) {
+            this.logger.warn('提示词导出失败', error);
+          }
+        }
+        
+        // 调用大模型API
+        this._callLargeModelAPI(prompt)
+          .then(result => {
+            // 结果现在是一个对象，包含html和text属性
+            resolve({
+              ...result,
+              fromCache: false
+            });
+          })
+          .catch(error => {
+            this.logger.error('报告生成失败', error);
+            reject(new Error('报告生成失败: ' + error.message));
+          });
+      } catch (error) {
+        this.logger.error('报告生成过程出错', error);
+        reject(new Error('报告生成失败: ' + error.message));
+      }
+    });
+  }
+  
+  /**
+   * 获取客户报告
+   * @param {String} customerId 客户ID
+   * @param {String} date 报告日期，不指定则获取最新
+   * @returns {Object|null} 报告内容
+   */
+  getCustomerReport(customerId, date) {
+    if (!customerId) return null;
+    
+    try {
+      // 构建存储键名
+      const htmlKey = date 
+        ? `html_report_${customerId}_${date}` 
+        : `html_report_${customerId}_latest`;
+      
+      // 尝试获取HTML报告
+      const htmlContent = wx.getStorageSync(htmlKey);
+      if (htmlContent) {
+        return {
+          html: htmlContent,
+          customerId: customerId,
+          date: date || '最新'
+        };
+      }
+      
+      // 如果没有HTML报告，尝试获取传统报告
+      const cachePattern = date 
+        ? `customer_${customerId}_${date}`
+        : `customer_${customerId}_`; 
+      
+      // 查找匹配的传统报告
+      let report = null;
+      if (date) {
+        report = this.reportsCache[cachePattern];
+      } else {
+        // 找最新的报告
+        let newestDate = '';
+        Object.keys(this.reportsCache).forEach(key => {
+          if (key.startsWith(cachePattern)) {
+            const keyDate = key.substring(cachePattern.length);
+            if (!newestDate || keyDate > newestDate) {
+              newestDate = keyDate;
+              report = this.reportsCache[key];
+            }
+          }
         });
       }
       
-      // 格式化数据
-      const { customerInfo, consumptionRecords } = this._formatCustomerData(customer, consumptions);
+      if (report) {
+        return {
+          report: report,
+          content: report.split('\n\n').filter(p => p.trim() !== ''),
+          customerId: customerId,
+          date: date || newestDate || '未知'
+        };
+      }
       
-      // 生成报告提示词
-      const prompt = this.templates.customer.prompt
-        .replace('{{customerInfo}}', customerInfo)
-        .replace('{{consumptionRecords}}', consumptionRecords);
-        
-      this.logger.info('开始生成客户报告', { 
-        customerId: customer.customerId,
-        name: customer.name,
-        consumptionCount: (consumptions || []).length
+      return null;
+    } catch (error) {
+      this.logger.error('获取客户报告失败', {
+        customerId, 
+        date, 
+        error
       });
-      
-      // 调用大模型API
-      this._callLargeModelAPI(prompt)
-        .then(result => {
-          // 保存到缓存
-          this.reportsCache[cacheKey] = result;
-          this._saveReportsToCache(this.reportsCache);
-          
-          resolve({
-            report: result,
-            fromCache: false
-          });
-        })
-        .catch(error => {
-          this.logger.error('报告生成失败', error);
-          reject(new Error('报告生成失败: ' + error.message));
-        });
-    });
+      return null;
+    }
   }
   
   /**
@@ -314,21 +750,16 @@ class ReportGenerator {
   }
   
   /**
-   * 清除特定客户的报告缓存
+   * 清除客户报告缓存
    * @param {String} customerId 客户ID
    */
   clearCustomerReportCache(customerId) {
     if (!customerId) return;
     
-    const pattern = `customer_${customerId}_`;
-    const keysToRemove = [];
-    
-    // 查找要删除的键
-    Object.keys(this.reportsCache).forEach(key => {
-      if (key.startsWith(pattern)) {
-        keysToRemove.push(key);
-      }
-    });
+    // 查找客户的所有报告键
+    const keysToRemove = Object.keys(this.reportsCache).filter(key =>
+      key.startsWith(`customer_${customerId}_`)
+    );
     
     // 删除缓存中的报告
     keysToRemove.forEach(key => {
@@ -337,6 +768,9 @@ class ReportGenerator {
     
     // 保存更新的缓存
     this._saveReportsToCache(this.reportsCache);
+    
+    // 清理HTML报告缓存
+    this._clearCustomerHtmlReports(customerId);
     
     this.logger.info(`已清除客户报告缓存`, {
       customerId,
@@ -348,166 +782,147 @@ class ReportGenerator {
    * 清除所有报告缓存
    */
   clearAllReportCache() {
+    // 清除传统报告缓存
     this.reportsCache = {};
     this._saveReportsToCache(this.reportsCache);
+    
+    // 清除HTML报告缓存
+    this._clearAllHtmlReports();
     
     this.logger.info('已清除所有报告缓存');
   }
   
   /**
-   * 调用大模型API
-   * @param {String} prompt 提示词
-   * @returns {Promise} API调用结果
+   * 清除特定客户的HTML报告
+   * @param {String} customerId 客户ID
    * @private
    */
-  _callLargeModelAPI(prompt) {
-    return new Promise((resolve, reject) => {
-      this.logger.info('调用大模型API', { 
-        url: this.apiConfig.url, 
-        model: this.apiConfig.model,
-        promptLength: prompt.length 
-      });
+  _clearCustomerHtmlReports(customerId) {
+    try {
+      const keys = wx.getStorageInfoSync().keys;
+      const htmlKeysPattern = `html_report_${customerId}_`;
       
-      // 检查是否有apiKey
-      if (!this.apiConfig.apiKey) {
-        this.logger.warn('未配置API密钥，使用本地模拟数据');
-        
-        // 返回模拟数据(开发阶段)
-        setTimeout(() => {
-          resolve(this._getMockReport());
-        }, 1500);
-        
-        return;
+      // 查找该客户的所有HTML报告
+      for (const key of keys) {
+        if (key.startsWith(htmlKeysPattern)) {
+          wx.removeStorageSync(key);
+        }
       }
       
-      // 调用大模型API
-      wx.request({
-        url: this.apiConfig.url,
-        method: 'POST',
-        header: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiConfig.apiKey}`
-        },
-        data: {
-          model: this.apiConfig.model,
-          messages: [
-            { role: "system", content: "你是一位专业的美容顾问助手，需要根据客户信息生成专业的分析报告。" },
-            { role: "user", content: prompt }
-          ],
-          temperature: this.apiConfig.temperature,
-          max_tokens: this.apiConfig.maxTokens
-        },
-        success: (res) => {
-          if (res.statusCode === 200 && res.data && res.data.choices && res.data.choices.length > 0) {
-            const content = res.data.choices[0].message.content;
-            this.logger.info('大模型API调用成功', { 
-              responseLength: content.length 
-            });
-            resolve(content);
-          } else {
-            this.logger.error('大模型API调用失败', res);
-            reject(new Error('API响应异常: ' + JSON.stringify(res.data)));
-          }
-        },
-        fail: (err) => {
-          this.logger.error('大模型API调用失败', err);
-          
-          // 开发阶段，API失败时使用模拟数据
-          this.logger.warn('API失败，使用本地模拟数据');
-          setTimeout(() => {
-            resolve(this._getMockReport());
-          }, 1000);
-        }
-      });
-    });
+      this.logger.info('已清除客户HTML报告', { customerId });
+    } catch (error) {
+      this.logger.error('清除客户HTML报告失败', error);
+    }
   }
   
   /**
-   * 获取模拟报告（开发阶段使用）
-   * @returns {String} 模拟报告内容
+   * 清除所有HTML报告
    * @private
    */
-  _getMockReport() {
-    return `# 客户分析报告
-
-## 1. 客户概况
-
-该客户是一位30岁的女性，会员等级为钻石会员，隶属于总店。客户居住在市中心区域，是一位有稳定消费能力的高价值客户。从消费记录来看，该客户对面部护理和身体护理项目都有较高的消费频率，总体消费水平较高，平均每次消费额度在800元以上。
-
-## 2. 消费分析
-
-- **消费金额**：过去半年内总共消费12次，累计消费金额达10,600元，平均每次消费883.33元
-- **消费频率**：平均每半个月到店一次，消费频率稳定
-- **项目偏好**：最常消费的项目为"补水焕肤护理"，共4次，其次是"深层清洁"和"精油SPA"
-- **消费习惯**：倾向于选择套餐服务，多采用会员卡支付方式
-- **满意度**：大部分服务评价为"非常满意"，个别项目评价为"满意"，无负面评价
-
-## 3. 客户画像
-
-该客户属于事业型女性，生活节奏较快，注重个人形象管理。从其消费选择和健康信息来看：
-
-- **性格特点**：细致、注重品质、对美容护理有较高要求
-- **消费习惯**：注重性价比，偏好高效、效果明显的护理项目
-- **生活方式**：工作压力较大，睡眠质量不佳，饮食不太规律，有轻度运动习惯
-
-健康状况方面，客户有轻度皮肤敏感情况，对某些化学成分存在过敏反应，需特别注意护理产品的选择。
-
-## 4. 推荐方案
-
-根据客户画像，推荐以下产品和服务：
-
-1. **护理方案**：
-   - 定制"敏感肌舒缓修复系列"，帮助改善皮肤敏感状况
-   - "抗压舒缓SPA套餐"，缓解工作压力，改善睡眠
-   - "水氧活肤"季卡服务，针对缺水问题提供长期解决方案
-
-2. **产品推荐**：
-   - 敏感肌专用修复精华，无刺激成分
-   - 深层补水面膜（建议每周使用2-3次）
-   - 舒压助眠喷雾，帮助改善睡眠质量
-
-3. **会员专享**：
-   - 推荐升级至黑钻会员，享受定制护理方案和产品折扣
-   - 生日月专属"全身SPA放松疗程"
-
-## 5. 客户维护建议
-
-1. **沟通策略**：
-   - 保持每月一次的微信问候，关注客户皮肤状况变化
-   - 活动通知提前一周预约，避免客户因工作繁忙错过
-
-2. **个性化服务**：
-   - 记录客户喜好（如室温、音乐、茶饮偏好等）
-   - 预约时间优先考虑傍晚时段（客户常选时间）
-
-3. **满意度提升**：
-   - 针对"精油SPA"项目的评价提升，建议由该客户最满意的技师王丽提供服务
-   - 每季度进行一次深度的皮肤评估和方案调整
-
-4. **忠诚度建设**：
-   - 邀请参与新品体验会，收集反馈意见
-   - 推荐"会员介绍计划"，增强客户归属感
-
-客户属于高价值、高潜力群体，建议纳入VIP客户管理计划，由店长定期回访，确保服务质量和客户满意度。`;
+  _clearAllHtmlReports() {
+    try {
+      const keys = wx.getStorageInfoSync().keys;
+      
+      // 查找所有HTML报告
+      for (const key of keys) {
+        if (key.startsWith('html_report_')) {
+          wx.removeStorageSync(key);
+        }
+      }
+      
+      this.logger.info('已清除所有HTML报告');
+    } catch (error) {
+      this.logger.error('清除所有HTML报告失败', error);
+    }
   }
   
   /**
    * 更新API配置
-   * @param {Object} config 新的API配置
+   * @param {Object} config 新的配置对象
    */
-  updateApiConfig(config) {
+  updateApiConfig(config = {}) {
     if (!config) return;
     
-    // 更新现有配置
-    this.apiConfig = {
-      ...this.apiConfig,
-      ...config
-    };
+    // 固定的模型名称
+    const MODEL_NAME = "Pro/deepseek-ai/DeepSeek-R1";
     
-    this.logger.info('API配置已更新', {
+    // 更新API URL
+    if (config.apiUrl) {
+      this.apiConfig.url = config.apiUrl;
+    }
+    
+    // 更新API密钥
+    if (config.apiKey) {
+      this.apiConfig.apiKey = config.apiKey;
+    }
+    
+    // 不再从配置中获取模型名称，而是使用固定值
+    this.apiConfig.model = MODEL_NAME;
+    this.logger.info('已固定使用模型', { model: MODEL_NAME });
+    
+    // 更新温度参数
+    if (typeof config.temperature === 'number') {
+      this.apiConfig.temperature = Math.max(0, Math.min(1, config.temperature));
+    }
+    
+    // 更新最大Token数
+    if (typeof config.maxTokens === 'number') {
+      this.apiConfig.maxTokens = Math.max(100, Math.min(4000, config.maxTokens));
+    }
+    
+    this.logger.info('API配置已更新', { 
       url: this.apiConfig.url,
-      model: this.apiConfig.model
+      model: MODEL_NAME,
+      temperature: this.apiConfig.temperature,
+      maxTokens: this.apiConfig.maxTokens
     });
+  }
+  
+  /**
+   * 格式化日期为iOS兼容格式
+   * @param {String} dateStr 日期字符串
+   * @returns {Date} 日期对象
+   * @private
+   */
+  _formatDateForIOS(dateStr) {
+    if (!dateStr) return new Date();
+    
+    // 将日期格式转换为iOS兼容格式：YYYY-MM-DDThh:mm:ss
+    return new Date(dateStr.replace(/\s+/g, 'T'));
+  }
+  
+  /**
+   * 同步HTML报告到传统缓存系统
+   * @param {String} customerId 客户ID
+   * @param {String} htmlContent HTML内容
+   * @param {String} dateStr 日期字符串
+   * @private
+   */
+  _syncHtmlReportToCache(customerId, htmlContent, dateStr) {
+    try {
+      // 构建传统缓存键
+      const cacheKey = `customer_${customerId}_${dateStr}`;
+      
+      // 从HTML中提取一段纯文本作为摘要
+      let textSummary = htmlContent
+        .replace(/<[^>]*>/g, '')  // 移除HTML标签
+        .replace(/\s+/g, ' ')     // 合并空格
+        .trim()
+        .substring(0, 1000);      // 限制长度
+      
+      // 添加到传统缓存
+      this.reportsCache[cacheKey] = textSummary;
+      
+      // 保存缓存
+      this._saveReportsToCache(this.reportsCache);
+      
+      this.logger.info('已同步HTML报告到传统缓存系统', {
+        customerId,
+        date: dateStr
+      });
+    } catch (error) {
+      this.logger.error('同步HTML报告到传统缓存系统失败', error);
+    }
   }
 }
 

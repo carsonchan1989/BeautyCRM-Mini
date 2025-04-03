@@ -180,15 +180,39 @@ def get_services():
 def get_service(service_id):
     """获取单个服务记录详情"""
     try:
+        logger.info(f"正在查询服务记录，ID: {service_id}")
         service = Service.query.get(service_id)
         
         if not service:
+            logger.warning(f"服务记录不存在: {service_id}")
             return jsonify({
                 'success': False,
                 'message': f'服务记录 {service_id} 不存在'
             })
-            
+        
+        # 获取完整的服务记录信息，包括关联的服务项目    
         service_dict = service.to_dict()
+        
+        # 确保service_items字段存在并完整包含所有需要的字段
+        if 'service_items' in service_dict and service_dict['service_items']:
+            logger.info(f"服务 {service_id} 有 {len(service_dict['service_items'])} 个服务项目")
+            for i, item in enumerate(service_dict['service_items']):
+                # 确保字段映射完整，适配前端需要的字段
+                item['service_name'] = item.get('project_name', '')
+                item['amount'] = item.get('unit_price', 0)
+                # 默认值处理
+                if 'is_specified' not in item:
+                    item['is_specified'] = False
+                if 'note' not in item:
+                    item['note'] = item.get('remark', '')
+                # 添加其他可能需要的字段
+                if 'consumed_sessions' not in item:
+                    item['consumed_sessions'] = []
+                
+                logger.debug(f"服务项目 {i+1}: {item['service_name']}, 美容师: {item.get('beautician_name', '未指定')}")
+        else:
+            logger.warning(f"服务 {service_id} 没有关联的服务项目数据")
+            service_dict['service_items'] = []
             
         return jsonify({
             'success': True,
@@ -197,10 +221,12 @@ def get_service(service_id):
         })
         
     except Exception as e:
-        logger.error(f"获取服务记录详情出错: {str(e)}")
+        error_msg = f"获取服务记录详情出错: {str(e)}"
+        logger.error(error_msg)
+        logger.error(traceback.format_exc())
         return jsonify({
             'success': False,
-            'message': f'获取服务记录详情失败: {str(e)}'
+            'message': error_msg
         })
 
 @service_bp.route('/create', methods=['POST'])
@@ -237,6 +263,21 @@ def create_service():
                         'success': False,
                         'message': '服务日期格式无效，请使用YYYY-MM-DD或YYYY-MM-DD HH:MM:SS格式'
                     })
+        
+        # 检查是否已存在相同的服务记录
+        existing_service = Service.query.filter_by(
+            customer_id=data.get('customer_id'),
+            service_date=service_date,
+            operator=data.get('operator')
+        ).first()
+        
+        if existing_service:
+            logger.warning(f"尝试创建重复的服务记录：客户={data.get('customer_id')}, 日期={service_date}, 操作员={data.get('operator')}")
+            return jsonify({
+                'success': False,
+                'message': '已存在相同的服务记录',
+                'data': existing_service.to_dict()
+            }), 409  # 409 Conflict
                 
         # 创建新服务记录
         service = Service(
@@ -516,25 +557,29 @@ def import_consumption_excel():
                 
                 # 如果是更新模式，检查是否有相同日期的记录
                 existing_service = None
-                if import_mode == 'update':
-                    # 查找相同客户、相同日期的记录
-                    existing_service = Service.query.filter_by(
-                        customer_id=customer_id,
-                        service_date=service_date
-                    ).first()
+                # 查找相同客户、相同日期、相同操作员的记录
+                existing_service = Service.query.filter_by(
+                    customer_id=customer_id,
+                    service_date=service_date,
+                    operator=record.get('operator')
+                ).first()
                 
-                if existing_service and import_mode == 'update':
-                    # 更新现有记录
-                    existing_service.total_amount = record.get('total_amount', 0)
-                    existing_service.payment_method = record.get('payment_method')
-                    existing_service.operator = record.get('operator')
-                    existing_service.remark = record.get('remark')
-                    
-                    # 删除现有项目
-                    ServiceItem.query.filter_by(service_id=existing_service.service_id).delete()
-                    
-                    # 添加新项目
-                    service_id = existing_service.service_id
+                if existing_service:
+                    if import_mode == 'update':
+                        # 更新现有记录
+                        existing_service.total_amount = record.get('total_amount', 0)
+                        existing_service.payment_method = record.get('payment_method')
+                        existing_service.remark = record.get('remark')
+                        
+                        # 删除现有项目
+                        ServiceItem.query.filter_by(service_id=existing_service.service_id).delete()
+                        
+                        # 添加新项目
+                        service_id = existing_service.service_id
+                    else:
+                        # add模式下跳过已存在的记录
+                        logger.info(f"跳过已存在的服务记录: 客户={customer_id}, 日期={service_date}, 操作员={record.get('operator')}")
+                        continue
                 else:
                     # 创建新服务记录
                     new_service = Service(

@@ -193,6 +193,11 @@ class Consumption(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
+    # 添加唯一性约束，防止重复记录
+    __table_args__ = (
+        db.UniqueConstraint('customer_id', 'date', 'project_name', 'amount', name='uix_consumption_record'),
+    )
+    
     def to_dict(self):
         return {
             'id': self.id,
@@ -232,6 +237,11 @@ class Service(db.Model):
     # 记录时间戳
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    # 添加更完善的唯一性约束，防止重复记录
+    __table_args__ = (
+        db.UniqueConstraint('customer_id', 'service_date', 'operator', 'total_amount', name='uix_service_record'),
+    )
     
     def to_dict(self):
         return {
@@ -309,6 +319,11 @@ class Communication(db.Model):
     # 记录时间戳
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    # 添加唯一性约束，防止重复记录
+    __table_args__ = (
+        db.UniqueConstraint('customer_id', 'communication_date', 'communication_content', name='uix_communication_record'),
+    )
     
     def to_dict(self):
         return {

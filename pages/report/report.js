@@ -2,6 +2,7 @@
 const DataStore = require('../../utils/dataStore')
 const Logger = require('../../utils/logger')
 const ReportGenerator = require('../../utils/reportGenerator')
+const apiConfig = require('../../config/api') // 添加API配置引用
 
 Page({
   data: {
@@ -29,6 +30,7 @@ Page({
   onLoad() {
     // 初始化Logger
     this.logger = new Logger({ debug: true });
+    this.logger.info('报告页面已加载');
     
     // 初始化DataStore
     this.dataStore = new DataStore({ logger: this.logger });
@@ -37,9 +39,9 @@ Page({
     this.reportGenerator = new ReportGenerator({ 
       logger: this.logger,
       // 配置大模型API
-      apiKey: '',
-      apiUrl: 'https://api.example.com/v1/generate',
-      model: 'gpt-3.5-turbo'
+      apiKey: 'sk-zenjhfgpeauztirirbzjshbvzuvqhqidkfkqwtmmenennmaa',
+      apiUrl: 'https://api.siliconflow.cn/v1',
+      model: 'Pro/deepseek-ai/DeepSeek-R1'
     });
     
     // 加载客户数据
@@ -52,25 +54,39 @@ Page({
   loadCustomerData() {
     this.setData({ isLoading: true });
     
-    try {
-      // 从DataStore获取所有客户
-      const customers = this.dataStore.getAllCustomers();
-      
-      this.logger.info(`加载了${customers.length}位客户数据`);
-      
-      this.setData({
-        customers: customers,
-        filteredCustomers: customers,
-        isLoading: false
-      });
-    } catch (error) {
-      this.logger.error('加载客户数据失败', error);
-      
-      this.setData({
-        isLoading: false,
-        errorMessage: '加载客户数据失败: ' + (error.message || '未知错误')
-      });
-    }
+    // 从服务器API获取客户数据，而不是从本地DataStore
+    wx.request({
+      url: apiConfig.getUrl(apiConfig.paths.customer.list),
+      method: 'GET',
+      success: (res) => {
+        // 检查响应是否成功
+        if (res.statusCode === 200) {
+          // 直接使用API返回的items数组作为客户列表
+          const customers = res.data.items || [];
+          
+          this.logger.info(`从API加载了${customers.length}位客户数据`);
+          
+          this.setData({
+            customers: customers,
+            filteredCustomers: customers,
+            isLoading: false
+          });
+        } else {
+          this.logger.error('从API加载客户数据失败', res.data);
+          this.setData({
+            isLoading: false,
+            errorMessage: '加载客户数据失败: ' + (res.data.message || '未知错误')
+          });
+        }
+      },
+      fail: (err) => {
+        this.logger.error('客户数据请求失败', err);
+        this.setData({
+          isLoading: false,
+          errorMessage: '网络请求失败: ' + (err.errMsg || '未知错误')
+        });
+      }
+    });
   },
   
   /**
@@ -104,18 +120,87 @@ Page({
     if (!customerId) return;
     
     // 查找选中的客户
-    const selectedCustomer = this.data.customers.find(c => c.customerId === customerId);
-    if (!selectedCustomer) return;
+    const selectedCustomer = this.data.customers.find(c => c.id === customerId);
+    if (!selectedCustomer) {
+      this.logger.warn('未找到选中的客户', { customerId });
+      return;
+    }
+    
+    this.logger.info('选中客户', { 
+      customerId, 
+      name: selectedCustomer.name 
+    });
     
     // 获取客户消费记录
-    const consumptions = this.dataStore.getCustomerConsumptions(customerId);
+    this.loadCustomerConsumptions(customerId, selectedCustomer);
+  },
+  
+  /**
+   * 加载客户消费记录
+   */
+  loadCustomerConsumptions(customerId, selectedCustomer) {
+    // 显示加载中状态
+    wx.showLoading({
+      title: '加载消费记录...',
+      mask: true
+    });
     
-    // 更新选中的客户
-    this.setData({
-      selectedCustomerId: customerId,
-      selectedCustomer: {
-        ...selectedCustomer,
-        consumptions: consumptions
+    // 从API获取客户消费记录
+    wx.request({
+      url: apiConfig.getUrl(apiConfig.paths.service.list) + `?customer_id=${customerId}`,
+      method: 'GET',
+      success: (res) => {
+        wx.hideLoading();
+        
+        if (res.statusCode === 200) {
+          // 直接使用返回的items数组作为消费记录
+          const consumptions = res.data.items || [];
+          
+          this.logger.info(`加载了${consumptions.length}条消费记录`, { customerId });
+          
+          // 更新选中的客户
+          this.setData({
+            selectedCustomerId: customerId,
+            selectedCustomer: {
+              ...selectedCustomer,
+              consumptions: consumptions
+            }
+          });
+        } else {
+          this.logger.error('加载消费记录失败', res.data);
+          
+          // 即使消费记录失败，也更新客户信息
+          this.setData({
+            selectedCustomerId: customerId,
+            selectedCustomer: {
+              ...selectedCustomer,
+              consumptions: []
+            }
+          });
+          
+          wx.showToast({
+            title: '获取消费记录失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        this.logger.error('消费记录请求失败', err);
+        
+        // 即使请求失败，也更新客户信息
+        this.setData({
+          selectedCustomerId: customerId,
+          selectedCustomer: {
+            ...selectedCustomer,
+            consumptions: []
+          }
+        });
+        
+        wx.showToast({
+          title: '网络请求失败',
+          icon: 'none'
+        });
       }
     });
   },
@@ -129,43 +214,22 @@ Page({
       return;
     }
     
-    this.setData({
-      isGenerating: true,
-      errorMessage: ''
-    });
-    
-    this.logger.info('开始生成客户分析报告', {
-      customerId: this.data.selectedCustomerId,
-      customerName: this.data.selectedCustomer.name
-    });
-    
-    const customer = this.data.selectedCustomer;
-    const consumptions = customer.consumptions || [];
-    
-    // 调用报告生成器
-    this.reportGenerator.generateCustomerReport(customer, consumptions)
-      .then(result => {
-        this.logger.info('报告生成成功', {
-          fromCache: result.fromCache
+    // 直接导航到报告创建页面，而不是在此处生成报告
+    wx.navigateTo({
+      url: `/pages/report/create?id=${this.data.selectedCustomerId}`,
+      success: () => {
+        this.logger.info('已导航到报告创建页面', { 
+          customerId: this.data.selectedCustomerId 
         });
-        
-        // 报告生成成功，跳转到报告查看页面
-        wx.navigateTo({
-          url: `/pages/report/detail?id=${this.data.selectedCustomerId}`,
-          success: () => {
-            // 重置状态
-            this.setData({ isGenerating: false });
-          }
-        });
-      })
-      .catch(error => {
-        this.logger.error('报告生成失败', error);
+      },
+      fail: (err) => {
+        this.logger.error('导航到报告创建页面失败', err);
         
         this.setData({
-          isGenerating: false,
-          errorMessage: '报告生成失败: ' + (error.message || '未知错误')
+          errorMessage: '无法打开报告创建页面: ' + (err.errMsg || '未知错误')
         });
-      });
+      }
+    });
   },
   
   /**

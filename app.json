@@ -11,11 +11,15 @@
     "pages/report/report",
     "pages/report/detail",
     "pages/report/create",
+    "pages/report/prompt",
     "pages/history/history",
     "pages/project/list",
     "pages/project/add",
     "pages/project/edit",
-    "pages/project/detail"
+    "pages/project/detail",
+    "pages/service/detail",
+    "pages/service/list",
+    "pages/service/add"
   ],
   "window": {
     "backgroundTextStyle": "light",

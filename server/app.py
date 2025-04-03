@@ -44,7 +44,7 @@ def create_app(config=None):
     app.register_blueprint(customer_bp, url_prefix='/api/customers')
     app.register_blueprint(excel_bp, url_prefix='/api/excel')
     app.register_blueprint(project_bp, url_prefix='/api/projects')
-    app.register_blueprint(service_bp, url_prefix='/api/services')
+    app.register_blueprint(service_bp, url_prefix='/api/service')
 
     # 创建文件夹
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

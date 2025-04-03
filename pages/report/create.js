@@ -19,7 +19,7 @@ Page({
     aiConfig: {
       temperature: 0.7,
       maxTokens: 2000,
-      model: 'gpt-3.5-turbo',
+      model: 'Pro/deepseek-ai/DeepSeek-R1',
       customPrompt: ''
     },
     
@@ -38,7 +38,10 @@ Page({
     errorMessage: '',
     
     // 当前激活的标签页
-    activeTab: 'basic' // basic, advanced
+    activeTab: 'basic', // basic, advanced
+    
+    // 是否需要强制刷新
+    forceRefresh: false
   },
   
   onLoad(options) {
@@ -53,9 +56,9 @@ Page({
     this.reportGenerator = new ReportGenerator({ 
       logger: this.logger,
       // 读取本地存储的API配置
-      apiKey: wx.getStorageSync('apiKey') || '',
-      apiUrl: wx.getStorageSync('apiUrl') || 'https://api.example.com/v1/generate',
-      model: wx.getStorageSync('modelName') || 'gpt-3.5-turbo'
+      apiKey: 'sk-zenjhfgpeauztirirbzjshbvzuvqhqidkfkqwtmmenennmaa',
+      apiUrl: 'https://api.siliconflow.cn/v1',
+      model: 'Pro/deepseek-ai/DeepSeek-R1'
     });
     
     // 获取客户ID参数
@@ -67,7 +70,13 @@ Page({
       return;
     }
     
-    this.setData({ customerId });
+    // 检查是否需要强制刷新(新增:支持true字符串或布尔值)
+    const forceRefresh = options.forceRefresh === 'true' || options.forceRefresh === true;
+    
+    this.setData({ 
+      customerId,
+      forceRefresh 
+    });
     
     // 加载客户数据
     this.loadCustomerData(customerId);
@@ -236,77 +245,120 @@ Page({
   },
   
   /**
-   * 生成报告
+   * 开始生成报告
    */
-  generateReport() {
-    if (!this.data.customer) {
-      this.setData({
-        errorMessage: '客户信息未加载'
+  startGenerating() {
+    // 获取所选客户ID
+    const customerId = this.data.customerId;
+    if (!customerId) {
+      wx.showToast({
+        title: '请先选择客户',
+        icon: 'none'
       });
       return;
     }
     
+    // 设置为生成中状态
     this.setData({
       isGenerating: true,
-      generationProgress: 10,
-      errorMessage: ''
+      generationProgress: 0,
+      generationStatus: '正在准备生成报告...'
     });
     
-    this.logger.info('开始生成客户分析报告', {
-      customerId: this.data.customerId,
-      customerName: this.data.customer.name,
-      configOptions: this.data.reportConfig
-    });
-    
-    // 模拟进度更新
-    let progress = 10;
-    const progressInterval = setInterval(() => {
-      progress += 5;
-      if (progress > 90) {
-        clearInterval(progressInterval);
+    // 创建进度条更新定时器 - 每200ms更新一次进度
+    this.progressTimer = setInterval(() => {
+      let progress = this.data.generationProgress;
+      if (progress < 98) {
+        // 前20%快速增加
+        if (progress < 20) {
+          progress += 2;
+        } 
+        // 20%-80%缓慢增加
+        else if (progress < 80) {
+          progress += 0.5;
+        }
+        // 80%-98%极慢增加
+        else {
+          progress += 0.1;
+        }
+        
+        // 更新状态文本
+        let status = '正在准备生成报告...';
+        if (progress >= 10 && progress < 30) {
+          status = '正在获取客户信息...';
+        } else if (progress >= 30 && progress < 60) {
+          status = '正在分析客户数据...';
+        } else if (progress >= 60 && progress < 90) {
+          status = '正在生成报告内容...';
+        } else if (progress >= 90) {
+          status = '正在处理结果...';
+        }
+        
+        this.setData({
+          generationProgress: progress,
+          generationStatus: status
+        });
       }
-      this.setData({ generationProgress: progress });
     }, 200);
     
-    // 调用报告生成器
-    this.reportGenerator.generateCustomerReport(
-      this.data.customer, 
-      this.data.consumptions,
-      {
-        ...this.data.reportConfig,
-        aiConfig: this.data.aiConfig
-      }
-    )
+    // 开始生成报告
+    this.generateCustomerReport(customerId)
       .then(result => {
-        // 清除进度定时器
-        clearInterval(progressInterval);
+        // 清除进度条定时器
+        if (this.progressTimer) {
+          clearInterval(this.progressTimer);
+        }
         
-        this.logger.info('报告生成成功', {
-          customerId: this.data.customerId,
-          fromCache: result.fromCache
-        });
-        
+        // 设置为100%完成
         this.setData({
-          isGenerating: false,
-          generationProgress: 100
+          generationProgress: 100,
+          generationStatus: '报告生成完成!'
         });
         
-        // 生成成功，跳转到报告详情页面
-        wx.navigateTo({
-          url: `/pages/report/detail?id=${this.data.customerId}`
-        });
+        // 延迟显示成功消息，给用户时间看到100%
+        setTimeout(() => {
+          // 显示成功消息
+          wx.showToast({
+            title: '报告生成成功!',
+            icon: 'success',
+            duration: 2000
+          });
+          
+          // 延迟页面跳转
+          setTimeout(() => {
+            // 重置状态
+            this.setData({
+              isGenerating: false,
+              generationProgress: 0
+            });
+            
+            // 跳转到报告详情页
+            wx.navigateTo({
+              url: `/pages/report/detail?id=${customerId}&date=${result.date}&format=html`
+            });
+          }, 1000);
+        }, 500);
       })
       .catch(error => {
-        // 清除进度定时器
-        clearInterval(progressInterval);
+        // 清除进度条定时器
+        if (this.progressTimer) {
+          clearInterval(this.progressTimer);
+        }
         
-        this.logger.error('报告生成失败', error);
-        
+        // 重置状态
         this.setData({
           isGenerating: false,
-          generationProgress: 0,
-          errorMessage: '报告生成失败: ' + (error.message || '未知错误')
+          generationProgress: 0
         });
+        
+        // 显示错误消息
+        wx.showModal({
+          title: '生成失败',
+          content: error.message || '报告生成失败，请重试',
+          showCancel: false
+        });
+        
+        this.logger.error('生成报告失败', error);
       });
   },
   
@@ -337,7 +389,7 @@ Page({
           const defaultAiConfig = {
             temperature: 0.7,
             maxTokens: 2000,
-            model: 'gpt-3.5-turbo',
+            model: 'Pro/deepseek-ai/DeepSeek-R1',
             customPrompt: ''
           };
           
@@ -356,6 +408,215 @@ Page({
           });
         }
       }
+    });
+  },
+  
+  /**
+   * 更新高级配置
+   * @param {Event} e 事件对象
+   */
+  updateAdvancedConfig(e) {
+    const { type, value } = e.currentTarget.dataset;
+    
+    if (type === 'model') {
+      // 始终使用固定的模型名称
+      this.setData({
+        'advancedConfig.model': 'Pro/deepseek-ai/DeepSeek-R1'
+      });
+      return;
+    }
+    
+    // 其他配置项正常处理
+    this.setData({
+      [`advancedConfig.${type}`]: value
+    });
+    
+    wx.showToast({
+      title: '配置已更新',
+      icon: 'success'
+    });
+  },
+  
+  /**
+   * 显示API状态提示框
+   * @param {String} message 提示消息
+   * @param {Boolean} success 是否成功
+   */
+  showApiStatusTip(message, success = false) {
+    wx.showModal({
+      title: success ? '成功' : '提示',
+      content: message,
+      showCancel: false
+    });
+  },
+  
+  /**
+   * 处理报告生成结果
+   * @param {Object} result 报告生成结果
+   * @param {Object} customer 客户信息
+   */
+  handleReportResult(result, customer) {
+    // 更新状态
+    this.setData({
+      generating: false,
+      progress: 100
+    });
+    
+    if (result.fromCache) {
+      this.showApiStatusTip('使用了本地缓存的报告', true);
+    } else {
+      // 真实API返回的结果
+      this.showApiStatusTip('报告生成成功!', true);
+    }
+    
+    // 将生成的报告添加到页面数据和上下文中
+    this.setData({
+      'reportData.html': result.html,
+      'reportData.text': result.text,
+      'reportData.customer': customer,
+      'reportData.ready': true
+    });
+    
+    // 清理进度条定时器
+    if (this.data.progressTimer) {
+      clearInterval(this.data.progressTimer);
+    }
+  },
+  
+  /**
+   * 模拟进度条
+   * @private
+   */
+  _simulateProgress() {
+    // 清理可能存在的定时器
+    if (this.data.progressTimer) {
+      clearInterval(this.data.progressTimer);
+    }
+    
+    let progress = 10;
+    const progressTimer = setInterval(() => {
+      // 进度接近90%时减缓增长速度
+      if (progress >= 90) {
+        // 停止进度条，等待实际结果
+        clearInterval(progressTimer);
+      } else if (progress >= 80) {
+        progress += 0.5;
+      } else if (progress >= 60) {
+        progress += 1;
+      } else {
+        progress += 3;
+      }
+      
+      this.setData({
+        generationProgress: progress,
+        progressTimer
+      });
+    }, 600);
+    
+    this.setData({ progressTimer });
+  },
+  
+  /**
+   * 切换强制刷新选项
+   */
+  toggleForceRefresh(e) {
+    const forceRefresh = e.detail.value;
+    this.setData({ forceRefresh });
+    
+    if (forceRefresh) {
+      wx.showToast({
+        title: '将强制生成新报告',
+        icon: 'none'
+      });
+    }
+  },
+  
+  /**
+   * 查看导出的提示词
+   */
+  viewExportedPrompts() {
+    wx.navigateTo({
+      url: '/pages/report/prompt'
+    });
+  },
+  
+  /**
+   * 生成客户报告
+   * @param {String} customerId 客户ID
+   * @returns {Promise} 生成报告的Promise
+   */
+  generateCustomerReport(customerId) {
+    return new Promise((resolve, reject) => {
+      if (!customerId || !this.data.customer) {
+        return reject(new Error('客户信息不完整'));
+      }
+      
+      // 配置AI参数
+      const options = {
+        forceRefresh: true, // 总是强制刷新，确保每次都调用API
+        aiConfig: this.data.aiConfig,
+        exportPrompt: true, // 启用提示词导出
+        showExportTip: true // 显示导出成功提示
+      };
+      
+      // 根据报告配置修改自定义提示词
+      let customPrompt = this.data.aiConfig.customPrompt || '';
+      
+      // 根据报告内容选项增加提示词
+      if (!this.data.reportConfig.includeBasicInfo) {
+        customPrompt += ' 不需要包含基本信息部分。';
+      }
+      
+      if (!this.data.reportConfig.includeConsumptionHistory) {
+        customPrompt += ' 不需要包含消费历史部分。';
+      }
+      
+      if (!this.data.reportConfig.includeSkinAnalysis) {
+        customPrompt += ' 不需要包含肌肤分析部分。';
+      }
+      
+      if (!this.data.reportConfig.includeRecommendations) {
+        customPrompt += ' 不需要包含个性化建议部分。';
+      }
+      
+      // 设置报告长度
+      if (this.data.reportConfig.maxLength === 'short') {
+        customPrompt += ' 报告内容简洁，不超过500字。';
+      } else if (this.data.reportConfig.maxLength === 'long') {
+        customPrompt += ' 报告内容详尽，不少于1500字。';
+      }
+      
+      // 更新AI配置中的自定义提示词
+      if (customPrompt) {
+        options.aiConfig.customPrompt = customPrompt;
+      }
+      
+      this.logger.info('开始生成客户报告', { 
+        customerId,
+        options,
+        forceRefresh: true // 记录日志表明强制刷新
+      });
+      
+      // 调用报告生成器
+      this.reportGenerator.generateCustomerReport(
+        this.data.customer,
+        this.data.consumptions,
+        options
+      )
+      .then(result => {
+        this.logger.info('报告生成成功', {
+          customerId,
+          fromCache: result.fromCache
+        });
+        
+        // 将日期添加到结果
+        result.date = new Date().toISOString().split('T')[0];
+        resolve(result);
+      })
+      .catch(error => {
+        this.logger.error('报告生成失败', error);
+        reject(error);
+      });
     });
   }
 });

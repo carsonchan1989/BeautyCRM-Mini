@@ -1,0 +1,164 @@
+<view class="container">
+  <!-- 标题栏 -->
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">API测试工具</view>
+  </view>
+  
+  <!-- 配置区域 -->
+  <view class="config-section">
+    <view class="section-title">API配置</view>
+    
+    <view class="form-item">
+      <view class="item-label">API地址:</view>
+      <input class="item-input" type="text" value="{{apiUrl}}" 
+             data-field="apiUrl" bindinput="updateConfig" 
+             placeholder="输入API地址"/>
+    </view>
+    
+    <view class="form-item">
+      <view class="item-label">API密钥:</view>
+      <input class="item-input" type="text" value="{{apiKey}}" 
+             data-field="apiKey" bindinput="updateConfig" 
+             placeholder="输入API密钥"/>
+    </view>
+    
+    <view class="form-item">
+      <view class="item-label">模型名称:</view>
+      <input class="item-input" type="text" value="{{model}}" 
+             data-field="model" bindinput="updateConfig" 
+             placeholder="输入模型名称"/>
+    </view>
+    
+    <view class="correct-model" wx:if="{{correctModelId}}">
+      <view class="correct-model-label">正确的模型ID:</view>
+      <view class="correct-model-value">{{correctModelId}}</view>
+      <view class="copy-button" bindtap="copyModelId">复制</view>
+    </view>
+  </view>
+  
+  <!-- 操作按钮区 -->
+  <view class="action-section">
+    <button class="action-button" bindtap="testConnection" disabled="{{testing}}">
+      测试API连接
+    </button>
+    
+    <button class="action-button" bindtap="getAvailableModels" disabled="{{testing}}">
+      获取可用模型
+    </button>
+    
+    <button class="action-button" bindtap="checkModelAvailability" disabled="{{testing}}">
+      检查模型可用性
+    </button>
+    
+    <button class="action-button" bindtap="testModelCall" disabled="{{testing}}">
+      测试模型调用
+    </button>
+    
+    <button class="action-button primary" bindtap="runFullTest" disabled="{{testing}}">
+      运行全面测试
+    </button>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{testing}}">
+    <view class="loading-icon"></view>
+    <text>测试中，请稍候...</text>
+  </view>
+  
+  <!-- 连接测试结果 -->
+  <view class="result-section" wx:if="{{connectionResult}}">
+    <view class="section-title">API连接测试结果</view>
+    <view class="result-content {{connectionResult.success ? 'success' : 'error'}}">
+      <view class="result-status">
+        {{connectionResult.success ? '✓ 连接成功' : '✗ 连接失败'}}
+      </view>
+      <view class="result-message">{{connectionResult.message}}</view>
+      <view class="result-details" wx:if="{{connectionResult.data}}">
+        响应状态码: {{connectionResult.statusCode}}
+      </view>
+    </view>
+  </view>
+  
+  <!-- 模型可用性测试结果 -->
+  <view class="result-section" wx:if="{{modelAvailability}}">
+    <view class="section-title">模型可用性测试结果</view>
+    <view class="result-content {{modelAvailability.available ? 'success' : 'error'}}">
+      <view class="result-status">
+        {{modelAvailability.available ? '✓ 模型可用' : '✗ 模型不可用'}}
+      </view>
+      <view class="result-message">{{modelAvailability.message}}</view>
+      <view class="result-details" wx:if="{{modelAvailability.model}}">
+        正确的模型ID: {{modelAvailability.model.id}}
+        <view class="small-text" wx:if="{{modelAvailability.matchType === 'fuzzy'}}">
+          (模糊匹配)
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 模型调用测试结果 -->
+  <view class="result-section" wx:if="{{testCallResult}}">
+    <view class="section-title">模型调用测试结果</view>
+    <view class="result-content {{testCallResult.success ? 'success' : 'error'}}">
+      <view class="result-status">
+        {{testCallResult.success ? '✓ 调用成功' : '✗ 调用失败'}}
+      </view>
+      <view class="result-message">{{testCallResult.message}}</view>
+      <view class="result-details" wx:if="{{testCallResult.content}}">
+        <view class="response-label">模型响应:</view>
+        <view class="response-content">{{testCallResult.content}}</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 全面测试结果 -->
+  <view class="result-section" wx:if="{{fullTestResult}}">
+    <view class="section-title">全面测试结果</view>
+    <view class="result-content {{fullTestResult.success ? 'success' : 'error'}}">
+      <view class="result-status">
+        {{fullTestResult.success ? '✓ 测试通过' : '✗ 测试失败'}}
+      </view>
+      <view class="result-message">
+        {{fullTestResult.recommendation || fullTestResult.message}}
+      </view>
+      <view class="result-details" wx:if="{{fullTestResult.recommendedModels.length > 0}}">
+        <view class="response-label">推荐模型:</view>
+        <view class="model-list">
+          <view class="model-item" wx:for="{{fullTestResult.recommendedModels}}" wx:key="index">
+            {{item}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 可用模型列表 -->
+  <view class="result-section models-section" wx:if="{{availableModels.length > 0}}">
+    <view class="section-title">可用模型列表</view>
+    <scroll-view scroll-y class="models-list">
+      <view class="model-item" wx:for="{{availableModels}}" wx:key="id">
+        <view class="model-name">{{item.id}}</view>
+        <view class="model-extra" wx:if="{{item.name !== item.id}}">
+          名称: {{item.name}}
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+  
+  <!-- 日志记录 -->
+  <view class="logs-section">
+    <view class="section-title">操作日志</view>
+    <scroll-view scroll-y class="logs-list">
+      <view class="log-item" wx:for="{{logs}}" wx:key="index">
+        <view class="log-time">{{item.time}}</view>
+        <view class="log-level {{item.level}}">{{item.level}}</view>
+        <view class="log-message">{{item.message}}</view>
+        <view class="log-data" wx:if="{{item.data}}">{{item.data}}</view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

@@ -1,0 +1,176 @@
+/* pages/test/api.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+  margin-bottom: 30rpx;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  padding: 10rpx;
+}
+
+.back-icon {
+  font-size: 36rpx;
+  margin-right: 6rpx;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.config-section, .test-results, .log-section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  padding-bottom: 10rpx;
+  border-bottom: 1px solid #eee;
+}
+
+.config-item {
+  display: flex;
+  margin-bottom: 20rpx;
+  align-items: center;
+}
+
+.item-label {
+  width: 160rpx;
+  color: #666;
+}
+
+.item-input {
+  flex: 1;
+  padding: 10rpx;
+  border: 1px solid #ddd;
+  border-radius: 6rpx;
+  color: #333;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 30rpx;
+}
+
+.test-button {
+  background-color: #10aeff;
+  color: #fff;
+  padding: 10rpx 40rpx;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  width: 60%;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.result-label {
+  width: 220rpx;
+  color: #666;
+}
+
+.result-value {
+  flex: 1;
+  font-weight: bold;
+}
+
+.result-value.success {
+  color: #07c160;
+}
+
+.result-value.error {
+  color: #fa5151;
+}
+
+.result-value.warning {
+  color: #fa9d3b;
+}
+
+.use-correct-model {
+  background-color: #fff9e6;
+  padding: 20rpx;
+  margin-top: 20rpx;
+  border-radius: 8rpx;
+  border: 1px solid #fae3b2;
+}
+
+.warning {
+  display: block;
+  color: #fa9d3b;
+  margin-bottom: 15rpx;
+  font-size: 28rpx;
+}
+
+.correct-button {
+  background-color: #fa9d3b;
+  color: #fff;
+  font-size: 26rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+  width: 60%;
+  margin: 0 auto;
+}
+
+.log-container {
+  max-height: 600rpx;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 8rpx;
+  padding: 15rpx;
+  background-color: #fafafa;
+}
+
+.log-item {
+  font-size: 26rpx;
+  padding: 10rpx 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.log-time {
+  color: #999;
+  margin-right: 10rpx;
+}
+
+.log-item.info .log-message {
+  color: #333;
+}
+
+.log-item.success .log-message {
+  color: #07c160;
+}
+
+.log-item.error .log-message {
+  color: #fa5151;
+}
+
+.log-item.warning .log-message {
+  color: #fa9d3b;
+}
+
+.empty-logs {
+  text-align: center;
+  color: #999;
+  padding: 30rpx 0;
+}

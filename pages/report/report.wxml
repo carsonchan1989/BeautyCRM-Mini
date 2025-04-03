@@ -15,6 +15,10 @@
   <view class="error-message" wx:if="{{errorMessage}}">
     <icon type="warn" size="18"></icon>
     <text>{{errorMessage}}</text>
+    <view class="error-solution" wx:if="{{errorMessage.includes('加载客户数据失败')}}">
+      <text>请先添加客户数据后再使用此功能</text>
+      <navigator url="/pages/customer/add" class="solution-link">去添加客户</navigator>
+    </view>
   </view>
   
   <!-- 内容区 -->
@@ -31,11 +35,11 @@
       
       <!-- 客户列表 -->
       <scroll-view scroll-y="true" class="customer-list">
-        <view class="customer-item {{selectedCustomerId === item.customerId ? 'selected' : ''}}" 
+        <view class="customer-item {{selectedCustomerId === item.id ? 'selected' : ''}}" 
               wx:for="{{filteredCustomers}}" 
-              wx:key="customerId"
+              wx:key="id"
               bindtap="selectCustomer"
-              data-id="{{item.customerId}}">
+              data-id="{{item.id}}">
           <view class="customer-info">
             <view class="customer-name">{{item.name || '未命名客户'}}</view>
             <view class="customer-detail">
@@ -116,9 +120,9 @@
           
           <view class="consumption-list">
             <view class="consumption-item" wx:for="{{selectedCustomer.consumptions}}" wx:key="index" wx:if="{{index < 3}}">
-              <view class="consumption-date">{{item.date}}</view>
-              <view class="consumption-project">{{item.projectName}}</view>
-              <view class="consumption-amount">¥{{item.amount}}</view>
+              <view class="consumption-date">{{item.date || item.service_date}}</view>
+              <view class="consumption-project">{{item.project_name || item.projectName || '未知项目'}}</view>
+              <view class="consumption-amount">¥{{item.amount || item.total_amount || 0}}</view>
             </view>
           </view>
           

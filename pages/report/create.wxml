@@ -14,177 +14,147 @@
     <text>{{errorMessage}}</text>
   </view>
   
-  <!-- 客户信息卡片 -->
-  <view class="customer-card" wx:if="{{customer}}">
-    <view class="customer-info">
-      <view class="avatar">
-        <text>{{customer.name ? customer.name.substring(0, 1) : '客'}}</text>
+  <!-- 客户信息 -->
+  <view class="customer-info" wx:if="{{customer}}">
+    <view class="customer-avatar">
+      <!-- 使用内联图标替代不存在的图片 -->
+      <view class="default-avatar">{{customer.name ? customer.name.substring(0,1) : '客'}}</view>
+    </view>
+    <view class="customer-details">
+      <text class="customer-name">{{customer.name}}</text>
+      <view class="customer-tags">
+        <text class="customer-tag">{{customer.gender || '未知'}}</text>
+        <text class="customer-tag" wx:if="{{customer.age}}">{{customer.age}}岁</text>
+        <text class="customer-tag" wx:if="{{customer.memberLevel}}">{{customer.memberLevel}}</text>
       </view>
-      <view class="info">
-        <view class="name">{{customer.name || '未命名客户'}}</view>
-        <view class="tags">
-          <text class="tag">{{customer.gender || '未知'}}</text>
-          <text class="tag" wx:if="{{customer.age}}">{{customer.age}}岁</text>
-          <text class="tag" wx:if="{{customer.memberLevel}}">{{customer.memberLevel}}</text>
+      <view class="consumption-info">
+        <text>消费记录: {{consumptions.length}}条</text>
+        <text wx:if="{{consumptions.length > 0}}">最近消费: {{consumptions[0].date}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 配置标签页 -->
+  <view class="tabs" wx:if="{{!isGenerating}}">
+    <view class="tab {{activeTab === 'basic' ? 'active' : ''}}" bindtap="switchTab" data-tab="basic">基础配置</view>
+    <view class="tab {{activeTab === 'advanced' ? 'active' : ''}}" bindtap="switchTab" data-tab="advanced">高级配置</view>
+  </view>
+  
+  <!-- 配置内容 -->
+  <view class="config-content" wx:if="{{!isGenerating}}">
+    <!-- 基础配置 -->
+    <block wx:if="{{activeTab === 'basic'}}">
+      <!-- 基础配置内容 -->
+      <view class="config-section">
+        <view class="section-title">报告内容</view>
+        
+        <!-- 开关选项 -->
+        <view class="config-item">
+          <view class="item-title">包含基本信息</view>
+          <switch checked="{{reportConfig.includeBasicInfo}}" data-field="includeBasicInfo" bindchange="updateSwitchConfig" />
+        </view>
+        
+        <view class="config-item">
+          <view class="item-title">包含消费历史</view>
+          <switch checked="{{reportConfig.includeConsumptionHistory}}" data-field="includeConsumptionHistory" bindchange="updateSwitchConfig" />
+        </view>
+        
+        <view class="config-item">
+          <view class="item-title">包含肌肤分析</view>
+          <switch checked="{{reportConfig.includeSkinAnalysis}}" data-field="includeSkinAnalysis" bindchange="updateSwitchConfig" />
+        </view>
+        
+        <view class="config-item">
+          <view class="item-title">包含个性化建议</view>
+          <switch checked="{{reportConfig.includeRecommendations}}" data-field="includeRecommendations" bindchange="updateSwitchConfig" />
+        </view>
+        
+        <!-- 报告长度 -->
+        <view class="config-item">
+          <view class="item-title">报告长度</view>
+          <radio-group class="radio-group" bindchange="updateReportConfig" data-field="maxLength">
+            <label class="radio">
+              <radio value="short" checked="{{reportConfig.maxLength === 'short'}}"/>简短
+            </label>
+            <label class="radio">
+              <radio value="medium" checked="{{reportConfig.maxLength === 'medium'}}"/>中等
+            </label>
+            <label class="radio">
+              <radio value="long" checked="{{reportConfig.maxLength === 'long'}}"/>详细
+            </label>
+          </radio-group>
+        </view>
+        
+        <!-- 强制刷新选项 -->
+        <view class="config-item highlight">
+          <view class="item-title">强制生成新报告</view>
+          <switch checked="{{forceRefresh}}" bindchange="toggleForceRefresh" />
         </view>
       </view>
-    </view>
-    <view class="customer-summary">
-      <view class="summary-item">
-        <text class="item-label">消费记录</text>
-        <text class="item-value">{{consumptions.length}}条</text>
-      </view>
-      <view class="summary-item">
-        <text class="item-label">最近消费</text>
-        <text class="item-value">{{consumptions[0].date || '无'}}</text>
-      </view>
-    </view>
-  </view>
-  
-  <!-- 配置选项卡 -->
-  <view class="config-tabs">
-    <view class="tab {{activeTab === 'basic' ? 'active' : ''}}" 
-          bindtap="switchTab" 
-          data-tab="basic">
-      基础配置
-    </view>
-    <view class="tab {{activeTab === 'advanced' ? 'active' : ''}}" 
-          bindtap="switchTab" 
-          data-tab="advanced">
-      高级配置
-    </view>
-  </view>
-  
-  <!-- 基础配置 -->
-  <view class="config-content" hidden="{{activeTab !== 'basic'}}">
-    <view class="config-card">
-      <view class="card-title">报告内容</view>
-      
-      <view class="config-item">
-        <view class="item-label">包含基本信息</view>
-        <switch class="item-control" 
-                checked="{{reportConfig.includeBasicInfo}}" 
-                data-field="includeBasicInfo"
-                bindchange="updateSwitchConfig"
-                color="#10aeff"/>
-      </view>
-      
-      <view class="config-item">
-        <view class="item-label">包含消费历史</view>
-        <switch class="item-control" 
-                checked="{{reportConfig.includeConsumptionHistory}}" 
-                data-field="includeConsumptionHistory"
-                bindchange="updateSwitchConfig"
-                color="#10aeff"/>
-      </view>
-      
-      <view class="config-item">
-        <view class="item-label">包含肌肤分析</view>
-        <switch class="item-control" 
-                checked="{{reportConfig.includeSkinAnalysis}}" 
-                data-field="includeSkinAnalysis"
-                bindchange="updateSwitchConfig"
-                color="#10aeff"/>
-      </view>
-      
-      <view class="config-item">
-        <view class="item-label">包含个性化建议</view>
-        <switch class="item-control" 
-                checked="{{reportConfig.includeRecommendations}}" 
-                data-field="includeRecommendations"
-                bindchange="updateSwitchConfig"
-                color="#10aeff"/>
-      </view>
-      
-      <view class="config-item">
-        <view class="item-label">报告长度</view>
-        <radio-group class="length-options" 
-                    data-field="maxLength"
-                    bindchange="updateReportConfig">
-          <label class="radio-label">
-            <radio value="short" checked="{{reportConfig.maxLength === 'short'}}" color="#10aeff"/>
-            <text>简短</text>
-          </label>
-          <label class="radio-label">
-            <radio value="medium" checked="{{reportConfig.maxLength === 'medium'}}" color="#10aeff"/>
-            <text>中等</text>
-          </label>
-          <label class="radio-label">
-            <radio value="long" checked="{{reportConfig.maxLength === 'long'}}" color="#10aeff"/>
-            <text>详细</text>
-          </label>
-        </radio-group>
-      </view>
-    </view>
-  </view>
-  
-  <!-- 高级配置 -->
-  <view class="config-content" hidden="{{activeTab !== 'advanced'}}">
-    <view class="config-card">
-      <view class="card-title">AI模型配置</view>
-      
-      <view class="config-item">
-        <view class="item-label">模型选择</view>
-        <picker range="{{['gpt-3.5-turbo', 'gpt-4']}}" 
-                value="{{['gpt-3.5-turbo', 'gpt-4'].indexOf(aiConfig.model)}}" 
-                data-field="model"
-                bindchange="updateAiConfig">
-          <view class="picker-view">
-            <text>{{aiConfig.model}}</text>
-            <text class="picker-arrow">▼</text>
+    </block>
+    
+    <!-- 高级配置 -->
+    <block wx:if="{{activeTab === 'advanced'}}">
+      <!-- 高级配置内容 -->
+      <view class="config-section">
+        <view class="section-title">高级AI配置</view>
+        
+        <!-- AI模型设置 -->
+        <view class="config-item">
+          <view class="item-title">温度</view>
+          <view class="slider-container">
+            <slider min="0" max="100" value="{{aiConfig.temperature * 100}}" block-size="20" active-color="#10aeff" show-value
+                    bindchange="updateAiConfig" data-field="temperature" />
           </view>
-        </picker>
+          <view class="item-desc">较低的值生成更确定性的回答，较高的值生成更创造性的回答</view>
+        </view>
+        
+        <!-- 自定义提示词 -->
+        <view class="config-item">
+          <view class="item-title">自定义提示词（可选）</view>
+          <textarea class="custom-prompt" placeholder="输入额外的分析要求" bindinput="updateAiConfig" data-field="customPrompt" value="{{aiConfig.customPrompt}}" maxlength="500"></textarea>
+          <view class="item-desc">这些提示词将作为补充指导添加到AI提示中</view>
+        </view>
       </view>
-      
-      <view class="config-item">
-        <view class="item-label">温度 ({{aiConfig.temperature}})</view>
-        <slider min="0" max="1" step="0.1" 
-                value="{{aiConfig.temperature}}" 
-                data-field="temperature"
-                bindchange="updateAiConfig"
-                activeColor="#10aeff"
-                show-value="{{false}}"
-                block-size="24"/>
-      </view>
-      
-      <view class="config-item">
-        <view class="item-label">最大Token ({{aiConfig.maxTokens}})</view>
-        <slider min="500" max="4000" step="500" 
-                value="{{aiConfig.maxTokens}}" 
-                data-field="maxTokens"
-                bindchange="updateAiConfig"
-                activeColor="#10aeff"
-                show-value="{{false}}"
-                block-size="24"/>
-      </view>
-      
-      <view class="config-item">
-        <view class="item-label">自定义提示词</view>
-        <textarea class="custom-prompt" 
-                 placeholder="输入自定义提示词（可选）" 
-                 value="{{aiConfig.customPrompt}}"
-                 data-field="customPrompt"
-                 bindinput="updateAiConfig"></textarea>
-      </view>
-      
-      <view class="reset-button" bindtap="resetConfig">
-        <text>重置为默认配置</text>
-      </view>
+    </block>
+  </view>
+  
+  <!-- 进度条 -->
+  <view class="generation-progress" wx:if="{{isGenerating}}">
+    <view class="progress-title">正在生成客户分析报告</view>
+    
+    <progress 
+      percent="{{generationProgress}}" 
+      stroke-width="8" 
+      color="#10AEFF" 
+      active="true" 
+      duration="20"
+      active-mode="forwards"
+      border-radius="5"
+    />
+    
+    <view class="progress-value">{{generationProgress}}%</view>
+    <view class="progress-tips">{{generationStatus}}</view>
+    <view class="progress-tips secondary" wx:if="{{generationProgress > 50}}">
+      根据数据量大小，可能需要30秒至2分钟
     </view>
   </view>
   
-  <!-- 生成按钮和进度 -->
-  <view class="action-section">
-    <block wx:if="{{isGenerating}}">
-      <view class="progress-bar">
-        <view class="progress-inner" style="width: {{generationProgress}}%"></view>
-      </view>
-      <view class="progress-text">正在生成报告 ({{generationProgress}}%)</view>
-    </block>
-    <block wx:else>
-      <button class="generate-button" bindtap="generateReport">
-        生成分析报告
-      </button>
-    </block>
+  <!-- 操作按钮 -->
+  <view class="actions">
+    <button 
+      class="btn {{!customerId || isGenerating ? 'disabled' : 'primary'}}" 
+      disabled="{{!customerId || isGenerating}}"
+      bindtap="startGenerating"
+    >
+      {{isGenerating ? '生成中...' : '生成报告'}}
+    </button>
+    
+    <button 
+      class="btn secondary"
+      bindtap="viewExportedPrompts"
+    >
+      查看导出的提示词
+    </button>
   </view>
 </view>

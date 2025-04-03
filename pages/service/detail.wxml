@@ -6,6 +6,12 @@
     <view class="loading"></view>
   </view>
   
+  <!-- 错误提示 -->
+  <view class="error-message" wx:if="{{errorMessage}}">
+    <icon type="warn" size="40"></icon>
+    <text>{{errorMessage}}</text>
+  </view>
+  
   <block wx:if="{{!loading && service}}">
     <view class="header">
       <view class="back-btn" bindtap="navigateBack">
@@ -22,6 +28,10 @@
     <view class="service-card">
       <view class="card-section">
         <view class="section-title">基本信息</view>
+        <view class="info-row">
+          <view class="info-label">服务ID</view>
+          <view class="info-value">{{service.service_id}}</view>
+        </view>
         <view class="info-row">
           <view class="info-label">服务日期</view>
           <view class="info-value">{{service.service_date}}</view>
@@ -42,9 +52,25 @@
           <view class="info-label">总金额</view>
           <view class="info-value amount">¥{{service.total_amount || '0'}}</view>
         </view>
+        <view class="info-row" wx:if="{{service.total_sessions}}">
+          <view class="info-label">总次数</view>
+          <view class="info-value">{{service.total_sessions}}次</view>
+        </view>
         <view class="info-row" wx:if="{{service.satisfaction}}">
           <view class="info-label">满意度</view>
           <view class="info-value">{{service.satisfaction}}</view>
+        </view>
+        <view class="info-row" wx:if="{{service.payment_method}}">
+          <view class="info-label">支付方式</view>
+          <view class="info-value">{{service.payment_method}}</view>
+        </view>
+        <view class="info-row" wx:if="{{service.operator}}">
+          <view class="info-label">操作人员</view>
+          <view class="info-value">{{service.operator}}</view>
+        </view>
+        <view class="info-row" wx:if="{{service.remark}}">
+          <view class="info-label">备注</view>
+          <view class="info-value">{{service.remark}}</view>
         </view>
       </view>
       
@@ -56,32 +82,41 @@
         <view class="service-items" wx:else>
           <view class="service-item" wx:for="{{service.service_items}}" wx:key="id">
             <view class="item-header">
-              <view class="item-name">{{item.service_name}}</view>
-              <view class="item-amount">¥{{item.amount || '0'}}</view>
+              <view class="item-name">{{item.service_name || item.project_name}}</view>
+              <view class="item-amount">¥{{item.amount || item.unit_price || '0'}}</view>
             </view>
             <view class="item-content">
-              <view class="item-info" wx:if="{{item.beautician}}">
+              <view class="item-info" wx:if="{{item.beautician || item.beautician_name}}">
                 <text class="label">美容师:</text>
-                <text class="value">{{item.beautician}}</text>
+                <text class="value">{{item.beautician || item.beautician_name}}</text>
               </view>
-              <view class="item-info" wx:if="{{item.note}}">
+              <view class="item-info" wx:if="{{item.quantity && item.quantity > 1}}">
+                <text class="label">数量:</text>
+                <text class="value">{{item.quantity}}</text>
+              </view>
+              <view class="item-info" wx:if="{{item.card_deduction}}">
+                <text class="label">扣卡金额:</text>
+                <text class="value">¥{{item.card_deduction}}</text>
+              </view>
+              <view class="item-info" wx:if="{{item.note || item.remark}}">
                 <text class="label">备注:</text>
-                <text class="value">{{item.note}}</text>
+                <text class="value">{{item.note || item.remark}}</text>
               </view>
               <view class="item-tag" wx:if="{{item.is_specified}}">已指定</view>
+              <view class="item-tag satisfaction" wx:if="{{!item.is_satisfied}}">不满意</view>
             </view>
           </view>
         </view>
       </view>
       
-      <view class="card-section" wx:if="{{service.service_items && service.service_items.some(item => item.consumed_sessions && item.consumed_sessions.length > 0)}}">
+      <view class="card-section" wx:if="{{hasConsumptionRecords}}">
         <view class="section-title">消耗记录</view>
         <view class="consumption-list">
           <block wx:for="{{service.service_items}}" wx:key="id" wx:for-item="item">
             <block wx:if="{{item.consumed_sessions && item.consumed_sessions.length > 0}}">
               <view class="consumption-item" wx:for="{{item.consumed_sessions}}" wx:for-item="session" wx:key="id">
                 <view class="consumption-header">
-                  <text class="consumption-service">{{item.service_name}}</text>
+                  <text class="consumption-service">{{item.service_name || item.project_name}}</text>
                   <text class="consumption-time">{{session.consumed_at}}</text>
                 </view>
                 <view class="consumption-content">
@@ -115,5 +150,25 @@
     <image class="not-found-image" src="/assets/icons/not-found.png" mode="aspectFit"></image>
     <view class="not-found-text">服务记录不存在或已被删除</view>
     <view class="back-to-list" bindtap="navigateBack">返回列表</view>
+  </view>
+
+  <!-- 调试信息 -->
+  <view class="debug-info" wx:if="{{service}}">
+    <view class="debug-title" bindtap="toggleDebug">调试信息 (点击{{showDebug ? '收起' : '展开'}})</view>
+    <view class="debug-content" wx:if="{{showDebug}}">
+      <view>服务ID: {{service.service_id}}</view>
+      <view>API路径: {{'/api/service/'+service.service_id}}</view>
+      <view>项目数量: {{service.service_items.length}}</view>
+      <view wx:if="{{service.service_items && service.service_items.length > 0}}">
+        <text>项目示例: </text>
+        <view class="debug-item">
+          <view>名称: {{service.service_items[0].project_name}}</view>
+          <view>美容师: {{service.service_items[0].beautician_name}}</view>
+          <view>单价: {{service.service_items[0].unit_price}}</view>
+          <view>数量: {{service.service_items[0].quantity}}</view>
+          <view>指定: {{service.service_items[0].is_specified ? '是' : '否'}}</view>
+        </view>
+      </view>
+    </view>
   </view>
 </view>

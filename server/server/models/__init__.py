@@ -200,21 +200,69 @@ class Consumption(db.Model):
 
 
 class Service(db.Model):
-    """服务消耗记录表"""
+    """服务消耗记录表 - 记录客户接受的服务项目"""
     __tablename__ = 'services'
     
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    service_id = db.Column(db.String(50), primary_key=True, default=generate_service_id)
     customer_id = db.Column(db.String(32), db.ForeignKey('customers.id'), nullable=False)
+    customer_name = db.Column(db.String(64), nullable=True)  # 冗余客户姓名
     
-    service_date = db.Column(db.DateTime, nullable=False)  # 到店时间
+    service_date = db.Column(db.DateTime, nullable=False, default=datetime.now)  # 服务日期（到店时间）
     departure_time = db.Column(db.DateTime, nullable=True)  # 离店时间
-    total_amount = db.Column(db.Float, nullable=True)  # 总耗卡金额
+    total_amount = db.Column(db.Float, default=0)  # 总金额
+    total_sessions = db.Column(db.Integer, default=0)  # 总耗卡次数
+    payment_method = db.Column(db.String(32), nullable=True)  # 支付方式
+    operator = db.Column(db.String(64), nullable=True)  # 操作人员
+    remark = db.Column(db.Text, nullable=True)  # 备注信息
     satisfaction = db.Column(db.String(32), nullable=True)  # 服务满意度
-    service_items = db.Column(db.String(256), nullable=True)  # 消耗项目
-    item_content = db.Column(db.Text, nullable=True)  # 项目内容
-    beautician = db.Column(db.String(64), nullable=True)  # 操作美容师
-    service_amount = db.Column(db.Float, nullable=True)  # 耗卡金额
-    is_specified = db.Column(db.Boolean, default=False)  # 是否指定
+    
+    # 关联服务项目
+    service_items = db.relationship('ServiceItem', backref='service', lazy=True, cascade="all, delete-orphan")
+    
+    # 记录时间戳
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    
+    # 添加更完善的唯一性约束，防止重复记录
+    __table_args__ = (
+        db.UniqueConstraint('customer_id', 'service_date', 'operator', 'total_amount', name='uix_service_record'),
+    )
+    
+    def to_dict(self):
+        return {
+            'service_id': self.service_id,
+            'customer_id': self.customer_id,
+            'customer_name': self.customer_name,
+            'service_date': self.service_date.strftime('%Y-%m-%d %H:%M:%S') if self.service_date else None,
+            'departure_time': self.departure_time.strftime('%Y-%m-%d %H:%M:%S') if self.departure_time else None,
+            'total_amount': self.total_amount,
+            'total_sessions': self.total_sessions,
+            'payment_method': self.payment_method,
+            'operator': self.operator,
+            'satisfaction': self.satisfaction,
+            'remark': self.remark,
+            'service_items': [item.to_dict() for item in self.service_items],
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None
+        }
+
+
+class ServiceItem(db.Model):
+    """服务项目表 - 记录每次服务中的具体项目信息"""
+    __tablename__ = 'service_items'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    service_id = db.Column(db.String(50), db.ForeignKey('services.service_id'), nullable=False)
+    
+    project_id = db.Column(db.String(50), nullable=True)  # 项目ID，可为空（历史数据或自定义项目）
+    project_name = db.Column(db.String(128), nullable=False)  # 项目名称
+    beautician_name = db.Column(db.String(64), nullable=True)  # 操作美容师
+    card_deduction = db.Column(db.Float, nullable=True)  # 扣卡金额
+    quantity = db.Column(db.Integer, default=1)  # 项目数量
+    unit_price = db.Column(db.Float, nullable=True)  # 项目单价
+    is_specified = db.Column(db.Boolean, default=False)  # 是否指定美容师
+    remark = db.Column(db.Text, nullable=True)  # 备注信息
+    is_satisfied = db.Column(db.Boolean, default=True)  # 是否满意
     
     # 记录时间戳
     created_at = db.Column(db.DateTime, default=datetime.now)
@@ -223,16 +271,16 @@ class Service(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'customer_id': self.customer_id,
-            'service_date': self.service_date.strftime('%Y-%m-%d %H:%M:%S') if self.service_date else None,
-            'departure_time': self.departure_time.strftime('%Y-%m-%d %H:%M:%S') if self.departure_time else None,
-            'total_amount': self.total_amount,
-            'satisfaction': self.satisfaction,
-            'service_items': self.service_items,
-            'item_content': self.item_content,
-            'beautician': self.beautician,
-            'service_amount': self.service_amount,
+            'service_id': self.service_id,
+            'project_id': self.project_id,
+            'project_name': self.project_name,
+            'beautician_name': self.beautician_name,
+            'card_deduction': self.card_deduction,
+            'quantity': self.quantity,
+            'unit_price': self.unit_price,
             'is_specified': self.is_specified,
+            'remark': self.remark,
+            'is_satisfied': self.is_satisfied,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
             'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None
         }

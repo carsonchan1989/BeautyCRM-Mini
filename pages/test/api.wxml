@@ -1,0 +1,84 @@
+<view class="container">
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">API模型测试</view>
+  </view>
+  
+  <view class="config-section">
+    <view class="section-title">API配置</view>
+    
+    <view class="config-item">
+      <view class="item-label">API地址:</view>
+      <input class="item-input" value="{{apiUrl}}" bindinput="updateApiUrl" />
+    </view>
+    
+    <view class="config-item">
+      <view class="item-label">API密钥:</view>
+      <input class="item-input" value="{{apiKey}}" bindinput="updateApiKey" password="true" />
+    </view>
+    
+    <view class="config-item">
+      <view class="item-label">模型名称:</view>
+      <input class="item-input" value="{{modelName}}" bindinput="updateModelName" />
+    </view>
+    
+    <view class="action-buttons">
+      <button class="test-button" bindtap="runAllTests" loading="{{testRunning}}">
+        运行所有测试
+      </button>
+    </view>
+  </view>
+  
+  <view class="test-results">
+    <view class="section-title">测试结果</view>
+    
+    <view class="result-item">
+      <text class="result-label">API连接:</text>
+      <text class="result-value {{testResults.connection === true ? 'success' : testResults.connection === false ? 'error' : ''}}">
+        {{testResults.connection === true ? '成功' : testResults.connection === false ? '失败' : testResults.connection === 'testing' ? '测试中...' : '未测试'}}
+      </text>
+    </view>
+    
+    <view class="result-item">
+      <text class="result-label">API授权:</text>
+      <text class="result-value {{testResults.auth === true ? 'success' : testResults.auth === false ? 'error' : ''}}">
+        {{testResults.auth === true ? '成功' : testResults.auth === false ? '失败' : testResults.auth === 'testing' ? '测试中...' : '未测试'}}
+      </text>
+    </view>
+    
+    <view class="result-item">
+      <text class="result-label">获取模型列表:</text>
+      <text class="result-value {{testResults.models === true ? 'success' : testResults.models === false ? 'error' : ''}}">
+        {{testResults.models === true ? '成功' : testResults.models === false ? '失败' : testResults.models === 'testing' ? '测试中...' : '未测试'}}
+      </text>
+    </view>
+    
+    <view class="result-item">
+      <text class="result-label">模型存在检查:</text>
+      <text class="result-value {{testResults.modelExists === true ? 'success' : testResults.modelExists === false ? 'error' : testResults.modelExists === 'corrected' ? 'warning' : ''}}">
+        {{testResults.modelExists === true ? '存在' : testResults.modelExists === false ? '不存在' : testResults.modelExists === 'corrected' ? '使用修正名称' : testResults.modelExists === 'testing' ? '测试中...' : '未测试'}}
+      </text>
+    </view>
+    
+    <view class="use-correct-model" wx:if="{{showCorrectModel}}">
+      <text class="warning">当前模型名称不可用，建议使用: {{modelNameCorrect}}</text>
+      <button class="correct-button" bindtap="useCorrectModel">使用正确名称</button>
+    </view>
+  </view>
+  
+  <view class="log-section">
+    <view class="section-title">测试日志</view>
+    <scroll-view scroll-y="true" class="log-container">
+      <view wx:for="{{logs}}" wx:key="index" class="log-item {{item.type}}">
+        <text class="log-time">[{{item.time}}]</text>
+        <text class="log-message">{{item.message}}</text>
+      </view>
+      <view class="empty-logs" wx:if="{{logs.length === 0}}">
+        <text>尚无日志</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>
