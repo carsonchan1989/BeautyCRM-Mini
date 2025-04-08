@@ -1,0 +1,55 @@
+/* components/html-parser/html-parser.wxss */
+
+.html-parser-container {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.rich-text-content {
+  width: 100%;
+  line-height: 1.6;
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 代码块样式 */
+.code-block {
+  background-color: #f5f5f5;
+  padding: 15rpx;
+  margin: 15rpx 0;
+  border-radius: 5rpx;
+  font-family: Consolas, Monaco, monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: auto;
+}
+
+.inline-code {
+  background-color: #f5f5f5;
+  padding: 4rpx 8rpx;
+  border-radius: 3rpx;
+  font-family: Consolas, Monaco, monospace;
+}
+
+/* 表格样式修复 - 使用类选择器替代/deep/选择器 */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15rpx 0;
+}
+
+.custom-th,
+.custom-td {
+  border: 1px solid #ddd;
+  padding: 8rpx;
+  text-align: left;
+}
+
+.custom-th {
+  background-color: #f2f2f2;
+} 

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "客户分析报告",
+  "usingComponents": {
+    "html-parser": "/components/html-parser/html-parser"
+  }
+} 

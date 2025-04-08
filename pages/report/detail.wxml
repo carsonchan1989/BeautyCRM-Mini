@@ -23,6 +23,23 @@
     <text>加载中...</text>
   </view>
   
+  <!-- 调试区域 - 仅在测试模式下显示 -->
+  <view class="debug-area" wx:if="{{testHtmlContent}}">
+    <view class="debug-title">调试区域</view>
+    <view class="debug-info">
+      <view>HTML内容长度: {{htmlContent.length || 0}}</view>
+      <view>解析状态: {{parsedHtmlReady ? '已解析' : '未解析'}}</view>
+    </view>
+    <view class="debug-html-preview">
+      <view class="preview-title">HTML源码预览:</view>
+      <text class="preview-content">{{htmlContent ? htmlContent.substring(0, 200) + '...' : '暂无内容'}}</text>
+    </view>
+    <view class="debug-buttons">
+      <button size="mini" bindtap="testHtmlParser" type="primary">重新测试</button>
+      <button size="mini" bindtap="debugHtmlContent" type="default">查看源码</button>
+    </view>
+  </view>
+  
   <!-- HTML报告内容 -->
   <block wx:if="{{htmlContent && !isLoading}}">
     <!-- 客户信息卡片 -->
@@ -42,7 +59,13 @@
     
     <!-- HTML报告内容 -->
     <view class="report-content">
-      <rich-text nodes="{{htmlContent}}" class="rich-text-report" space="nbsp"></rich-text>
+      <!-- 使用自定义HTML解析器组件 -->
+      <html-parser htmlContent="{{htmlContent}}" class="report-html-parser" bind:parsed="onHtmlParsed"></html-parser>
+      
+      <!-- 直接显示内容 - 这是一个始终会显示的后备方案 -->
+      <view wx:if="{{htmlContent && !htmlParserWorks}}" class="text-content">
+        <rich-text nodes="{{htmlContent}}" space="nbsp"></rich-text>
+      </view>
       
       <view class="report-footer">
         <view class="disclaimer">
@@ -55,6 +78,12 @@
     <view class="action-buttons">
       <button class="action-button regenerate" bindtap="regenerateReport">
         重新生成
+      </button>
+      <button class="action-button source" bindtap="viewReportSource" wx:if="{{htmlContent}}">
+        查看示例
+      </button>
+      <button class="action-button debug" bindtap="debugHtmlContent" wx:if="{{htmlContent}}">
+        查看源码
       </button>
     </view>
   </block>

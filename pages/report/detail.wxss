@@ -128,11 +128,11 @@
 
 /* 报告内容 */
 .report-content {
+  width: 100%;
   background-color: #fff;
   border-radius: 15rpx;
-  padding: 30rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .section-title {
@@ -251,10 +251,12 @@
   justify-content: center;
   margin-top: 30rpx;
   margin-bottom: 40rpx;
+  flex-wrap: wrap;
+  gap: 20rpx;
 }
 
 .action-button {
-  width: 60%;
+  width: 40%;
   height: 80rpx;
   line-height: 80rpx;
   border-radius: 40rpx;
@@ -264,6 +266,20 @@
 .action-button.regenerate {
   background-color: #f5f5f5;
   color: #666;
+}
+
+.action-button.debug {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.action-button.source {
+  background-color: #4caf50;
+  color: white;
+}
+
+.action-button.source:active {
+  background-color: #388e3c;
 }
 
 /* 无数据提示 */
@@ -295,4 +311,98 @@
   color: #fff;
   border-radius: 40rpx;
   font-size: 30rpx;
+}
+
+/* 自定义HTML解析器样式 */
+.report-html-parser {
+  width: 100%;
+  padding: 20rpx;
+  background-color: #fff;
+  border-radius: 15rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 适配不同设备尺寸 */
+@media screen and (min-width: 768px) {
+  .report-html-parser {
+    padding: 40rpx;
+  }
+}
+
+/* 调试区域样式 */
+.debug-area {
+  margin: 20rpx;
+  padding: 20rpx;
+  border: 2rpx dashed #999;
+  border-radius: 10rpx;
+  background-color: #f8f8f8;
+}
+
+.debug-title {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.debug-info {
+  margin: 10rpx 0;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.debug-html-preview {
+  margin: 15rpx 0;
+  background-color: #fff;
+  padding: 10rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid #eee;
+}
+
+.preview-title {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 5rpx;
+}
+
+.preview-content {
+  font-size: 24rpx;
+  color: #333;
+  word-break: break-all;
+  white-space: pre-wrap;
+  font-family: monospace;
+  max-height: 200rpx;
+  overflow-y: auto;
+}
+
+.debug-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10rpx;
+}
+
+.debug-buttons button {
+  margin-left: 10rpx;
+}
+
+/* 文本内容显示样式 */
+.text-content {
+  padding: 20rpx;
+  margin: 20rpx 0;
+  border: 1rpx solid #eee;
+  border-radius: 10rpx;
+  background-color: #fff;
+  font-size: 28rpx;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 备用内容显示样式 */
+.fallback-content {
+  padding: 20rpx;
+  margin: 20rpx 0;
+  border: 1rpx solid #eee;
+  border-radius: 10rpx;
+  background-color: #fff;
 }

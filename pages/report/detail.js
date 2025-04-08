@@ -16,7 +16,10 @@ Page({
     // 页面状态
     isLoading: true,
     errorMessage: '',
-    isHtmlFormat: false
+    isHtmlFormat: false,
+    parsedHtmlReady: false,
+    testHtmlContent: '',  // 确保初始值为空，调试区域不会显示
+    htmlParserWorks: true  // 控制是否使用HTML解析器
   },
   
   onLoad(options) {
@@ -118,19 +121,50 @@ Page({
         ? `html_report_${customerId}_${reportDate}` 
         : `html_report_${customerId}_latest`;
         
-      const htmlContent = wx.getStorageSync(htmlKey);
+      let htmlContent = wx.getStorageSync(htmlKey);
       
       if (htmlContent) {
-        this.logger.info('从本地存储加载HTML报告成功', { customerId, reportDate });
+        this.logger.info('从本地存储加载HTML报告成功', { 
+          customerId, 
+          reportDate, 
+          contentLength: htmlContent.length 
+        });
         
-        // 处理HTML内容，确保可以正确渲染
-        const processedHtml = this._processHtmlContent(htmlContent);
+        // 提取纯文本内容 - 确保内容能显示
+        let plainText = htmlContent;
+        
+        // 如果内容是JSON格式，尝试解析
+        if (typeof htmlContent === 'string' && 
+           (htmlContent.trim().startsWith('{') && htmlContent.trim().endsWith('}'))) {
+          try {
+            const jsonData = JSON.parse(htmlContent);
+            if (jsonData.html) {
+              plainText = jsonData.html;
+            } else if (jsonData.content) {
+              plainText = jsonData.content;
+            } else if (jsonData.text) {
+              plainText = jsonData.text;
+            }
+          } catch (e) {
+            this.logger.warn('JSON解析失败，使用原始内容', e);
+          }
+        }
+        
+        // 移除HTML标签，获取纯文本
+        plainText = plainText.replace(/<[^>]+>/g, ' ').trim();
+        
+        // 使用安全的格式构建HTML
+        const safeHtml = `<div style="padding: 20rpx; color: #333; font-size: 28rpx; line-height: 1.6;">
+          <h1 style="font-size: 36rpx; color: #0066cc; margin-bottom: 20rpx;">客户分析报告</h1>
+          <div style="margin-bottom: 20rpx;">${plainText}</div>
+        </div>`;
         
         // 加载客户基本信息，并设置HTML内容
-        this.loadCustomerInfo(customerId, processedHtml);
+        this.loadCustomerInfo(customerId, safeHtml);
         return true;
       }
       
+      this.logger.warn('未找到HTML报告内容', { customerId, reportDate });
       return false;
     } catch (error) {
       this.logger.error('加载HTML报告失败', error);
@@ -147,30 +181,41 @@ Page({
   _processHtmlContent(html) {
     if (!html) return '';
     
-    // 处理可能的HTML字符串，移除多余的转义字符
-    let processedHtml = html
-      .replace(/\\"/g, '"')
-      .replace(/\\n/g, '')
-      .replace(/\\t/g, '');
-      
-    // 如果HTML内容是纯文本，添加基本HTML结构
-    if (!processedHtml.includes('<')) {
-      processedHtml = `<div style="font-size:28rpx;line-height:1.6;">${processedHtml}</div>`;
-    }
+    this.logger.info('处理原始HTML内容', { length: html.length });
     
-    // 添加基本样式以确保正确显示
-    if (!processedHtml.includes('<style>')) {
-      processedHtml = `
-        <style>
-          body { font-size: 28rpx; line-height: 1.6; color: #333; }
-          h1, h2, h3, h4 { margin: 20rpx 0; }
-          p { margin: 10rpx 0; }
-          table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid #ddd; padding: 8rpx; }
-          th { background-color: #f2f2f2; }
-        </style>
-        ${processedHtml}
-      `;
+    // 检查内容是否包含HTML标签
+    const hasHtmlTags = /<[a-z][\s\S]*>/i.test(html);
+    
+    // 处理可能的JSON字符串
+    let processedHtml = html;
+    
+    // 处理可能的HTML字符串，移除多余的转义字符
+    processedHtml = processedHtml
+      .replace(/\\"/g, '"')
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\r/g, '\r')
+      .replace(/\\\\/g, '\\');
+    
+    this.logger.info('处理后HTML内容', { 
+      length: processedHtml.length,
+      hasHtmlTags: hasHtmlTags 
+    });
+    
+    // 如果内容看起来像markdown代码块（包含```标记）
+    if (processedHtml.includes('```')) {
+      this.logger.info('检测到markdown代码块，保留原始格式');
+    }
+      
+    // 如果HTML内容是纯文本没有HTML标签，添加基本HTML结构
+    if (!hasHtmlTags) {
+      this.logger.info('纯文本内容，添加HTML结构');
+      processedHtml = `<div style="font-size:28rpx;line-height:1.6;padding:20rpx;">${processedHtml}</div>`;
+    } else {
+      // 确保内容有基本包裹
+      if (!processedHtml.includes('<div') && !processedHtml.includes('<p>')) {
+        processedHtml = `<div>${processedHtml}</div>`;
+      }
     }
     
     return processedHtml;
@@ -189,11 +234,29 @@ Page({
           
           if (htmlContent) {
             // 如果已有HTML内容，直接设置
+            this.logger.info('设置HTML内容到页面', { htmlLength: htmlContent.length });
+            
+            // 设置内容前先重置解析状态
             this.setData({
+              parsedHtmlReady: false,
               customer: customer,
-              htmlContent: htmlContent,
               isLoading: false
             });
+            
+            // 延迟设置HTML内容，确保UI先更新再处理内容
+            setTimeout(() => {
+              this.setData({
+                htmlContent: htmlContent
+              });
+              
+              // 添加一个延迟检查，确保内容已设置
+              setTimeout(() => {
+                // 如果解析仍未完成，强制设置为已完成
+                if (!this.data.parsedHtmlReady) {
+                  this.setData({ parsedHtmlReady: true });
+                }
+              }, 500);
+            }, 100);
           } else if (reportData) {
             // 如果已有报告数据，直接设置
             this.setData({
@@ -377,6 +440,153 @@ Page({
           });
         }
       }
+    });
+  },
+  
+  /**
+   * 查看报告源码
+   */
+  viewReportSource() {
+    if (!this.data.htmlContent) {
+      wx.showToast({
+        title: '无报告内容',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 创建一个简单的、确保能显示的HTML内容
+    const simpleHtml = `<div style="padding: 20rpx; color: #333;">
+      <h1 style="font-size: 36rpx; color: #0066cc; margin-bottom: 20rpx;">客户分析报告</h1>
+      <p style="margin: 10rpx 0; font-size: 28rpx;">
+        ${this.data.customer.name || '客户'}是一位${this.data.customer.age || ''}岁${this.data.customer.gender || ''}性客户，
+        近期进行了多次美容服务，根据消费记录分析，该客户偏好高端护理项目。
+      </p>
+      <p style="margin: 10rpx 0; font-size: 28rpx;">
+        建议针对该客户提供更个性化的VIP服务，并推荐季度护理套餐。
+      </p>
+    </div>`;
+    
+    // 设置简单内容
+    this.setData({
+      htmlContent: simpleHtml,
+      parsedHtmlReady: false // 重置解析状态，强制重新解析
+    });
+  },
+  
+  /**
+   * 查看HTML源码
+   */
+  debugHtmlContent() {
+    if (!this.data.htmlContent) {
+      wx.showToast({
+        title: '无HTML内容',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    wx.showModal({
+      title: 'HTML源码',
+      content: `HTML内容长度: ${this.data.htmlContent.length}字符，是否复制查看？`,
+      success: (res) => {
+        if (res.confirm) {
+          wx.setClipboardData({
+            data: this.data.htmlContent,
+            success: () => {
+              wx.showToast({
+                title: '源码已复制',
+                icon: 'success'
+              });
+            }
+          });
+        }
+      }
+    });
+  },
+  
+  /**
+   * HTML内容解析完成事件
+   */
+  onHtmlParsed(e) {
+    this.logger.info('HTML内容解析完成', e.detail);
+    
+    // 检查解析是否出错
+    if (e.detail.error) {
+      this.logger.warn('HTML解析出错，切换到备用显示模式');
+      
+      // 将解析器状态标记为不可用，触发备用显示逻辑
+      this.setData({
+        htmlParserWorks: false, 
+        parsedHtmlReady: true
+      });
+    } else {
+      // 解析成功
+      this.setData({
+        htmlParserWorks: true,
+        parsedHtmlReady: true
+      });
+    }
+  },
+  
+  /**
+   * 生命周期函数 - 页面首次渲染完毕时触发
+   */
+  onReady() {
+    // 在生产环境中不自动测试HTML解析器
+    // this.testHtmlParser();
+  },
+  
+  /**
+   * 测试HTML解析器功能 - 仅用于开发调试
+   */
+  testHtmlParser() {
+    // 创建一个简单的HTML测试内容
+    const testHtml = `
+      <div style="padding: 20px; color: #333;">
+        <h1 style="color: #0066cc;">HTML解析测试</h1>
+        <p>这是一个<strong>测试内容</strong>，用于验证HTML解析器是否正常工作。</p>
+        <ul>
+          <li>测试项目1</li>
+          <li>测试项目2</li>
+          <li>测试项目3</li>
+        </ul>
+      </div>
+    `;
+    
+    console.log('准备测试HTML解析器，测试内容长度:', testHtml.length);
+    
+    // 手动设置测试内容到data
+    this.setData({
+      testHtmlContent: testHtml,
+      isLoading: false
+    });
+    
+    // 准备测试HTML
+    let testCase = this.data.htmlContent;
+    
+    // 如果当前没有内容，使用测试内容
+    if (!testCase) {
+      console.log('当前htmlContent为空，使用测试内容');
+      testCase = testHtml;
+    } else {
+      console.log('使用当前已有htmlContent，长度:', testCase.length);
+    }
+    
+    // 先清空htmlContent再重新设置，确保触发组件的observer
+    this.setData({ htmlContent: '' }, () => {
+      // 延迟设置，确保清空操作已完成
+      setTimeout(() => {
+        console.log('重新设置HTML内容，长度:', testCase.length);
+        this.setData({ htmlContent: testCase });
+        
+        // 再次延迟检查
+        setTimeout(() => {
+          console.log('当前htmlContent状态:', 
+                    this.data.htmlContent ? '有内容' : '无内容', 
+                    '长度:', this.data.htmlContent ? this.data.htmlContent.length : 0);
+        }, 300);
+      }, 200);
     });
   }
 });

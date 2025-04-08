@@ -55,6 +55,19 @@ module.exports = {
       delete: (id) => `/customers/communications/${id}`,
     },
 
+    // 项目库相关API
+    project: {
+      list: '/projects',
+      detail: (id) => `/projects/${id}`,
+      create: '/projects',
+      update: (id) => `/projects/${id}`,
+      delete: (id) => `/projects/${id}`,
+      categories: '/projects/categories',
+      stats: '/projects/stats',
+      import: '/projects/import/excel',
+      confirm: '/projects/import/confirm'
+    },
+
     // Excel处理相关API
     excel: {
       preCheck: '/excel/import', // 预检查使用相同的URL，通过formData中的action参数区分

@@ -282,7 +282,17 @@ def import_to_database(data):
         'health_records': 0,
         'consumptions': 0,
         'services': 0,
-        'communications': 0
+        'communications': 0,
+        'service_items': 0,
+        'skipped': {
+            'customers': 0,
+            'health_records': 0,
+            'consumptions': 0,
+            'services': 0,
+            'communications': 0,
+            'service_items': 0
+        },
+        'errors': []
     }
     
     try:
@@ -292,11 +302,13 @@ def import_to_database(data):
         consumption_fields = [column.key for column in Consumption.__table__.columns]
         service_fields = [column.key for column in Service.__table__.columns]
         communication_fields = [column.key for column in Communication.__table__.columns]
+        service_item_fields = [column.key for column in ServiceItem.__table__.columns]
         
         logger.info(f"Customer字段: {customer_fields}")
         logger.info(f"HealthRecord字段: {health_record_fields}")
         logger.info(f"Consumption字段: {consumption_fields}")
         logger.info(f"Service字段: {service_fields}")
+        logger.info(f"ServiceItem字段: {service_item_fields}")
         logger.info(f"Communication字段: {communication_fields}")
         
         # 导入客户数据
@@ -306,6 +318,7 @@ def import_to_database(data):
                 continue
                 
             if not customer_data.get('id'):
+                result['skipped']['customers'] += 1
                 continue
             
             # 过滤字段 - 仅保留模型中存在的字段
@@ -331,12 +344,13 @@ def import_to_database(data):
         for health_data in data['health_records']:
             # 跳过标题行或无效数据
             if not health_data.get('customer_id') or health_data.get('customer_id') in ['客户ID', 'ID']:
+                result['skipped']['health_records'] += 1
                 continue
             
             # 过滤字段 - 仅保留模型中存在的字段
             filtered_data = {k: v for k, v in health_data.items() if k in health_record_fields}
             logger.info(f"过滤后的健康档案数据: {filtered_data.keys()}")
-                
+            
             # 检查健康档案是否已存在
             health_record = HealthRecord.query.filter_by(customer_id=filtered_data['customer_id']).first()
             
@@ -356,6 +370,7 @@ def import_to_database(data):
         for consumption_data in data['consumptions']:
             # 跳过标题行或无效数据
             if not consumption_data.get('customer_id') or consumption_data.get('customer_id') in ['客户ID', 'ID']:
+                result['skipped']['consumptions'] += 1
                 continue
             
             # 过滤字段 - 仅保留模型中存在的字段
@@ -365,158 +380,200 @@ def import_to_database(data):
             # 检查必填字段
             if not filtered_data.get('date'):
                 logger.warning(f"跳过缺少date的消费记录: {filtered_data}")
+                result['skipped']['consumptions'] += 1
                 continue
             
-            # 创建新消费记录（不检查重复）
-            consumption = Consumption(**filtered_data)
-            db.session.add(consumption)
-            
-            result['consumptions'] += 1
+            try:
+                # 检查是否已存在相同的消费记录
+                existing_consumption = Consumption.query.filter_by(
+                    customer_id=filtered_data['customer_id'],
+                    date=filtered_data['date'],
+                    project_name=filtered_data.get('project_name', '')
+                ).first()
+                
+                if existing_consumption:
+                    # 如果存在，更新记录
+                    for key, value in filtered_data.items():
+                        if hasattr(existing_consumption, key) and value is not None:
+                            setattr(existing_consumption, key, value)
+                    logger.info(f"更新已存在的消费记录: {filtered_data.get('customer_id')} - {filtered_data.get('date')} - {filtered_data.get('project_name')}")
+                else:
+                    # 创建新消费记录
+                    consumption = Consumption(**filtered_data)
+                    db.session.add(consumption)
+                    logger.info(f"创建新消费记录: {filtered_data.get('customer_id')} - {filtered_data.get('date')} - {filtered_data.get('project_name')}")
+                
+                result['consumptions'] += 1
+            except Exception as e:
+                logger.error(f"导入消费记录时出错: {str(e)}")
+                result['errors'].append(f"消费记录错误: {str(e)}")
+                result['skipped']['consumptions'] += 1
         
         # 导入服务记录
         for service_data in data['services']:
-            # 跳过标题行或无效数据
-            if not service_data.get('customer_id') or service_data.get('customer_id') in ['客户ID', 'ID']:
-                continue
-            
-            # 提取服务项目列表
-            service_items_list = service_data.pop('service_items', []) if isinstance(service_data.get('service_items'), list) else []
-            
-            # 记录服务项目数据
-            logger.info(f"服务项目列表大小: {len(service_items_list)}")
-            if service_items_list:
-                logger.info(f"服务项目样例: {service_items_list[0]}")
-            
-            # 过滤服务记录主表字段
-            filtered_data = {k: v for k, v in service_data.items() if k in service_fields}
-            logger.info(f"过滤后的服务记录数据: {filtered_data.keys()}")
-            
-            # 如果service_date为空，使用当前时间作为替代
-            if not filtered_data.get('service_date'):
-                logger.warning(f"服务记录缺少service_date字段，使用当前时间: {filtered_data}")
-                filtered_data['service_date'] = datetime.now()
-            
-            # 检查是否已存在相同服务记录（相同客户、相同日期、相同金额）
-            existing_service = Service.query.filter_by(
-                customer_id=filtered_data['customer_id'],
-                service_date=filtered_data['service_date']
-            ).first()
-            
-            if existing_service:
-                logger.info(f"发现已存在的服务记录: {existing_service.service_id}")
+            try:
+                # 跳过标题行或无效数据
+                if not service_data.get('customer_id') or service_data.get('customer_id') in ['客户ID', 'ID']:
+                    result['skipped']['services'] += 1
+                    continue
                 
-                # 检查是否需要添加新的服务项目 - 比较项目内容是否已存在
+                # 提取服务项目列表
+                service_items_list = service_data.pop('service_items', []) if isinstance(service_data.get('service_items'), list) else []
+                
+                # 记录服务项目数据
+                logger.info(f"服务项目列表大小: {len(service_items_list)}")
                 if service_items_list:
-                    existing_items = {(item.project_name, item.beautician_name): item 
-                                     for item in existing_service.service_items}
+                    logger.info(f"服务项目样例: {service_items_list[0]}")
+                
+                # 过滤服务记录主表字段
+                filtered_data = {k: v for k, v in service_data.items() if k in service_fields}
+                logger.info(f"过滤后的服务记录数据: {filtered_data.keys()}")
+                
+                # 如果service_date为空，使用当前时间作为替代
+                if not filtered_data.get('service_date'):
+                    logger.warning(f"服务记录缺少service_date字段，使用当前时间: {filtered_data}")
+                    filtered_data['service_date'] = datetime.now()
+                
+                # 检查是否已存在相同服务记录（相同客户、相同日期）
+                existing_service = Service.query.filter_by(
+                    customer_id=filtered_data['customer_id'],
+                    service_date=filtered_data['service_date']
+                ).first()
+                
+                service_record = None
+                if existing_service:
+                    logger.info(f"发现已存在的服务记录: {existing_service.service_id}")
                     
-                    for item_data in service_items_list:
+                    # 更新现有服务记录
+                    for key, value in filtered_data.items():
+                        if hasattr(existing_service, key) and value is not None:
+                            setattr(existing_service, key, value)
+                    
+                    service_record = existing_service
+                    logger.info(f"更新服务记录: ID={existing_service.service_id}")
+                else:
+                    # 生成服务记录ID (如果没有提供)
+                    if 'service_id' not in filtered_data or not filtered_data['service_id']:
+                        service_id = f"S{uuid.uuid4().hex[:10].upper()}"
+                        filtered_data['service_id'] = service_id
+                    
+                    # 复制客户姓名到service记录
+                    if 'name' in service_data and not filtered_data.get('customer_name'):
+                        filtered_data['customer_name'] = service_data['name']
+                    
+                    # 创建新服务记录
+                    service_record = Service(**filtered_data)
+                    db.session.add(service_record)
+                    db.session.flush()  # 确保获取到新ID
+                    logger.info(f"创建新服务记录: ID={service_record.service_id}")
+                
+                result['services'] += 1
+                
+                # 处理服务项目 - 无论是更新还是创建服务记录
+                if service_items_list and service_record:
+                    # 获取现有服务项目
+                    existing_items = {}
+                    if service_record.service_id:
+                        for item in ServiceItem.query.filter_by(service_id=service_record.service_id).all():
+                            key = (item.project_name, item.beautician_name)
+                            existing_items[key] = item
+                    
+                    # 处理每个服务项目
+                    for item_idx, item_data in enumerate(service_items_list):
                         try:
                             # 确保所有必要字段存在
-                            if 'project_name' not in item_data or not item_data['project_name']:
-                                logger.warning(f"服务项目数据缺少project_name字段，跳过: {item_data}")
+                            if 'project_name' not in item_data or not item_data.get('project_name'):
+                                logger.warning(f"服务项目 {item_idx+1} 缺少project_name字段，跳过: {item_data}")
+                                result['skipped']['service_items'] += 1
                                 continue
                             
+                            # 准备服务项目数据
+                            service_item_data = {
+                                'service_id': service_record.service_id,
+                                'project_name': item_data['project_name'].strip(),
+                                'beautician_name': item_data.get('beautician_name', '').strip(),
+                                'unit_price': float(item_data.get('unit_price', 0)),
+                                'is_specified': bool(item_data.get('is_specified', False))
+                            }
+                            
                             # 创建查找键
-                            item_key = (item_data['project_name'], item_data.get('beautician_name', ''))
+                            item_key = (service_item_data['project_name'], service_item_data['beautician_name'])
                             
                             # 检查是否已存在相同服务项目
                             if item_key in existing_items:
-                                logger.info(f"服务项目已存在，跳过: {item_data['project_name']} - {item_data.get('beautician_name', '')}")
-                                continue
+                                # 更新已存在的项目
+                                existing_item = existing_items[item_key]
+                                for key, value in service_item_data.items():
+                                    if hasattr(existing_item, key) and value is not None:
+                                        setattr(existing_item, key, value)
+                                logger.info(f"更新服务项目: {item_key}")
+                            else:
+                                # 创建新的服务项目
+                                service_item = ServiceItem(**service_item_data)
+                                db.session.add(service_item)
+                                logger.info(f"创建新服务项目: {item_key}")
                             
-                            # 创建新的服务项目
-                            service_item_data = {
-                                'service_id': existing_service.service_id,
-                                'project_name': item_data['project_name'],
-                                'beautician_name': item_data.get('beautician_name', ''),
-                                'unit_price': item_data.get('unit_price', 0),
-                                'is_specified': item_data.get('is_specified', False)
-                            }
-                            
-                            service_item = ServiceItem(**service_item_data)
-                            db.session.add(service_item)
-                            logger.info(f"为现有服务记录添加新项目: {item_data['project_name']} - {item_data.get('beautician_name', '')}")
-                            
+                            result['service_items'] += 1
                         except Exception as e:
-                            logger.error(f"为现有记录添加服务项目时出错: {str(e)}")
-                            logger.error(f"原始项目数据: {item_data}")
-                
-            else:
-                # 添加总项目数
-                if 'total_project_count' in service_data:
-                    filtered_data['total_project_count'] = service_data['total_project_count']
-                
-                # 生成服务记录ID (如果没有提供)
-                if 'service_id' not in filtered_data or not filtered_data['service_id']:
-                    service_id = f"S{uuid.uuid4().hex[:10].upper()}"
-                    filtered_data['service_id'] = service_id
-                
-                # 复制客户姓名到service记录
-                if 'name' in service_data and not filtered_data.get('customer_name'):
-                    filtered_data['customer_name'] = service_data['name']
-                
-                # 创建新服务记录
-                service = Service(**filtered_data)
-                db.session.add(service)
-                db.session.flush()  # 确保获取到新ID
-                
-                # 添加关联的服务项目
-                if service_items_list:
-                    logger.info(f"为新服务记录添加 {len(service_items_list)} 个服务项目")
+                            logger.error(f"处理服务项目 {item_idx+1} 时出错: {str(e)}")
+                            logger.error(f"项目数据: {item_data}")
+                            result['errors'].append(f"服务项目错误: {str(e)}")
+                            result['skipped']['service_items'] += 1
                     
-                    for item_data in service_items_list:
-                        try:
-                            # 确保所有必要字段存在
-                            if 'project_name' not in item_data or not item_data['project_name']:
-                                logger.warning(f"服务项目数据缺少project_name字段，跳过: {item_data}")
-                                continue
-                            
-                            logger.info(f"处理服务项目: {item_data}")
-                            
-                            # 创建新的服务项目
-                            service_item_data = {
-                                'service_id': service.service_id,
-                                'project_name': item_data['project_name'],
-                                'beautician_name': item_data.get('beautician_name', ''),
-                                'unit_price': item_data.get('unit_price', 0),
-                                'is_specified': item_data.get('is_specified', False)
-                            }
-                            
-                            service_item = ServiceItem(**service_item_data)
-                            db.session.add(service_item)
-                            logger.info(f"创建新服务项目: {item_data['project_name']} - {item_data.get('beautician_name', '')}")
-                            
-                        except Exception as e:
-                            logger.error(f"创建服务项目时出错: {str(e)}")
-                            logger.error(f"原始项目数据: {item_data}")
-                        
                     # 更新服务记录的总项目数
-                    if not service.total_sessions and service_items_list:
-                        service.total_sessions = len(service_items_list)
-                
-                result['services'] += 1
+                    if service_record:
+                        # 重新查询关联的服务项目
+                        items_count = ServiceItem.query.filter_by(service_id=service_record.service_id).count()
+                        if items_count > 0 and (not service_record.total_sessions or service_record.total_sessions < items_count):
+                            service_record.total_sessions = items_count
+                            logger.info(f"更新服务记录总项目数: {items_count}")
+            except Exception as e:
+                logger.error(f"处理服务记录时出错: {str(e)}")
+                result['errors'].append(f"服务记录错误: {str(e)}")
+                result['skipped']['services'] += 1
         
         # 导入沟通记录
         for communication_data in data['communications']:
-            # 跳过标题行或无效数据
-            if not communication_data.get('customer_id') or communication_data.get('customer_id') in ['客户ID', 'ID']:
-                continue
-            
-            # 过滤字段 - 仅保留模型中存在的字段
-            filtered_data = {k: v for k, v in communication_data.items() if k in communication_fields}
-            logger.info(f"过滤后的沟通记录数据: {filtered_data.keys()}")
-            
-            # 检查必填字段
-            if not filtered_data.get('communication_date'):
-                logger.warning(f"跳过缺少communication_date的沟通记录: {filtered_data}")
-                continue
-            
-            # 创建新沟通记录
-            communication = Communication(**filtered_data)
-            db.session.add(communication)
-            
-            result['communications'] += 1
+            try:
+                # 跳过标题行或无效数据
+                if not communication_data.get('customer_id') or communication_data.get('customer_id') in ['客户ID', 'ID']:
+                    result['skipped']['communications'] += 1
+                    continue
+                
+                # 过滤字段 - 仅保留模型中存在的字段
+                filtered_data = {k: v for k, v in communication_data.items() if k in communication_fields}
+                logger.info(f"过滤后的沟通记录数据: {filtered_data.keys()}")
+                
+                # 检查必填字段
+                if not filtered_data.get('communication_date'):
+                    logger.warning(f"跳过缺少communication_date的沟通记录: {filtered_data}")
+                    result['skipped']['communications'] += 1
+                    continue
+                
+                # 检查是否已存在相同的沟通记录
+                existing_comm = Communication.query.filter_by(
+                    customer_id=filtered_data['customer_id'],
+                    communication_date=filtered_data['communication_date'],
+                    communication_content=filtered_data.get('communication_content', '')
+                ).first()
+                
+                if existing_comm:
+                    # 如果存在，更新记录
+                    for key, value in filtered_data.items():
+                        if hasattr(existing_comm, key) and value is not None:
+                            setattr(existing_comm, key, value)
+                    logger.info(f"更新已存在的沟通记录: {filtered_data.get('customer_id')} - {filtered_data.get('communication_date')}")
+                else:
+                    # 创建新沟通记录
+                    communication = Communication(**filtered_data)
+                    db.session.add(communication)
+                    logger.info(f"创建新沟通记录: {filtered_data.get('customer_id')} - {filtered_data.get('communication_date')}")
+                
+                result['communications'] += 1
+            except Exception as e:
+                logger.error(f"导入沟通记录时出错: {str(e)}")
+                result['errors'].append(f"沟通记录错误: {str(e)}")
+                result['skipped']['communications'] += 1
         
         # 提交所有更改
         db.session.commit()
@@ -527,6 +584,7 @@ def import_to_database(data):
     except Exception as e:
         db.session.rollback()
         logger.exception(f"数据库导入失败: {str(e)}")
+        result['errors'].append(f"数据库错误: {str(e)}")
         raise e
 
 # 辅助函数：导出客户数据

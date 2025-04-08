@@ -1,0 +1,10 @@
+<!-- components/html-parser/html-parser.wxml -->
+<view class="html-parser-container">
+  <!-- 简化使用rich-text渲染HTML内容 -->
+  <rich-text wx:if="{{parsedContent}}" nodes="{{parsedContent}}" class="rich-text-content" space="nbsp"></rich-text>
+  
+  <!-- 显示空内容提示 -->
+  <view wx:else class="empty-content">
+    <text>暂无内容显示</text>
+  </view>
+</view> 

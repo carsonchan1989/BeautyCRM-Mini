@@ -271,27 +271,57 @@ class ReportGenerator {
    * 保存HTML报告到本地存储
    * @param {String} customerId 客户ID
    * @param {String} htmlContent HTML内容
+   * @param {String} [date] 可选的报告日期，默认为当天
+   * @returns {Boolean} 保存是否成功
    * @private
    */
-  _saveReportToStorage(customerId, htmlContent) {
+  _saveReportToStorage(customerId, htmlContent, date) {
     if (!customerId || !htmlContent) {
-      this.logger.warn('保存报告时缺少必要参数', { customerId });
-      return;
+      this.logger.warn('保存报告时缺少必要参数', { customerId, hasContent: !!htmlContent });
+      return false;
     }
     
     try {
-      // 保存最新报告
+      // 获取当前日期
+      const reportDate = date || new Date().toISOString().split('T')[0];
+      
+      // 格式化HTML内容，确保能正确显示
+      let formattedHtml = htmlContent;
+      
+      // 检查是否已经是HTML格式
+      if (!htmlContent.includes('<div') && !htmlContent.includes('<p>')) {
+        // 添加基本HTML包装
+        formattedHtml = `<div style="padding: 20rpx; color: #333; font-size: 28rpx; line-height: 1.6;">
+          <h1 style="font-size: 36rpx; color: #0066cc; margin-bottom: 20rpx;">客户分析报告</h1>
+          <p>${htmlContent.replace(/\n/g, '</p><p>')}</p>
+        </div>`;
+      }
+      
+      // 构建存储键
+      const dateKey = `html_report_${customerId}_${reportDate}`;
       const latestKey = `html_report_${customerId}_latest`;
-      wx.setStorageSync(latestKey, htmlContent);
       
-      // 保存带日期的报告版本
-      const date = new Date().toISOString().split('T')[0];
-      const dateKey = `html_report_${customerId}_${date}`;
-      wx.setStorageSync(dateKey, htmlContent);
+      // 保存报告
+      wx.setStorageSync(dateKey, formattedHtml);
+      wx.setStorageSync(latestKey, formattedHtml);
       
-      this.logger.info('HTML报告已保存到本地存储', { customerId, date });
+      // 同步到报告缓存系统
+      this._syncReportToCache(customerId, {
+        date: reportDate,
+        format: 'html',
+        type: 'full'
+      });
+      
+      this.logger.info('HTML报告已保存到本地存储', {
+        customerId,
+        date: reportDate,
+        contentLength: formattedHtml.length
+      });
+      
+      return true;
     } catch (error) {
       this.logger.error('保存HTML报告失败', error);
+      return false;
     }
   }
   
@@ -351,23 +381,85 @@ class ReportGenerator {
    */
   _getProjectData() {
     return new Promise((resolve, reject) => {
-      // 使用导入的apiConfig替代原来全局的apiConfig
+      // 导入API配置
+      const apiConfig = require('../config/api');
+      
+      // 检查API路径是否存在
       if (!apiConfig || !apiConfig.paths || !apiConfig.paths.project) {
         this.logger.warn('项目API路径未定义');
         return resolve([]);
       }
       
+      this.logger.info('开始获取项目库数据...');
+      
+      // 构建API URL并输出日志
+      const url = apiConfig.getUrl(apiConfig.paths.project.list);
+      this.logger.info(`请求项目库数据，URL: ${url}`);
+      
       wx.request({
-        url: apiConfig.getUrl(apiConfig.paths.project.list),
+        url: url,
         method: 'GET',
         success: (res) => {
+          this.logger.info(`项目库API响应状态码: ${res.statusCode}`);
+          
           if (res.statusCode === 200) {
-            resolve(res.data);
+            let projects = [];
+            
+            // 尝试多种数据格式
+            if (res.data && res.data.data && Array.isArray(res.data.data)) {
+              // 标准格式：{ success: true, data: [...] }
+              projects = res.data.data;
+              this.logger.info('从标准格式响应中提取项目数据');
+            } else if (Array.isArray(res.data)) {
+              // 直接返回数组的格式
+              projects = res.data;
+              this.logger.info('从数组格式响应中提取项目数据');
+            } else if (typeof res.data === 'object') {
+              // 尝试在对象中查找项目数组
+              this.logger.info(`API响应对象的键: ${Object.keys(res.data).join(', ')}`);
+              
+              // 尝试常见的数据字段名
+              const possibleKeys = ['projects', 'items', 'results', 'list', 'records', 'data'];
+              for (const key of possibleKeys) {
+                if (res.data[key] && Array.isArray(res.data[key])) {
+                  projects = res.data[key];
+                  this.logger.info(`从响应对象的 "${key}" 字段中提取项目数据`);
+                  break;
+                }
+              }
+              
+              // 如果仍然没有找到，尝试查找第一个数组类型的属性
+              if (projects.length === 0) {
+                for (const key in res.data) {
+                  if (Array.isArray(res.data[key])) {
+                    projects = res.data[key];
+                    this.logger.info(`从响应对象的第一个数组字段 "${key}" 中提取项目数据`);
+                    break;
+                  }
+                }
+              }
+            }
+            
+            // 如果找到项目数据
+            if (projects && projects.length > 0) {
+              this.logger.info(`成功获取项目库数据，共 ${projects.length} 条`);
+              if (projects.length > 0) {
+                this.logger.info(`样例项目数据: ${JSON.stringify(projects[0])}`);
+              }
+              resolve(projects);
+            } else {
+              this.logger.warn('API响应成功但未找到项目数据');
+              // 打印整个响应内容用于调试
+              this.logger.info(`完整响应内容: ${JSON.stringify(res.data).substring(0, 500)}...`);
+              resolve([]);
+            }
           } else {
-            reject(new Error('获取项目库数据失败'));
+            this.logger.error(`获取项目库数据失败，状态码: ${res.statusCode}`);
+            reject(new Error(`获取项目库数据失败，状态码: ${res.statusCode}`));
           }
         },
         fail: (err) => {
+          this.logger.error('请求项目库数据网络错误', err);
           reject(err);
         }
       });
@@ -488,85 +580,51 @@ class ReportGenerator {
   generateCustomerReport(customer, consumptions, options = {}) {
     return new Promise(async (resolve, reject) => {
       if (!customer || !customer.id) {
-        this.logger.error('缺少有效的客户信息');
-        return reject(new Error('缺少有效的客户信息'));
+        return reject(new Error('客户信息不完整'));
       }
-      
+
       try {
-        // 更新API配置
-        if (options.aiConfig) {
-          this.updateApiConfig(options.aiConfig);
-        }
-        
-        // 检查是否强制刷新
-        const forceRefresh = options.forceRefresh === true;
-        
-        // 检查缓存中是否有此客户的HTML报告
-        const today = new Date(); // 当前日期不需要格式化，直接使用new Date()创建
-        const dateStr = today.getFullYear() + '-' + 
-                       String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                       String(today.getDate()).padStart(2, '0');
-        
-        const htmlCacheKey = `html_report_${customer.id}_latest`;
-        
-        // 如果不是强制刷新且有缓存，则使用缓存
-        if (!forceRefresh) {
-          const cachedHtml = wx.getStorageSync(htmlCacheKey);
-          if (cachedHtml) {
-            this.logger.info('使用缓存的HTML报告', { 
-              customerId: customer.id,
-              cacheDate: dateStr
-            });
-            
-            // 确保缓存的HTML报告也同步到传统缓存系统中
-            this._syncHtmlReportToCache(customer.id, cachedHtml, dateStr);
-            
+        const customerId = customer.id;
+        this.logger.info(`开始生成客户 ${customerId} 的报告...`);
+
+        // 检查缓存中是否有现成的报告（如果不强制刷新）
+        if (!options.forceRefresh) {
+          const cachedReport = this._getReportFromCache(customerId);
+          if (cachedReport) {
+            this.logger.info(`从缓存中获取到客户 ${customerId} 的报告`);
             return resolve({
-              html: cachedHtml,
-              text: cachedHtml, // 为了兼容性，也提供text属性
-              customerId: customer.id,
+              html: cachedReport.html || '',
+              text: cachedReport.text || '',
               fromCache: true
             });
           }
         }
+
+        // 获取AI配置
+        const aiConfig = options.aiConfig || {};
         
-        // 格式化数据
-        const { customerInfo, consumptionRecords, customerId } = this._formatCustomerData(customer, consumptions);
-        
+        // 格式化客户信息和消费记录
+        const { customerInfo, consumptionRecords, customerId: id } = this._formatCustomerData(customer, consumptions);
+
         // 获取项目库数据
         let projectList = [];
         try {
           projectList = await this._getProjectData();
-          this.logger.info('获取项目库数据成功', { count: projectList.length });
+          this.logger.info(`获取到 ${projectList.length} 个项目库数据`);
         } catch (error) {
-          this.logger.warn('获取项目库数据失败', error);
+          this.logger.warn('获取项目库数据失败，将使用空数组', error);
         }
         
-        // 生成报告提示词
+        // 替换模板中的变量
         let prompt = this.templates.customer.prompt
-          .replace('{{customerInfo}}', customerInfo)
-          .replace('{{consumptionRecords}}', consumptionRecords)
-          .replace(/{{customerId}}/g, customerId); // 替换所有出现的customerId
-          
-        // 添加自定义提示词
-        if (options.aiConfig && options.aiConfig.customPrompt) {
-          prompt += '\n\n附加说明：' + options.aiConfig.customPrompt;
+          .replace(/{{customerId}}/g, id)
+          .replace(/{{customerInfo}}/g, customerInfo)
+          .replace(/{{consumptionRecords}}/g, consumptionRecords);
+
+        // 如果有自定义提示词，追加到提示词后
+        if (aiConfig.customPrompt) {
+          prompt += '\n\n' + aiConfig.customPrompt;
         }
-        
-        // 添加项目库数据
-        if (projectList.length > 0) {
-          prompt += '\n\n店内项目库：\n';
-          for (let i = 0; i < Math.min(projectList.length, 10); i++) {
-            const project = projectList[i];
-            prompt += `${i+1}. ${project.name}: ${project.description || '无描述'}, 价格: ${project.price || '未定价'}\n`;
-          }
-        }
-        
-        this.logger.info('开始生成客户报告', { 
-          customerId: customer.id,
-          name: customer.name,
-          consumptionCount: (consumptions || []).length
-        });
         
         // 在调用大模型API之前，添加下面代码以导出提示词：
         if (options.exportPrompt && this.promptExporter) {
@@ -575,7 +633,7 @@ class ReportGenerator {
             const timestamp = new Date().toISOString().split('T')[0];
             const filename = `customer_${customer.id}_${timestamp}.md`;
             
-            // 导出提示词，不再传递fullPrompt
+            // 导出提示词，传递完整的客户数据、消费记录和项目库数据
             const exportResult = await this.promptExporter.exportPromptToFile({
               customer,
               consumptions,

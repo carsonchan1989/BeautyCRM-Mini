@@ -491,19 +491,34 @@ def export_data_to_markdown():
                         if isinstance(service_items, list):
                             # 新结构：service_items是对象列表
                             for item_idx, item in enumerate(service_items, 1):
-                                # 打印服务项目详情的调试信息
-                                print(f"DEBUG - 服务项目详情: {item}")
+                                # 添加详细调试日志
+                                logger.debug(f"处理服务项目: {item}")
                                 
                                 # 获取项目数据，优先使用真实数据
                                 project_name = item.get('project_name', '')
                                 beautician_name = item.get('beautician_name', '')
-                                amount = item.get('card_deduction', 0) or item.get('unit_price', 0)
+                                
+                                # 获取金额 - 检查多种可能的字段名
+                                amount = None
+                                amount_fields = ['card_deduction', 'unit_price', 'amount', 'price']
+                                for field in amount_fields:
+                                    if field in item and item[field] is not None:
+                                        try:
+                                            amount = float(item[field])
+                                            break
+                                        except (ValueError, TypeError):
+                                            continue
+                                
+                                if amount is None:
+                                    amount = 0.0
+                                    logger.warning(f"无法从项目中提取金额: {item}")
+                                
                                 is_specified = item.get('is_specified', False)
                                 
                                 # 显示真实数据而不是默认"无详情"
                                 project_display = project_name if project_name else "无项目名称"
                                 beautician_display = beautician_name if beautician_name else "无美容师"
-                                amount_display = amount if amount else "无金额"
+                                amount_display = f"{amount:.1f}" if amount is not None else "无金额"
                                 
                                 # 指定状态转为中文
                                 specified_text = "是" if is_specified else "否"
@@ -513,11 +528,22 @@ def export_data_to_markdown():
                             # 兼容旧结构：service_items可能是字符串
                             project_name = service_items if isinstance(service_items, str) else "无项目名称"
                             beautician_name = record.get('beautician', '无美容师')
-                            amount = record.get('service_amount', '无金额')
+                            
+                            # 处理金额 - 尝试获取数值并格式化
+                            amount = record.get('service_amount')
+                            if amount is not None:
+                                try:
+                                    amount = float(amount)
+                                    amount_display = f"{amount:.1f}"
+                                except (ValueError, TypeError):
+                                    amount_display = str(amount)
+                            else:
+                                amount_display = "无金额"
+                            
                             is_specified = record.get('is_specified', False)
                             specified_text = "是" if is_specified else "否"
                             
-                            f.write(f"  - 项目1: {project_name}, 美容师: {beautician_name}, 金额: {amount}, 是否指定: {specified_text}\n")
+                            f.write(f"  - 项目1: {project_name}, 美容师: {beautician_name}, 金额: {amount_display}, 是否指定: {specified_text}\n")
                     else:
                         f.write("  - 无项目详情\n")
                     

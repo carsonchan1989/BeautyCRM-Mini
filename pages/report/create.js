@@ -469,13 +469,54 @@ Page({
       this.showApiStatusTip('报告生成成功!', true);
     }
     
+    // 格式化HTML内容，确保能正确显示
+    let formattedHtml = '';
+    if (result.html) {
+      // 包装HTML使其能正确显示
+      formattedHtml = `<div style="padding: 20rpx; color: #333; font-size: 28rpx; line-height: 1.6;">
+        <h1 style="font-size: 36rpx; color: #0066cc; margin-bottom: 20rpx;">客户分析报告</h1>
+        ${result.html}
+      </div>`;
+    } else if (result.text) {
+      // 将纯文本转换为HTML
+      formattedHtml = `<div style="padding: 20rpx; color: #333; font-size: 28rpx; line-height: 1.6;">
+        <h1 style="font-size: 36rpx; color: #0066cc; margin-bottom: 20rpx;">客户分析报告</h1>
+        <p style="margin-bottom: 10rpx;">${result.text.replace(/\n/g, '</p><p style="margin-bottom: 10rpx;">')}</p>
+      </div>`;
+    }
+    
     // 将生成的报告添加到页面数据和上下文中
     this.setData({
-      'reportData.html': result.html,
+      'reportData.html': formattedHtml,
       'reportData.text': result.text,
       'reportData.customer': customer,
       'reportData.ready': true
     });
+    
+    // 保存到本地存储 - 确保使用标准化的格式
+    try {
+      // 今日日期
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+      
+      // 存储HTML报告
+      const dateKey = `html_report_${customer.id}_${dateStr}`;
+      const latestKey = `html_report_${customer.id}_latest`;
+      
+      wx.setStorageSync(dateKey, formattedHtml);
+      wx.setStorageSync(latestKey, formattedHtml);
+      
+      console.log('报告已保存到本地存储', { 
+        dateKey, 
+        latestKey, 
+        contentLength: formattedHtml.length
+      });
+    } catch (e) {
+      console.error('保存报告到本地存储失败', e);
+    }
     
     // 清理进度条定时器
     if (this.data.progressTimer) {

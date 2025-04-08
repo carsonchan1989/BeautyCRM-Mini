@@ -42,29 +42,54 @@ class PromptExporter {
         
         const filePath = this.exportDir + filename;
         
+        // 日志记录导出开始
+        this.logger.info('开始导出提示词', { 
+          filename, 
+          hasCustomer: !!data.customer,
+          hasConsumptions: !!(data.consumptions && data.consumptions.length),
+          hasProjects: !!(data.projects && data.projects.length)
+        });
+        
         // 如果没有传入项目数据，尝试从API获取
         if (!data.projects || data.projects.length === 0) {
+          this.logger.info('未传入项目数据，尝试从API获取');
           try {
             data.projects = await this._fetchProjects();
-            this.logger.info('从API获取项目数据成功', { count: data.projects.length });
+            if (data.projects && data.projects.length > 0) {
+              this.logger.info('从API获取项目数据成功', { count: data.projects.length });
+            } else {
+              this.logger.warn('从API获取到的项目数据为空');
+            }
           } catch (error) {
             this.logger.warn('从API获取项目数据失败', error);
           }
+        } else {
+          this.logger.info('使用传入的项目数据', { count: data.projects.length });
         }
         
         // 获取客户的服务记录和沟通记录
         if (data.customer && data.customer.id) {
           try {
             // 获取服务记录
-            data.services = await this._fetchServices(data.customer.id);
-            this.logger.info('获取服务记录成功', { count: data.services.length });
+            if (!data.services || data.services.length === 0) {
+              data.services = await this._fetchServices(data.customer.id);
+              this.logger.info('获取服务记录成功', { count: data.services.length });
+            }
             
             // 获取沟通记录
-            data.communications = await this._fetchCommunications(data.customer.id);
-            this.logger.info('获取沟通记录成功', { count: data.communications.length });
+            if (!data.communications || data.communications.length === 0) {
+              data.communications = await this._fetchCommunications(data.customer.id);
+              this.logger.info('获取沟通记录成功', { count: data.communications.length });
+            }
           } catch (error) {
             this.logger.warn('获取客户额外数据失败', error);
           }
+        }
+        
+        // 确保项目数据是数组
+        if (!Array.isArray(data.projects)) {
+          this.logger.warn('项目数据不是数组，重置为空数组');
+          data.projects = [];
         }
         
         // 构建Markdown内容
@@ -73,7 +98,11 @@ class PromptExporter {
         // 写入文件
         fs.writeFileSync(filePath, content, 'utf8');
         
-        this.logger.info('提示词已导出', { filePath });
+        this.logger.info('提示词已导出', { 
+          filePath,
+          contentLength: content.length,
+          projectCount: (data.projects || []).length
+        });
         
         resolve({
           success: true,
@@ -95,25 +124,85 @@ class PromptExporter {
    */
   _fetchProjects() {
     return new Promise((resolve, reject) => {
+      // 确保apiConfig存在且包含项目路径
+      const apiConfig = require('../config/api');
+      
       if (!apiConfig || !apiConfig.paths || !apiConfig.paths.project) {
         this.logger.warn('项目API路径未定义');
         return resolve([]);
       }
       
+      this.logger.info('开始获取项目库数据...');
+      
+      // 构建API URL
+      const url = apiConfig.getUrl(apiConfig.paths.project.list);
+      this.logger.info('项目库API URL', { url });
+      
       wx.request({
-        url: apiConfig.getUrl(apiConfig.paths.project.list),
+        url: url,
         method: 'GET',
         success: (res) => {
-          if (res.statusCode === 200 && res.data) {
-            // 根据API返回格式提取项目数据
-            const projects = res.data.data || [];
-            resolve(projects);
+          this.logger.info(`项目库API响应状态码: ${res.statusCode}`);
+          
+          if (res.statusCode === 200) {
+            let projects = [];
+            
+            // 尝试多种数据格式
+            if (res.data && res.data.data && Array.isArray(res.data.data)) {
+              // 标准格式：{ success: true, data: [...] }
+              projects = res.data.data;
+              this.logger.info('从标准格式响应中提取项目数据');
+            } else if (Array.isArray(res.data)) {
+              // 直接返回数组的格式
+              projects = res.data;
+              this.logger.info('从数组格式响应中提取项目数据');
+            } else if (typeof res.data === 'object') {
+              // 尝试在对象中查找项目数组
+              this.logger.info(`API响应对象的键: ${Object.keys(res.data).join(', ')}`);
+              
+              // 尝试常见的数据字段名
+              const possibleKeys = ['projects', 'items', 'results', 'list', 'records', 'data'];
+              for (const key of possibleKeys) {
+                if (res.data[key] && Array.isArray(res.data[key])) {
+                  projects = res.data[key];
+                  this.logger.info(`从响应对象的 "${key}" 字段中提取项目数据`);
+                  break;
+                }
+              }
+              
+              // 如果仍然没有找到，尝试查找第一个数组类型的属性
+              if (projects.length === 0) {
+                for (const key in res.data) {
+                  if (Array.isArray(res.data[key])) {
+                    projects = res.data[key];
+                    this.logger.info(`从响应对象的第一个数组字段 "${key}" 中提取项目数据`);
+                    break;
+                  }
+                }
+              }
+            }
+            
+            // 如果找到项目数据
+            if (projects && projects.length > 0) {
+              this.logger.info(`成功获取项目库数据，共 ${projects.length} 条`);
+              if (projects.length > 0) {
+                this.logger.info(`样例项目数据: ${JSON.stringify(projects[0])}`);
+              }
+              resolve(projects);
+            } else {
+              this.logger.warn('API响应成功但未找到项目数据');
+              // 打印整个响应内容用于调试
+              this.logger.info(`完整响应内容: ${JSON.stringify(res.data).substring(0, 500)}...`);
+              resolve([]);
+            }
           } else {
-            reject(new Error('获取项目库数据失败'));
+            this.logger.error(`获取项目库数据失败，状态码: ${res.statusCode}`);
+            reject(new Error(`获取项目库数据失败，状态码: ${res.statusCode}`));
           }
         },
         fail: (err) => {
-          reject(err);
+          this.logger.error('请求项目库数据网络错误', err);
+          reject(new Error('请求项目库数据失败: ' + (err.errMsg || '网络错误')));
         }
       });
     });
@@ -363,45 +452,53 @@ class PromptExporter {
       // 使用最新的健康记录
       const health = customer.health_records[0];
       
-      content += `| 字段 | 值 |\n`;
-      content += `| ---- | ---- |\n`;
+      content += `| 类别 | 字段 | 值 |\n`;
+      content += `| ------- | ---- | ---- |\n`;
       
       // 获取字段映射
       var healthMapping = this._getHealthFieldMapping();
       
-      // 预定义的主要健康字段，按顺序显示
-      var mainHealthFields = [
-        'skin_type', 'pores_blackheads', 'wrinkles_texture', 'photoaging_inflammation',
-        'tcm_constitution', 'tongue_features', 'long_term_health_goal', 'short_term_health_goal', 
-        'short_term_beauty_goal'
-      ];
+      // 将健康档案字段按类别分组
+      var healthCategories = {
+        '皮肤状况': ['skin_type', 'oil_water_balance', 'pores_blackheads', 'wrinkles_texture', 'pigmentation', 'photoaging_inflammation'],
+        '中医体质': ['tcm_constitution', 'tongue_features', 'pulse_data'],
+        '生活习惯': ['sleep_routine', 'exercise_pattern', 'diet_restrictions'],
+        '护理需求': ['care_time_flexibility', 'massage_pressure_preference', 'environment_requirements'],
+        '美容健康目标': ['short_term_beauty_goal', 'long_term_beauty_goal', 'short_term_health_goal', 'long_term_health_goal'],
+        '健康记录': ['medical_cosmetic_history', 'wellness_service_history', 'major_disease_history', 'allergies']
+      };
       
-      // 先添加主要健康字段
-      for (var i = 0; i < mainHealthFields.length; i++) {
-        var field = mainHealthFields[i];
-        if (health && health.hasOwnProperty(field)) {
-          var chineseField = healthMapping[field] || field;
-          content += `| ${chineseField} | ${health[field] || '未知'} |\n`;
+      // 按分类显示字段
+      for (var category in healthCategories) {
+        var fields = healthCategories[category];
+        for (var i = 0; i < fields.length; i++) {
+          var field = fields[i];
+          if (health && health.hasOwnProperty(field) && health[field]) {
+            var chineseField = healthMapping[field] || field;
+            content += `| ${category} | ${chineseField} | ${health[field]} |\n`;
+          }
         }
       }
       
-      // 再添加其他健康字段
+      // 检查是否有未分类的字段
       for (var key in health) {
-        if (health.hasOwnProperty(key)) {
-          // 排除已添加的主要字段和系统字段
-          var excludedKeys = mainHealthFields.concat(['id', 'customer_id', 'created_at', 'updated_at']);
+        if (health.hasOwnProperty(key) && health[key]) {
+          // 排除系统字段和已处理的分类字段
+          var isSystemField = ['id', 'customer_id', 'created_at', 'updated_at'].includes(key);
+          var isProcessed = false;
           
-          var isExcluded = false;
-          for (var i = 0; i < excludedKeys.length; i++) {
-            if (key === excludedKeys[i]) {
-              isExcluded = true;
+          // 检查该字段是否已在任何分类中处理过
+          for (var category in healthCategories) {
+            if (healthCategories[category].includes(key)) {
+              isProcessed = true;
               break;
             }
           }
           
-          if (!isExcluded && health[key]) {
+          // 如果字段未处理且不是系统字段
+          if (!isProcessed && !isSystemField) {
             var chineseKey = this._getChineseHealthFieldName(key);
-            content += `| ${chineseKey} | ${health[key]} |\n`;
+            content += `| 其他 | ${chineseKey} | ${health[key]} |\n`;
           }
         }
       }
@@ -597,10 +694,8 @@ class PromptExporter {
       
       content += `**共有${projects.length}个项目**\n\n`;
       
-      // 检查项目数据结构，记录日志
-      if (projects.length > 0) {
-        this.logger.info('项目库数据结构示例:', JSON.stringify(projects[0], null, 2));
-      }
+      // 记录项目数据到日志
+      this.logger.info(`处理项目库数据，共 ${projects.length} 个项目`);
       
       content += `| 项目名称 | 分类 | 价格 | 功效 | 建议次数 | 描述 |\n`;
       content += `| -------- | ---- | ---- | ---- | -------- | ---- |\n`;
@@ -642,6 +737,10 @@ class PromptExporter {
       }
       
       content += '\n';
+    } else {
+      this.logger.warn('没有项目库数据可显示');
+      content += '### 6. 店内项目库\n\n';
+      content += '**暂无项目数据**\n\n';
     }
     
     // ==== 第二部分：AI提示词 ====
@@ -651,7 +750,36 @@ class PromptExporter {
     if (prompt) {
       content += '### 提示词模板\n\n';
       content += '```\n';
-      content += prompt;
+      // 从原始提示词中移除客户分析报告模板，保留第6点但移除模板内容
+      let modifiedPrompt = prompt;
+      if (modifiedPrompt.includes('根据以下客户分析报告模板生成内容')) {
+        // 找到模板开始的标记
+        const templateStartIndex = modifiedPrompt.indexOf('根据以下客户分析报告模板生成内容');
+        if (templateStartIndex > 0) {
+          // 寻找模板文本开始的位置（客户ID后的换行符）
+          const customerIdLineEndIndex = modifiedPrompt.indexOf('\n', templateStartIndex);
+          if (customerIdLineEndIndex > 0) {
+            // 寻找模板文本结束的位置（通常是最后一个场景之后或文档结束）
+            let templateEndIndex = modifiedPrompt.length;
+            // 检查是否有附加内容
+            const additionalContentIndex = modifiedPrompt.indexOf('报告内容详尽', customerIdLineEndIndex);
+            if (additionalContentIndex > 0) {
+              templateEndIndex = additionalContentIndex;
+            }
+            
+            // 截取模板前的部分和附加要求部分（如果有）
+            const beforeTemplate = modifiedPrompt.substring(0, customerIdLineEndIndex + 1);
+            const afterTemplate = additionalContentIndex > 0 ? 
+                                 modifiedPrompt.substring(additionalContentIndex) : 
+                                 '';
+            
+            // 构建新的提示词，不包含具体模板内容
+            modifiedPrompt = beforeTemplate + ' 请参考下方提供的模板生成内容\n' + afterTemplate;
+          }
+        }
+      }
+      
+      content += modifiedPrompt;
       content += '\n```\n\n';
     }
     
@@ -663,44 +791,71 @@ class PromptExporter {
       content += '\n```\n\n';
     }
     
-    // ==== 第三部分：报告示例格式 ====
-    content += `## 第三部分：报告示例格式\n\n`;
+    // 添加客户分析报告模板
+    content += '### 根据以下客户分析报告模板生成内容\n\n';
     content += '```\n';
-    content += `客户分析报告
-
-1. 客户基本情况分析
-[在此处提供客户的基本情况分析]
+    content += `1. 客户基本情况分析
+林晓薇（28岁，外资企业时尚编辑，年收入35万）呈现典型的"精致悦己型"人格特征：
+生活状态：单身独居，自有公寓，作息规律（23:00-7:00），偏好轻食，注重护肤与健身，消费决策自主性强，风险敏感度低。
+地域背景：杭州籍现居上海浦东，居住时长6年，适应快节奏都市生活，对高效便捷服务需求显著。
+健康数据：混合偏油肤质（T区油U区干），存在鼻翼黑头、眼周细纹、光老化II级问题，中医体质为湿热质（舌红苔黄），需调节亚健康状态，改善失眠。
+人性洞察：高收入独立女性追求"内外兼修"，既需即时可见的美容效果（如黑头淡化、抗初老），也注重长期健康管理，同时渴望通过高品质服务获得身份认同感。
 
 2. 客户消耗行为分析
-[在此处提供客户的消耗行为分析]
+耗卡特征：2023年7-10月到店10次，总耗卡金额8,623元，集中于冰肌焕颜护理（4次）、黄金射频紧致疗程（3次）、帝王艾灸调理（3次），单次耗卡金额波动大（480-1,840元）。
+服务偏好：
+项目组合：高频叠加面部护理（冰肌焕颜）与抗衰项目（射频），辅以养生类艾灸调理，体现"美容+养生"双线需求。
+美容师指定：70%耗卡指定李婷（操作轻柔、服务细致），反映对服务稳定性和情感连接的重视。
+满意度：平均评分4.7/5，投诉记录1次（预约时间延误），补偿后未影响复购，显示对品牌容忍度较高但要求快速问题解决。
 
 3. 客户消费行为分析
-[在此处提供客户的消费行为分析]
+消费结构：3个月内累计消费12,880元，偏好高价抗衰项目（黄金射频占比52.8%），支付方式多元（支付宝、信用卡、储值卡），储值卡使用率低（仅1次）。
+决策逻辑：
+功效导向：优先选择"即时效果可见"项目（射频提升下颌线后主动追加颈部护理）。
+社交属性：冰肌焕颜护理耗卡频次高，推测与职场形象维护强相关。
+潜在机会点：未尝试身体护理（如经络排毒）、特色项目（极光泡泡），可能因时间限制或认知不足未触发需求。
 
 4. 客户服务偏好与健康数据深化分析
-[在此处提供客户的服务偏好与健康数据分析]
-
+服务场景需求：
+时间灵活度：周末到店为主，工作日偏好晚间（结合作息23点入睡，推测19-21点为黄金时段）。
+环境要求：香薰音乐氛围，排斥嘈杂环境，适合VIP室私密服务。
+健康痛点：
+短期：失眠改善（艾灸调理已初见成效）、黑头清洁。
+长期：光老化防护、湿热体质调理（可能伴随痘痘反复风险）。
 5. 客户沟通记录分析
-[在此处提供客户的沟通记录分析]
-
+核心诉求：
+信息透明化（对比项目差异、术后修复细节）。
+服务确定性（严格守时、指定技师）。
+情感价值（被重视感，如投诉后补偿方案接受度高）。
+沟通风格：理性直接（线上咨询占比40%），偏好图文说明而非电话沟通。
 6. 客户需求总结
 需求类型	显性需求	隐性需求
-美容需求	[填写显性需求]	[填写隐性需求]
-健康需求	[填写显性需求]	[填写隐性需求]
-情感需求	[填写显性需求]	[填写隐性需求]
+美容需求	抗初老、黑头清洁、颈部护理	职场竞争力提升、社交形象管理
+健康需求	失眠改善、湿热体质调理	亚健康状态突破、预防潜在皮肤炎症
+情感需求	服务稳定性、高效问题响应	被尊重感、个性化专属体验
 
 7. 可匹配项目推荐
-[在此处提供可匹配的项目推荐]
-
+黑头专项管理套餐（冰肌焕颜+极光净透泡泡）：解决显性黑头问题，结合深层清洁与补水，预防毛孔粗大。
+夜间焕肤护理（定制版射频+艾灸睡眠调理）：适配其作息时间，同步实现抗衰与助眠。
+私人健康顾问服务（中医体质调理+年度光老化防护计划）：捆绑销售高频耗卡项目与长周期健康管理，提升客户粘性。
 8. 销售沟通要点与话术
-场景1：[描述场景]
-[在此处提供销售话术，不少于50字]
-
-场景2：[描述场景]
-[在此处提供销售话术，不少于50字]
-
-场景3：[描述场景]
-[在此处提供销售话术，不少于50字]`;
+场景1：耗卡余额提醒+项目推荐
+话术：
+"晓薇您好，系统显示您的储值卡余额还剩1,200元，刚好可以体验我们新推出的【黑头专项管理套餐】。您一直做的冰肌焕颜主要针对补水提亮，而新增的极光泡泡能通过活氧吸附技术深入清洁鼻翼黑头（展示对比图）。考虑到您每周健身容易出汗加剧毛孔堵塞，这个组合能帮您实现'清洁+养护'一步到位。本周六李婷老师有专属预约档期，需要帮您锁定名额吗？"
+设计逻辑：
+数据关联（耗卡记录+健身习惯）增强专业感。
+指定美容师触发情感偏好，限时预约制造紧迫感。
+________________________________________
+场景2：健康管理场景切入
+话术：
+"晓薇，注意到您最近三次艾灸调理都安排在傍晚，是否因为工作压力大影响睡眠？我们的中医团队针对湿热体质研发了【夜间焕肤护理】，在射频紧致后增加头部经络按摩助眠手法，搭配定制艾草精油。上周VIP客户反馈平均入睡时间提前了40分钟，您要不要试试？首次体验可赠送睡眠监测手环，方便您量化调理效果。"
+设计逻辑：
+从服务时间规律挖掘健康痛点，提供解决方案。
+用客户案例与赠品降低决策门槛，突出"量身定制"。
+________________________________________
+场景3：社交场景激发升级消费
+话术：
+"晓薇，您之前提到常参加时尚活动，我们下月将举办'职场女神焕新计划'，参与即可获得专业妆造+品牌拍摄。您只需升级到【私人健康顾问服务】，即可免费尊享席位（展示往期活动照）。这个套餐包含全年光老化防护和季度体质检测，像您这样长期面对电脑的职场精英，不仅能维稳肌肤状态，还能优先体验抗蓝光新项目哦！"`;
     content += '\n```\n\n';
     
     return content;
@@ -738,42 +893,69 @@ class PromptExporter {
     }
     
     // 第二部分：报告格式示例
-    fullPrompt += '\n## 报告格式示例\n\n';
-    fullPrompt += `客户分析报告
-    
-1. 客户基本情况分析
-[在此处提供客户的基本情况分析]
+    fullPrompt += '\n## 根据以下客户分析报告模板生成内容\n\n';
+    fullPrompt += `1. 客户基本情况分析
+林晓薇（28岁，外资企业时尚编辑，年收入35万）呈现典型的"精致悦己型"人格特征：
+生活状态：单身独居，自有公寓，作息规律（23:00-7:00），偏好轻食，注重护肤与健身，消费决策自主性强，风险敏感度低。
+地域背景：杭州籍现居上海浦东，居住时长6年，适应快节奏都市生活，对高效便捷服务需求显著。
+健康数据：混合偏油肤质（T区油U区干），存在鼻翼黑头、眼周细纹、光老化II级问题，中医体质为湿热质（舌红苔黄），需调节亚健康状态，改善失眠。
+人性洞察：高收入独立女性追求"内外兼修"，既需即时可见的美容效果（如黑头淡化、抗初老），也注重长期健康管理，同时渴望通过高品质服务获得身份认同感。
 
 2. 客户消耗行为分析
-[在此处提供客户的消耗行为分析]
+耗卡特征：2023年7-10月到店10次，总耗卡金额8,623元，集中于冰肌焕颜护理（4次）、黄金射频紧致疗程（3次）、帝王艾灸调理（3次），单次耗卡金额波动大（480-1,840元）。
+服务偏好：
+项目组合：高频叠加面部护理（冰肌焕颜）与抗衰项目（射频），辅以养生类艾灸调理，体现"美容+养生"双线需求。
+美容师指定：70%耗卡指定李婷（操作轻柔、服务细致），反映对服务稳定性和情感连接的重视。
+满意度：平均评分4.7/5，投诉记录1次（预约时间延误），补偿后未影响复购，显示对品牌容忍度较高但要求快速问题解决。
 
 3. 客户消费行为分析
-[在此处提供客户的消费行为分析]
+消费结构：3个月内累计消费12,880元，偏好高价抗衰项目（黄金射频占比52.8%），支付方式多元（支付宝、信用卡、储值卡），储值卡使用率低（仅1次）。
+决策逻辑：
+功效导向：优先选择"即时效果可见"项目（射频提升下颌线后主动追加颈部护理）。
+社交属性：冰肌焕颜护理耗卡频次高，推测与职场形象维护强相关。
+潜在机会点：未尝试身体护理（如经络排毒）、特色项目（极光泡泡），可能因时间限制或认知不足未触发需求。
 
 4. 客户服务偏好与健康数据深化分析
-[在此处提供客户的服务偏好与健康数据分析]
-
+服务场景需求：
+时间灵活度：周末到店为主，工作日偏好晚间（结合作息23点入睡，推测19-21点为黄金时段）。
+环境要求：香薰音乐氛围，排斥嘈杂环境，适合VIP室私密服务。
+健康痛点：
+短期：失眠改善（艾灸调理已初见成效）、黑头清洁。
+长期：光老化防护、湿热体质调理（可能伴随痘痘反复风险）。
 5. 客户沟通记录分析
-[在此处提供客户的沟通记录分析]
-
+核心诉求：
+信息透明化（对比项目差异、术后修复细节）。
+服务确定性（严格守时、指定技师）。
+情感价值（被重视感，如投诉后补偿方案接受度高）。
+沟通风格：理性直接（线上咨询占比40%），偏好图文说明而非电话沟通。
 6. 客户需求总结
-需求类型\t显性需求\t隐性需求
-美容需求\t[填写显性需求]\t[填写隐性需求]
-健康需求\t[填写显性需求]\t[填写隐性需求]
-情感需求\t[填写显性需求]\t[填写隐性需求]
+需求类型	显性需求	隐性需求
+美容需求	抗初老、黑头清洁、颈部护理	职场竞争力提升、社交形象管理
+健康需求	失眠改善、湿热体质调理	亚健康状态突破、预防潜在皮肤炎症
+情感需求	服务稳定性、高效问题响应	被尊重感、个性化专属体验
 
 7. 可匹配项目推荐
-[在此处提供可匹配的项目推荐]
-
+黑头专项管理套餐（冰肌焕颜+极光净透泡泡）：解决显性黑头问题，结合深层清洁与补水，预防毛孔粗大。
+夜间焕肤护理（定制版射频+艾灸睡眠调理）：适配其作息时间，同步实现抗衰与助眠。
+私人健康顾问服务（中医体质调理+年度光老化防护计划）：捆绑销售高频耗卡项目与长周期健康管理，提升客户粘性。
 8. 销售沟通要点与话术
-场景1：[描述场景]
-[在此处提供销售话术，不少于50字]
-
-场景2：[描述场景]
-[在此处提供销售话术，不少于50字]
-
-场景3：[描述场景]
-[在此处提供销售话术，不少于50字]`;
+场景1：耗卡余额提醒+项目推荐
+话术：
+"晓薇您好，系统显示您的储值卡余额还剩1,200元，刚好可以体验我们新推出的【黑头专项管理套餐】。您一直做的冰肌焕颜主要针对补水提亮，而新增的极光泡泡能通过活氧吸附技术深入清洁鼻翼黑头（展示对比图）。考虑到您每周健身容易出汗加剧毛孔堵塞，这个组合能帮您实现'清洁+养护'一步到位。本周六李婷老师有专属预约档期，需要帮您锁定名额吗？"
+设计逻辑：
+数据关联（耗卡记录+健身习惯）增强专业感。
+指定美容师触发情感偏好，限时预约制造紧迫感。
+________________________________________
+场景2：健康管理场景切入
+话术：
+"晓薇，注意到您最近三次艾灸调理都安排在傍晚，是否因为工作压力大影响睡眠？我们的中医团队针对湿热体质研发了【夜间焕肤护理】，在射频紧致后增加头部经络按摩助眠手法，搭配定制艾草精油。上周VIP客户反馈平均入睡时间提前了40分钟，您要不要试试？首次体验可赠送睡眠监测手环，方便您量化调理效果。"
+设计逻辑：
+从服务时间规律挖掘健康痛点，提供解决方案。
+用客户案例与赠品降低决策门槛，突出"量身定制"。
+________________________________________
+场景3：社交场景激发升级消费
+话术：
+"晓薇，您之前提到常参加时尚活动，我们下月将举办'职场女神焕新计划'，参与即可获得专业妆造+品牌拍摄。您只需升级到【私人健康顾问服务】，即可免费尊享席位（展示往期活动照）。这个套餐包含全年光老化防护和季度体质检测，像您这样长期面对电脑的职场精英，不仅能维稳肌肤状态，还能优先体验抗蓝光新项目哦！"`;
     
     return fullPrompt;
   }
