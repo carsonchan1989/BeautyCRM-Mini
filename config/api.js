@@ -3,10 +3,13 @@
  * 集中管理所有API接口地址
  */
 
-// 基础URL，从全局配置获取
+const config = {
+  baseUrl: 'http://1.12.60.202:5000/'  // 注意要加上端口号 5000
+};
+
+// 获取基础URL
 const getBaseUrl = () => {
-  const app = getApp();
-  return (app && app.globalData && app.globalData.apiBaseUrl) || 'http://localhost:5000';
+  return config.baseUrl;
 };
 
 module.exports = {
@@ -70,7 +73,7 @@ module.exports = {
 
     // Excel处理相关API
     excel: {
-      preCheck: '/excel/import', // 预检查使用相同的URL，通过formData中的action参数区分
+      preCheck: '/excel/import',
       import: '/excel/import',
       export: '/excel/export',
     }
