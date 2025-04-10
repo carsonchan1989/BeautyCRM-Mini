@@ -19,7 +19,9 @@
       "disablePlugins": [],
       "outputPath": ""
     },
-    "useIsolateContext": true
+    "useIsolateContext": true,
+    "ignoreUploadUnusedFiles": false,
+    "condition": false
   },
   "condition": {},
   "editorSetting": {
