@@ -1,0 +1,92 @@
+<view class="container">
+  <view class="header">
+    <view class="back-button" bindtap="goBack">
+      <text class="back-icon">←</text>
+      <text>返回</text>
+    </view>
+    <view class="title">Excel文件上传</view>
+  </view>
+  
+  <view class="upload-section">
+    <view class="upload-box" bindtap="selectExcelFile">
+      <view class="upload-icon">
+        <text class="icon">+</text>
+      </view>
+      <text class="upload-text">点击选择Excel文件</text>
+      <text class="upload-hint">支持.xlsx、.xls格式</text>
+    </view>
+    
+    <view class="file-info" wx:if="{{fileInfo}}">
+      <view class="info-item">
+        <text class="label">文件名称：</text>
+        <text class="value">{{fileInfo.name}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">文件大小：</text>
+        <text class="value">{{fileInfo.size}}</text>
+      </view>
+      <view class="info-item">
+        <text class="label">选择时间：</text>
+        <text class="value">{{fileInfo.time}}</text>
+      </view>
+    </view>
+    
+    <view class="status-box">
+      <text class="status-text">状态: {{importStatus}}</text>
+      <text class="error-message" wx:if="{{errorMessage}}">{{errorMessage}}</text>
+    </view>
+    
+    <view class="button-group">
+      <button class="preview-button" bindtap="previewExcel" disabled="{{!selectedFile}}">预览数据</button>
+      <button class="import-button" bindtap="startImport" disabled="{{!selectedFile}}">开始导入</button>
+    </view>
+  </view>
+  
+  <view class="preview-section" wx:if="{{isPreviewMode && previewData}}">
+    <view class="preview-title">数据预览</view>
+    <view class="preview-tabs">
+      <view class="tab-item active">客户数据</view>
+    </view>
+    
+    <scroll-view scroll-x="true" class="table-container">
+      <view class="table">
+        <view class="table-header">
+          <view class="th" wx:for="{{previewData.headers}}" wx:key="index">{{item}}</view>
+        </view>
+        <view class="table-body">
+          <view class="tr" wx:for="{{previewData.rows}}" wx:key="index" wx:for-item="row">
+            <view class="td" wx:for="{{row}}" wx:key="index">{{item}}</view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+    
+    <view class="preview-note">
+      <text>注：仅显示部分数据，完整数据将在导入后保存</text>
+    </view>
+  </view>
+  
+  <view class="import-results" wx:if="{{importResult}}">
+    <view class="result-title">导入结果</view>
+    <view class="result-item">
+      <text class="result-label">客户数据：</text>
+      <text class="result-value">{{importResult.customers || 0}}条</text>
+    </view>
+    <view class="result-item">
+      <text class="result-label">健康档案：</text>
+      <text class="result-value">{{importResult.health || 0}}条</text>
+    </view>
+    <view class="result-item">
+      <text class="result-label">消费记录：</text>
+      <text class="result-value">{{importResult.consumption || 0}}条</text>
+    </view>
+    <view class="result-item">
+      <text class="result-label">服务记录：</text>
+      <text class="result-value">{{importResult.service || 0}}条</text>
+    </view>
+    <view class="result-item">
+      <text class="result-label">沟通记录：</text>
+      <text class="result-value">{{importResult.communication || 0}}条</text>
+    </view>
+  </view>
+</view>

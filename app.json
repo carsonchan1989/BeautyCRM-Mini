@@ -8,6 +8,7 @@
     "pages/customer/detail",
     "pages/excel/import",
     "pages/excel/preview",
+    "pages/excel/upload",
     "pages/report/report",
     "pages/report/detail",
     "pages/report/create",

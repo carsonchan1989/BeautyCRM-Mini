@@ -101,8 +101,10 @@ Page({
       success: function(res) {
         if (res.statusCode === 200) {
           that.setData({
-            healthData: res.data.length > 0 ? res.data[0] : null
+            healthData: Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null
           });
+        } else {
+          console.error('获取健康档案失败:', res.data);
         }
       },
       fail: function(err) {
@@ -120,8 +122,10 @@ Page({
       success: function(res) {
         if (res.statusCode === 200) {
           that.setData({
-            consumptionData: res.data || []
+            consumptionData: Array.isArray(res.data) ? res.data : []
           });
+        } else {
+          console.error('获取消费记录失败:', res.data);
         }
       },
       fail: function(err) {
@@ -139,8 +143,10 @@ Page({
       success: function(res) {
         if (res.statusCode === 200) {
           that.setData({
-            serviceData: res.data || []
+            serviceData: Array.isArray(res.data) ? res.data : []
           });
+        } else {
+          console.error('获取服务记录失败:', res.data);
         }
       },
       fail: function(err) {
@@ -158,8 +164,10 @@ Page({
       success: function(res) {
         if (res.statusCode === 200) {
           that.setData({
-            communicationData: res.data || []
+            communicationData: Array.isArray(res.data) ? res.data : []
           });
+        } else {
+          console.error('获取沟通记录失败:', res.data);
         }
       },
       fail: function(err) {

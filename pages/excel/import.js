@@ -128,7 +128,7 @@ Page({
     }, 300);
 
     // 发送预检查请求
-    const preCheckUrl = `${app.globalData.apiBaseUrl}/excel/import`;
+    const preCheckUrl = apiConfig.getUrl(apiConfig.paths.excel.preCheck);
     
     wx.uploadFile({
       url: preCheckUrl,
@@ -227,7 +227,7 @@ Page({
     }, 300);
 
     // 上传文件到服务器
-    const importUrl = `${app.globalData.apiBaseUrl}/excel/import`;
+    const importUrl = apiConfig.getUrl(apiConfig.paths.excel.import);
     logger.info('上传文件到:', importUrl);
 
     // 添加调试信息到表单

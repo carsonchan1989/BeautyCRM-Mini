@@ -83,10 +83,18 @@ def get_customer(customer_id):
         communications = Communication.query.filter_by(customer_id=customer_id).all()
         customer_data['communication_records'] = [record.to_dict() for record in communications]
 
-        return jsonify(customer_data), 200
+        return jsonify({
+            'code': 0,
+            'data': customer_data,
+            'message': '获取客户详情成功'
+        }), 200
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        current_app.logger.error(f"获取客户详情失败: {str(e)}")
+        return jsonify({
+            'code': 1,
+            'message': f'获取客户详情失败: {str(e)}'
+        }), 500
 
 @customer_bp.route('/', methods=['POST'])
 def create_customer():

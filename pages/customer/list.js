@@ -61,50 +61,168 @@ Page({
    * 加载客户数据
    */
   loadCustomerData(callback) {
-    this.setData({ isLoading: true, errorMessage: '' });
+    const that = this;
+    const url = apiConfig.getUrl(apiConfig.paths.customer.list);
     
-    // 从服务器获取客户数据
+    this.logger.info('开始加载客户数据', { url });
+    
+    this.setData({ loading: true, errorMessage: '' });
+    
     wx.request({
-      url: apiConfig.getUrl(apiConfig.paths.customer.list),
+      url: url,
       method: 'GET',
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.items) {
-          const customers = res.data.items.map(item => ({
+      timeout: 10000, // 设置10秒超时
+      enableHttp2: false, // 禁用HTTP/2
+      enableQuic: false, // 禁用QUIC
+      success: function(res) {
+        that.logger.info('收到服务器响应', { 
+          statusCode: res.statusCode,
+          data: res.data && res.data.items ? `${res.data.items.length}条记录` : '无数据'
+        });
+        
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          that.logger.info('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            that.logger.info(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'GET',
+              success: (redirectRes) => {
+                that.logger.info(`重定向请求响应:`, redirectRes.statusCode);
+                if (redirectRes.statusCode === 200) {
+                  // 处理重定向后的成功响应
+                  const customers = redirectRes.data && redirectRes.data.items ? redirectRes.data.items : [];
+                  that.logger.info(`从重定向API加载了${customers.length}位客户`);
+                  
+                  // 确保客户ID存在
+                  const processedCustomers = customers.map(item => ({
+                    ...item,
+                    id: item.id || item.customerId // 确保id字段存在
+                  }));
+                  
+                  // 更新到本地存储
+                  that.dataStore.saveData({
+                    customers: processedCustomers,
+                    consumptions: []
+                  }, false);
+                  
+                  that.setData({
+                    allCustomers: processedCustomers,
+                    customers: processedCustomers,
+                    loading: false,
+                    isEmpty: processedCustomers.length === 0
+                  });
+                  
+                  // 应用当前的搜索和筛选
+                  that.applySearchAndFilter();
+                } else {
+                  that.logger.error('重定向请求失败', { 
+                    statusCode: redirectRes.statusCode,
+                    data: redirectRes.data 
+                  });
+                  that.setData({ 
+                    loading: false,
+                    isEmpty: true,
+                    errorMessage: '加载失败：' + (redirectRes.data && redirectRes.data.error ? redirectRes.data.error : '重定向请求失败')
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                that.logger.error('重定向请求错误', redirectErr);
+                that.setData({ 
+                  loading: false,
+                  isEmpty: true,
+                  errorMessage: '重定向请求错误'
+                });
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
+        if (res.statusCode === 200) {
+          // 正确处理返回的数据格式：{items: [...]}
+          const customers = res.data && res.data.items ? res.data.items : [];
+          that.logger.info(`从API加载了${customers.length}位客户`);
+          
+          // 确保客户ID存在
+          const processedCustomers = customers.map(item => ({
             ...item,
             id: item.id || item.customerId // 确保id字段存在
           }));
-          this.logger.info(`从API加载了${customers.length}位客户`);
           
           // 更新到本地存储
-          this.dataStore.saveData({
-            customers: customers,
+          that.dataStore.saveData({
+            customers: processedCustomers,
             consumptions: []
           }, false);
           
-          this.setData({
-            allCustomers: customers,
-            customers: customers,
-            isLoading: false
+          that.setData({
+            allCustomers: processedCustomers,
+            customers: processedCustomers,
+            loading: false,
+            isEmpty: processedCustomers.length === 0
           });
           
           // 应用当前的搜索和筛选
-          this.applySearchAndFilter();
+          that.applySearchAndFilter();
         } else {
-          this.logger.error('API返回数据格式不正确', res.data);
-          
-          // 尝试从本地存储加载
-          this.loadFromLocalStorage();
+          that.logger.error('请求失败', { 
+            statusCode: res.statusCode,
+            data: res.data 
+          });
+          that.setData({ 
+            loading: false,
+            isEmpty: true,
+            errorMessage: '加载失败：' + (res.data && res.data.error ? res.data.error : '未知错误')
+          });
         }
         
         if (callback && typeof callback === 'function') {
           callback();
         }
       },
-      fail: (err) => {
-        this.logger.error('请求客户数据失败', err);
+      fail: function(err) {
+        that.logger.error('请求客户数据失败', err);
         
         // 尝试从本地存储加载
-        this.loadFromLocalStorage();
+        const localData = that.dataStore.getData();
+        if (localData && localData.customers && localData.customers.length > 0) {
+          that.logger.info('从本地缓存加载客户数据', { count: localData.customers.length });
+          that.setData({
+            allCustomers: localData.customers,
+            customers: localData.customers,
+            loading: false,
+            errorMessage: '网络请求失败，显示本地缓存数据'
+          });
+          that.applySearchAndFilter();
+          return;
+        }
+        
+        // 显示具体的错误信息
+        let errorMsg = '网络请求失败';
+        if (err.errMsg.includes('timeout')) {
+          errorMsg = '请求超时，请检查网络连接';
+        } else if (err.errMsg.includes('fail')) {
+          errorMsg = '无法连接到服务器，请确认服务器地址是否正确';
+        }
+        
+        that.setData({
+          loading: false,
+          isEmpty: true,
+          errorMessage: errorMsg
+        });
+        
+        // 显示错误提示
+        wx.showToast({
+          title: errorMsg,
+          icon: 'none',
+          duration: 2000
+        });
         
         if (callback && typeof callback === 'function') {
           callback();

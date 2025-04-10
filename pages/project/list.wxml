@@ -1,17 +1,73 @@
 <view class="container">
+  <!-- 标题栏 -->
   <view class="header">
-    <view class="search-box">
-      <input type="text" placeholder="搜索项目" bindinput="onSearchInput" value="{{searchKeyword}}" />
-      <icon type="search" size="20"></icon>
+    <view class="back-button" bindtap="goToHome">
+      <text class="back-icon">←</text>
+      <text>返回</text>
     </view>
-    <view class="filter-box">
-      <picker bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}">
-        <view class="picker">
-          {{categoryIndex === null ? '全部分类' : categories[categoryIndex]}}
-          <text class="arrow">▼</text>
+    <view class="title">项目管理</view>
+    <view class="add-button" bindtap="onAddProject">
+      <text>新增</text>
+    </view>
+  </view>
+  
+  <!-- 错误信息 -->
+  <view class="error-message" wx:if="{{errorMessage}}">
+    <icon type="warn" size="18"></icon>
+    <text>{{errorMessage}}</text>
+  </view>
+
+  <!-- 搜索和筛选 -->
+  <view class="search-filter-bar">
+    <view class="search-box">
+      <icon type="search" size="16" color="#999"/>
+      <input placeholder="搜索项目名称" 
+             value="{{searchKeyword}}" 
+             bindinput="onSearchInput"/>
+    </view>
+    <view class="filter-button" bindtap="toggleFilterPanel">
+      <text>筛选</text>
+      <text class="filter-icon">↓</text>
+    </view>
+  </view>
+  
+  <!-- 筛选面板 -->
+  <view class="filter-panel" hidden="{{!showFilterPanel}}">
+    <view class="filter-row">
+      <view class="filter-label">分类</view>
+      <picker range="{{categories}}" 
+              value="{{categoryIndex}}" 
+              bindchange="onCategoryChange">
+        <view class="filter-value">
+          <text>{{categories[categoryIndex]}}</text>
+          <text class="filter-arrow">▼</text>
         </view>
       </picker>
     </view>
+    
+    <view class="filter-row">
+      <view class="filter-label">价格范围</view>
+      <picker range="{{priceRanges}}" 
+              value="{{priceRangeIndex}}" 
+              bindchange="onPriceRangeChange">
+        <view class="filter-value">
+          <text>{{priceRanges[priceRangeIndex]}}</text>
+          <text class="filter-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    
+    <view class="filter-actions">
+      <button class="reset-button" bindtap="resetFilter">重置</button>
+    </view>
+  </view>
+  
+  <!-- 结果统计 -->
+  <view class="result-count">
+    共 {{projects.length}} 个项目
+    <text wx:if="{{projects.length < allProjects.length}}">
+      (筛选自{{allProjects.length}}个)
+    </text>
   </view>
 
   <view class="project-list">
@@ -36,19 +92,22 @@
         </view>
         <view class="project-actions">
           <button class="btn-edit" catchtap="onEditProject" data-id="{{item.id}}">编辑</button>
-          <button class="btn-delete" catchtap="onDeleteProject" data-id="{{item.id}}">删除</button>
+          <button class="btn-delete" catchtap="onDeleteProject" data-id="{{item.id}}" data-name="{{item.name}}">删除</button>
         </view>
       </view>
     </block>
-    <view class="empty-tip" wx:else>
+    
+    <!-- 无数据提示 -->
+    <view class="empty-tip" wx:if="{{projects.length === 0 && !isLoading}}">
       <view class="empty-icon">📋</view>
       <text>暂无项目数据</text>
-      <text class="empty-sub-tip">点击下方按钮添加项目</text>
+      <text class="empty-sub-tip">点击右上角"新增"添加项目</text>
     </view>
-  </view>
-
-  <view class="add-button" bindtap="onAddProject">
-    <text>+</text>
-    <text>添加项目</text>
+    
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="loading-icon"></view>
+      <text>加载中...</text>
+    </view>
   </view>
 </view> 

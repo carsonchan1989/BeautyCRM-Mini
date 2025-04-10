@@ -1,35 +1,58 @@
 <view class="container">
-  <view class="project-card">
-    <view class="header">
-      <view class="title">{{projectData.name}}</view>
-      <view class="category">{{projectData.category}}</view>
-    </view>
-
-    <view class="info-section">
-      <view class="info-item">
-        <text class="label">价格</text>
-        <text class="value price">¥{{projectData.price}}</text>
-      </view>
-
-      <view class="info-item">
-        <text class="label">时长</text>
-        <text class="value">{{projectData.duration}}分钟</text>
-      </view>
-    </view>
-
-    <view class="description-section">
-      <view class="section-title">项目描述</view>
-      <view class="description-content">{{projectData.description || '暂无描述'}}</view>
-    </view>
-
-    <view class="notes-section">
-      <view class="section-title">注意事项</view>
-      <view class="notes-content">{{projectData.notes || '暂无注意事项'}}</view>
-    </view>
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
   </view>
 
-  <view class="button-group">
-    <button class="btn-edit" bindtap="onEditProject">编辑项目</button>
-    <button class="btn-delete" bindtap="onDeleteProject">删除项目</button>
+  <!-- 错误信息 -->
+  <view class="error-container" wx:elif="{{errorMessage}}">
+    <icon type="warn" size="64"></icon>
+    <text class="error-text">{{errorMessage}}</text>
+    <button class="btn-retry" bindtap="loadProjectData" data-id="{{projectId}}">重试</button>
+  </view>
+
+  <!-- 项目详情内容 -->
+  <block wx:elif="{{projectData.name}}">
+    <view class="project-card">
+      <view class="header">
+        <view class="title">{{projectData.name}}</view>
+        <view class="category">{{projectData.category}}</view>
+      </view>
+
+      <view class="info-section">
+        <view class="info-item">
+          <text class="label">价格</text>
+          <text class="value price">¥{{projectData.price}}</text>
+        </view>
+
+        <view class="info-item">
+          <text class="label">时长</text>
+          <text class="value">{{projectData.duration}}分钟</text>
+        </view>
+      </view>
+
+      <view class="description-section">
+        <view class="section-title">项目描述</view>
+        <view class="description-content">{{projectData.description || '暂无描述'}}</view>
+      </view>
+
+      <view class="notes-section">
+        <view class="section-title">注意事项</view>
+        <view class="notes-content">{{projectData.notes || '暂无注意事项'}}</view>
+      </view>
+    </view>
+
+    <view class="button-group">
+      <button class="btn-edit" bindtap="onEditProject">编辑项目</button>
+      <button class="btn-delete" bindtap="onDeleteProject">删除项目</button>
+    </view>
+  </block>
+
+  <!-- 数据为空 -->
+  <view class="empty-container" wx:else>
+    <icon type="info" size="64" color="#999"></icon>
+    <text class="empty-text">未找到项目信息</text>
+    <button class="btn-back" bindtap="goBack">返回列表</button>
   </view>
 </view> 

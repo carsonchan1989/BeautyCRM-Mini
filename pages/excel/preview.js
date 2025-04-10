@@ -37,8 +37,12 @@ Page({
   fetchData: function (dataType) {
     logger.info(`正在获取${dataType}数据，页码：${this.data.currentPage}`);
     
+    wx.showLoading({
+      title: '加载中...'
+    });
+    
     wx.request({
-      url: `${this.data.serverUrl}/customers`,
+      url: apiConfig.getUrl(`/api/customers`),
       method: 'GET',
       data: {
         page: this.data.currentPage,
@@ -46,20 +50,78 @@ Page({
         data_type: dataType
       },
       success: (res) => {
+        logger.info(`获取数据响应: 状态码 ${res.statusCode}`);
+        
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          logger.info('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            logger.info(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'GET',
+              data: {
+                page: this.data.currentPage,
+                per_page: this.data.pageSize,
+                data_type: dataType
+              },
+              success: (redirectRes) => {
+                logger.info(`重定向请求响应: 状态码 ${redirectRes.statusCode}`);
+                if (redirectRes.statusCode === 200) {
+                  const items = redirectRes.data.items || [];
+                  const total = redirectRes.data.total || 0;
+                  
+                  logger.info(`数据获取成功: ${items.length}条记录，总计: ${total}`);
+                  
+                  this.setData({
+                    dataList: items,
+                    totalCount: total,
+                    hasMore: this.data.currentPage * this.data.pageSize < total,
+                    loading: false
+                  });
+                } else {
+                  logger.error('重定向后数据获取失败:', redirectRes);
+                  this.setData({
+                    loading: false,
+                    errorMessage: (redirectRes.data && redirectRes.data.error) || '数据加载失败'
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                logger.error('重定向请求失败:', redirectErr);
+                this.setData({
+                  loading: false,
+                  errorMessage: '重定向网络请求失败：' + (redirectErr.errMsg || JSON.stringify(redirectErr))
+                });
+              },
+              complete: () => {
+                wx.hideLoading();
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
         if (res.statusCode === 200) {
-          logger.info(`数据获取成功: ${res.data.items.length}条记录`);
+          const items = res.data.items || [];
+          const total = res.data.total || 0;
+          
+          logger.info(`数据获取成功: ${items.length}条记录，总计: ${total}`);
           
           this.setData({
-            dataList: res.data.items,
-            totalCount: res.data.total,
-            hasMore: this.data.currentPage * this.data.pageSize < res.data.total,
+            dataList: items,
+            totalCount: total,
+            hasMore: this.data.currentPage * this.data.pageSize < total,
             loading: false
           });
         } else {
           logger.error('数据获取失败:', res);
           this.setData({
             loading: false,
-            errorMessage: res.data.error || '数据加载失败'
+            errorMessage: (res.data && res.data.error) || '数据加载失败'
           });
         }
       },
@@ -69,6 +131,9 @@ Page({
           loading: false,
           errorMessage: '网络请求失败：' + (err.errMsg || JSON.stringify(err))
         });
+      },
+      complete: () => {
+        wx.hideLoading();
       }
     });
   },
@@ -114,12 +179,64 @@ Page({
     });
     
     wx.request({
-      url: `${this.data.serverUrl}/excel/export`,
+      url: apiConfig.getUrl(`/api/excel/export`),
       method: 'POST',
       data: {
         include_sections: [this.data.dataType]
       },
       success: (res) => {
+        logger.info(`导出响应: 状态码 ${res.statusCode}`);
+        
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          logger.info('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            logger.info(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'POST',
+              data: {
+                include_sections: [this.data.dataType]
+              },
+              success: (redirectRes) => {
+                wx.hideLoading();
+                logger.info(`重定向请求响应: 状态码 ${redirectRes.statusCode}`);
+                if (redirectRes.statusCode === 200) {
+                  logger.info('导出请求成功:', redirectRes.data);
+                  
+                  wx.showModal({
+                    title: '导出成功',
+                    content: `Excel文件已导出：${redirectRes.data.filename || '未知文件名'}`,
+                    showCancel: false
+                  });
+                } else {
+                  logger.error('重定向后导出失败:', redirectRes.data);
+                  
+                  wx.showModal({
+                    title: '导出失败',
+                    content: (redirectRes.data && redirectRes.data.error) || '导出过程中发生错误',
+                    showCancel: false
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                wx.hideLoading();
+                logger.error('重定向请求失败:', redirectErr);
+                
+                wx.showModal({
+                  title: '导出失败',
+                  content: '重定向请求失败：' + (redirectErr.errMsg || JSON.stringify(redirectErr)),
+                  showCancel: false
+                });
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
         wx.hideLoading();
         
         if (res.statusCode === 200) {
@@ -127,7 +244,7 @@ Page({
           
           wx.showModal({
             title: '导出成功',
-            content: `Excel文件已导出：${res.data.filename}`,
+            content: `Excel文件已导出：${res.data.filename || '未知文件名'}`,
             showCancel: false
           });
         } else {
@@ -135,7 +252,7 @@ Page({
           
           wx.showModal({
             title: '导出失败',
-            content: res.data.error || '导出过程中发生错误',
+            content: (res.data && res.data.error) || '导出过程中发生错误',
             showCancel: false
           });
         }
