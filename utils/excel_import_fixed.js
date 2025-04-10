@@ -1,5 +1,6 @@
 // 修复版Excel导入模块
 const app = getApp();
+const apiConfig = require('../config/api');
 
 /**
  * 导入Excel文件并处理消耗数据
@@ -42,9 +43,9 @@ function importExcelData(file) {
 function uploadExcelFile(file) {
   return new Promise((resolve, reject) => {
     wx.uploadFile({
-      url: `${app.globalData.apiBaseUrl}/api/excel/import`,
+      url: apiConfig.getUrl('/api/excel/import'),
       filePath: file.path,
-      name: 'excel_file',
+      name: 'file',
       success: function(res) {
         try {
           const data = JSON.parse(res.data);
@@ -72,7 +73,7 @@ function uploadExcelFile(file) {
 function processExcelData(fileUrl) {
   return new Promise((resolve, reject) => {
     wx.request({
-      url: `${app.globalData.apiBaseUrl}/api/excel/process`,
+      url: apiConfig.getUrl('/api/excel/process'),
       method: 'POST',
       data: {
         fileUrl: fileUrl,
@@ -124,9 +125,9 @@ function processExcelData(fileUrl) {
 function previewExcelData(file) {
   return new Promise((resolve, reject) => {
     wx.uploadFile({
-      url: `${app.globalData.apiBaseUrl}/api/excel/preview`,
+      url: apiConfig.getUrl('/api/excel/preview'),
       filePath: file.path,
-      name: 'excel_file',
+      name: 'file',
       success: function(res) {
         try {
           const data = JSON.parse(res.data);

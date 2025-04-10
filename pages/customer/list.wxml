@@ -120,14 +120,14 @@
     </view>
     
     <!-- 无数据提示 -->
-    <view class="empty-tip" wx:if="{{customers.length === 0 && !isLoading}}">
+    <view class="empty-tip" wx:if="{{customers.length === 0 && !loading}}">
       <icon type="info" size="60" color="#999"></icon>
       <text>暂无客户数据</text>
       <text class="sub-tip">点击右上角"新增"添加客户</text>
     </view>
     
     <!-- 加载状态 -->
-    <view class="loading-state" wx:if="{{isLoading}}">
+    <view class="loading-state" wx:if="{{loading}}">
       <view class="loading-icon"></view>
       <text>加载中...</text>
     </view>

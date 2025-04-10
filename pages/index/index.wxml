@@ -12,11 +12,11 @@
       <text class="refresh-text" bindtap="refreshStats">刷新</text>
     </view>
     <view class="stats-grid">
-      <view class="stats-item" bindtap="navigateToCustomerList">
+      <view class="stats-item" bindtap="onCustomerStatsTap">
         <text class="stats-number">{{customerCount || 0}}</text>
         <text class="stats-label">客户数量</text>
       </view>
-      <view class="stats-item" bindtap="navigateToProjectManagement">
+      <view class="stats-item" bindtap="onProjectStatsTap">
         <text class="stats-number">{{projectCount || 0}}</text>
         <text class="stats-label">项目数量</text>
       </view>
@@ -26,7 +26,7 @@
   
   <!-- 功能区域 -->
   <view class="function-grid">
-    <view class="function-item" bindtap="navigateToProjectManagement">
+    <view class="function-item" bindtap="navigateToProject">
       <view class="function-icon">📋</view>
       <text class="function-label">项目管理</text>
     </view>

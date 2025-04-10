@@ -64,7 +64,64 @@ function request(options) {
         // 处理HTTP状态码
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
-        } else {
+        } 
+        // 处理重定向状态码
+        else if (res.statusCode >= 300 && res.statusCode < 400) {
+          logger.info(`${method} ${url} 重定向:`, res.statusCode);
+          
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            logger.info(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method,
+              data,
+              header: headers,
+              timeout,
+              success: (redirectRes) => {
+                logger.info(`重定向请求响应:`, redirectRes.statusCode);
+                if (redirectRes.statusCode >= 200 && redirectRes.statusCode < 300) {
+                  resolve(redirectRes.data);
+                } else {
+                  const error = {
+                    code: redirectRes.statusCode,
+                    message: (redirectRes.data && redirectRes.data.error) || '重定向请求失败',
+                    data: redirectRes.data
+                  };
+                  
+                  logger.error(`重定向请求失败:`, error);
+                  reject(error);
+                }
+              },
+              fail: (redirectErr) => {
+                logger.error(`重定向请求错误:`, redirectErr);
+                reject({
+                  code: -1,
+                  message: redirectErr.errMsg || '重定向请求失败',
+                  err: redirectErr
+                });
+              }
+            });
+          } else {
+            // 如果没有获取到重定向URL，尝试直接返回响应数据
+            logger.info(`未找到重定向URL，尝试使用当前响应数据`);
+            if (res.data) {
+              resolve(res.data);
+            } else {
+              const error = {
+                code: res.statusCode,
+                message: '重定向但未找到目标URL',
+                data: res.data
+              };
+              
+              logger.error(`${method} ${url} 重定向处理失败:`, error);
+              reject(error);
+            }
+          }
+        }
+        else {
           const error = {
             code: res.statusCode,
             message: (res.data && res.data.error) || '请求失败',

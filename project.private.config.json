@@ -3,7 +3,28 @@
   "projectname": "BeautyCRM-Mini",
   "setting": {
     "compileHotReLoad": true,
-    "urlCheck": false
+    "urlCheck": false,
+    "bigPackageSizeSupport": false
   },
-  "libVersion": "3.7.12"
+  "libVersion": "3.8.0",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "客户列表",
+          "pathName": "pages/customer/list",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "客户详情",
+          "pathName": "pages/customer/detail",
+          "query": "id=1",
+          "launchMode": "default",
+          "scene": null
+        }
+      ]
+    }
+  }
 }

@@ -52,13 +52,71 @@ Page({
    * 加载客户数据
    */
   loadCustomerData() {
-    this.setData({ isLoading: true });
+    this.setData({ 
+      isLoading: true,
+      errorMessage: '' 
+    });
     
     // 从服务器API获取客户数据，而不是从本地DataStore
+    wx.showLoading({
+      title: '加载客户数据...'
+    });
+    
     wx.request({
       url: apiConfig.getUrl(apiConfig.paths.customer.list),
       method: 'GET',
       success: (res) => {
+        this.logger.info(`客户数据响应: 状态码 ${res.statusCode}`);
+        
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          this.logger.info('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            this.logger.info(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'GET',
+              success: (redirectRes) => {
+                this.logger.info(`重定向请求响应: 状态码 ${redirectRes.statusCode}`);
+                if (redirectRes.statusCode === 200) {
+                  // 直接使用API返回的items数组作为客户列表
+                  const customers = redirectRes.data.items || [];
+                  
+                  this.logger.info(`从重定向API加载了${customers.length}位客户数据`);
+                  
+                  this.setData({
+                    customers: customers,
+                    filteredCustomers: customers,
+                    isLoading: false,
+                    errorMessage: customers.length > 0 ? '' : '暂无客户数据'
+                  });
+                } else {
+                  this.logger.error('重定向后加载客户数据失败', redirectRes.data);
+                  this.setData({
+                    isLoading: false,
+                    errorMessage: '加载客户数据失败: ' + 
+                      (redirectRes.data && redirectRes.data.message ? redirectRes.data.message : '重定向请求失败')
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                this.logger.error('重定向请求错误:', redirectErr);
+                this.setData({
+                  isLoading: false,
+                  errorMessage: '网络请求失败: 重定向错误'
+                });
+              },
+              complete: () => {
+                wx.hideLoading();
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
         // 检查响应是否成功
         if (res.statusCode === 200) {
           // 直接使用API返回的items数组作为客户列表
@@ -69,13 +127,14 @@ Page({
           this.setData({
             customers: customers,
             filteredCustomers: customers,
-            isLoading: false
+            isLoading: false,
+            errorMessage: customers.length > 0 ? '' : '暂无客户数据'
           });
         } else {
           this.logger.error('从API加载客户数据失败', res.data);
           this.setData({
             isLoading: false,
-            errorMessage: '加载客户数据失败: ' + (res.data.message || '未知错误')
+            errorMessage: '加载客户数据失败: ' + (res.data && res.data.message ? res.data.message : '未知错误')
           });
         }
       },
@@ -85,6 +144,9 @@ Page({
           isLoading: false,
           errorMessage: '网络请求失败: ' + (err.errMsg || '未知错误')
         });
+      },
+      complete: () => {
+        wx.hideLoading();
       }
     });
   },
@@ -150,6 +212,77 @@ Page({
       url: apiConfig.getUrl(apiConfig.paths.service.list) + `?customer_id=${customerId}`,
       method: 'GET',
       success: (res) => {
+        this.logger.info(`消费记录响应: 状态码 ${res.statusCode}`);
+        
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          this.logger.info('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            this.logger.info(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'GET',
+              success: (redirectRes) => {
+                wx.hideLoading();
+                this.logger.info(`重定向请求响应: 状态码 ${redirectRes.statusCode}`);
+                if (redirectRes.statusCode === 200) {
+                  // 直接使用返回的items数组作为消费记录
+                  const consumptions = redirectRes.data.items || [];
+                  
+                  this.logger.info(`从重定向API加载了${consumptions.length}条消费记录`, { customerId });
+                  
+                  // 更新选中的客户
+                  this.setData({
+                    selectedCustomerId: customerId,
+                    selectedCustomer: {
+                      ...selectedCustomer,
+                      consumptions: consumptions
+                    }
+                  });
+                } else {
+                  this.logger.error('重定向后加载消费记录失败', redirectRes.data);
+                  
+                  // 即使消费记录失败，也更新客户信息
+                  this.setData({
+                    selectedCustomerId: customerId,
+                    selectedCustomer: {
+                      ...selectedCustomer,
+                      consumptions: []
+                    }
+                  });
+                  
+                  wx.showToast({
+                    title: '获取消费记录失败',
+                    icon: 'none'
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                wx.hideLoading();
+                this.logger.error('重定向请求错误:', redirectErr);
+                
+                // 即使请求失败，也更新客户信息
+                this.setData({
+                  selectedCustomerId: customerId,
+                  selectedCustomer: {
+                    ...selectedCustomer,
+                    consumptions: []
+                  }
+                });
+                
+                wx.showToast({
+                  title: '网络请求失败',
+                  icon: 'none'
+                });
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
         wx.hideLoading();
         
         if (res.statusCode === 200) {

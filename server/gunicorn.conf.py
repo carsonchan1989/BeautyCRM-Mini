@@ -18,14 +18,16 @@ keepalive = 2
 # 日志配置
 accesslog = "logs/access.log"
 errorlog = "logs/error.log"
-loglevel = "info"
+loglevel = "debug"
+capture_output = True
+enable_stdio_inheritance = True
 access_log_format = '%({x-real-ip}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
 # 进程名称
 proc_name = "beauty-crm"
 
 # 进程管理
-daemon = True  # 设置为后台运行
+daemon = False  # 暂时关闭守护进程模式
 pidfile = "beauty-crm.pid"
 umask = 0
 user = None
@@ -49,5 +51,10 @@ reload_engine = "auto"
 reload_extra_files = [
     "app.py",
     "models.py",
-    "wsgi.py"
+    "wsgi.py",
+    "api/customer_routes.py",
+    "api/excel_routes.py",
+    "api/project_routes.py",
+    "api/service_routes.py",
+    "utils/excel_processor.py"
 ]

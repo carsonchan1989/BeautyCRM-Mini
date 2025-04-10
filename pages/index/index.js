@@ -2,6 +2,7 @@
 const Logger = require('../../utils/logger')
 const apiConfig = require('../../config/api')
 
+// 确保Page调用是正确的
 Page({
   data: {
     // 功能模块
@@ -111,29 +112,82 @@ Page({
 
     // 调用API获取统计数据
     wx.request({
-      url: 'http://localhost:5000/api/customers/stats',
+      url: apiConfig.getUrl(apiConfig.paths.customer.stats),
       method: 'GET',
       success: function(res) {
-        console.log('统计数据返回:', res.data);
+        self.logger.info('统计数据返回:', res.data);
         
-        // 直接检查返回的数据结构中是否有total_customers字段
-        if(res.data && res.statusCode === 200 && res.data.success) {
-          self.setData({
-            customerCount: res.data.data.total_customers || 0,
-            projectCount: res.data.data.project_count || 0,
-            lastUpdate: self.formatDate(new Date())
-          });
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          self.logger.info('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            self.logger.info(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'GET',
+              success: (redirectRes) => {
+                self.logger.info(`重定向请求响应:`, redirectRes.statusCode);
+                if (redirectRes.statusCode === 200) {
+                  // 处理重定向后的成功响应
+                  self.processStatisticsData(redirectRes.data);
+                } else {
+                  self.logger.error('重定向请求失败', { 
+                    statusCode: redirectRes.statusCode,
+                    data: redirectRes.data 
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                self.logger.error('重定向请求错误', redirectErr);
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
+        // 处理不同格式的返回数据
+        if(res.statusCode === 200) {
+          self.processStatisticsData(res.data);
         } else {
-          console.error('获取统计数据失败，数据格式不正确:', res);
+          self.logger.error('获取统计数据失败，状态码:', res.statusCode);
         }
       },
       fail: function(err) {
-        console.error('统计数据请求失败:', err);
+        self.logger.error('统计数据请求失败:', err);
       },
       complete: function() {
         wx.hideLoading();
       }
     });
+  },
+  
+  // 处理统计数据
+  processStatisticsData(data) {
+    if(data && data.success && data.data) {
+      // 返回格式为 {success: true, data: {...}}
+      this.setData({
+        customerCount: data.data.total_customers || 0,
+        projectCount: data.data.project_count || 0,
+        lastUpdate: this.formatDate(new Date())
+      });
+    } else if(data && data.items) {
+      // 返回格式为 {items: [...], total: 3}
+      this.setData({
+        customerCount: data.total || 0,
+        projectCount: 0, // 项目数据可能需要单独请求
+        lastUpdate: this.formatDate(new Date())
+      });
+    } else if(data && typeof data === 'object') {
+      // 返回直接就是数据对象
+      this.setData({
+        customerCount: data.total_customers || data.customer_count || 0,
+        projectCount: data.project_count || 0,
+        lastUpdate: this.formatDate(new Date())
+      });
+    }
   },
   
   // 格式化日期
@@ -199,53 +253,52 @@ Page({
     this.navigateToProject();
   },
 
-  // 添加缺失的导航方法
-  // 项目管理
+  // 导航到项目管理
   navigateToProjectManagement() {
     wx.navigateTo({
       url: '/pages/project/list'
     });
   },
 
-  // Excel导入
+  // 导航到Excel导入
   navigateToExcelImport() {
     wx.navigateTo({
       url: '/pages/excel/import'
     });
   },
 
-  // 智能分析
+  // 导航到智能分析
   navigateToAnalysis() {
     wx.navigateTo({
       url: '/pages/report/report'
     });
   },
 
-  // 历史报告
+  // 导航到历史报告
   navigateToHistory() {
     wx.navigateTo({
       url: '/pages/history/history'
     });
   },
 
-  // 添加客户
+  // 导航到添加客户
   navigateToAddCustomer() {
     wx.navigateTo({
       url: '/pages/customer/add'
     });
   },
 
-  // 创建报告
+  // 导航到创建报告
   navigateToCreateReport() {
     wx.navigateTo({
       url: '/pages/report/create'
     });
   },
 
-  // 客户列表
+  // 导航到客户列表
   navigateToCustomerList() {
     wx.navigateTo({
       url: '/pages/customer/list'
     });
   }
-});
+})

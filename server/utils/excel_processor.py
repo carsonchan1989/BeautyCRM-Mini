@@ -194,35 +194,35 @@ class ExcelProcessor:
                     if sheet_name == '客户':
                         logger.info(f"尝试使用'{sheet_name}'Sheet页作为客户信息表")
                         df = excel_data[sheet_name]
-                        logger.info(f"'{sheet_name}'列名: {list(df.columns)}")
+                            logger.info(f"'{sheet_name}'列名: {list(df.columns)}")
                         customers = self._process_customers(df)
                         processed_data['customers'] = customers
                         logger.info(f"处理客户信息完成，共{len(customers)}条记录")
                         break
-                else:
+            else:
                     logger.warning("没有找到包含客户基本信息的Sheet页")
 
             # 处理健康档案sheet - 根据Excel中的表名调整
-            for sheet_name in sheet_names:
-                if '健康' in sheet_name or '档案' in sheet_name:
+                for sheet_name in sheet_names:
+                    if '健康' in sheet_name or '档案' in sheet_name:
                     logger.info(f"开始处理'{sheet_name}'Sheet页")
-                    df = excel_data[sheet_name]
+                        df = excel_data[sheet_name]
                     health_records = self._process_health_records(df)
                     processed_data['health_records'] = health_records
                     logger.info(f"处理健康档案完成，共{len(health_records)}条记录")
-                    break
+                        break
             else:
                 logger.warning("没有找到包含健康档案的Sheet页")
 
             # 处理消费记录sheet - 根据Excel中的表名调整
-            for sheet_name in sheet_names:
+                for sheet_name in sheet_names:
                 if '消费' in sheet_name and '记录' in sheet_name:
                     logger.info(f"开始处理'{sheet_name}'Sheet页")
-                    df = excel_data[sheet_name]
+                        df = excel_data[sheet_name]
                     consumptions = self._process_consumptions(df)
                     processed_data['consumptions'] = consumptions
                     logger.info(f"处理消费记录完成，共{len(consumptions)}条记录")
-                    break
+                        break
             else:
                 # 如果没有找到包含"消费记录"的Sheet页，尝试直接使用"消费"表
                 for sheet_name in sheet_names:
@@ -249,14 +249,14 @@ class ExcelProcessor:
                 logger.warning("没有找到包含服务记录的Sheet页")
 
             # 处理沟通记录sheet - 根据Excel中的表名调整
-            for sheet_name in sheet_names:
+                for sheet_name in sheet_names:
                 if '沟通' in sheet_name and '记录' in sheet_name:
                     logger.info(f"开始处理'{sheet_name}'Sheet页")
-                    df = excel_data[sheet_name]
+                        df = excel_data[sheet_name]
                     communications = self._process_communications(df)
                     processed_data['communications'] = communications
                     logger.info(f"处理沟通记录完成，共{len(communications)}条记录")
-                    break
+                        break
             else:
                 logger.warning("没有找到包含沟通记录的Sheet页")
 
@@ -355,7 +355,7 @@ class ExcelProcessor:
     def _process_health_records(self, df):
         """处理健康档案记录"""
         logger.info("开始处理健康档案记录")
-        
+
         # 检查头部行是否是标题
         if df.shape[0] > 0 and isinstance(df.iloc[0, 0], str) and ('客户ID' in df.iloc[0, 0] or 'ID' in df.iloc[0, 0]):
             logger.info("检测到第一行是标题行，将其作为新的列名")
@@ -384,7 +384,7 @@ class ExcelProcessor:
                 if field not in self.health_fields.values() and field not in ['customer_id', 'name']:
                     continue
                 
-                # 处理空值
+            # 处理空值
                 if pd.isna(value):
                     record[field] = None
                     continue
@@ -405,7 +405,7 @@ class ExcelProcessor:
     def _process_consumptions(self, df):
         """处理消费记录"""
         logger.info("开始处理消费记录")
-        
+
         # 检查头部行是否是标题
         if df.shape[0] > 0 and isinstance(df.iloc[0, 0], str) and ('客户ID' in df.iloc[0, 0] or 'ID' in df.iloc[0, 0]):
             logger.info("检测到第一行是标题行，将其作为新的列名")
@@ -434,7 +434,7 @@ class ExcelProcessor:
                 if field not in self.consumption_fields.values():
                     continue
                 
-                # 处理空值
+            # 处理空值
                 if pd.isna(value):
                     consumption[field] = None
                     continue
@@ -481,7 +481,7 @@ class ExcelProcessor:
                             consumption[field] = int(sessions_str)
                         elif isinstance(value, (int, float)):
                             consumption[field] = int(value)
-                        else:
+                else:
                             consumption[field] = int(value) if not pd.isna(value) else None
                         logger.info(f"提取总次数: 原始值 {value} -> {consumption[field]}")
                     except (ValueError, TypeError) as e:
@@ -621,7 +621,7 @@ class ExcelProcessor:
                                     departure_dt = datetime.strptime(departure_time, "%Y/%m/%d %H:%M")
                                 else:
                                     departure_dt = datetime.strptime(departure_time, "%Y-%m-%d %H:%M")
-                            else:
+                else:
                                 departure_dt = pd.to_datetime(departure_time).to_pydatetime()
                             
                             departure_time_obj = departure_dt
@@ -637,7 +637,7 @@ class ExcelProcessor:
                                 # 处理可能的"次"字符
                                 total_projects_str = total_projects.replace("次", "").strip()
                                 total_sessions = int(float(total_projects_str))
-                            else:
+                        else:
                                 total_sessions = int(total_projects)
                         except Exception as e:
                             logger.warning(f"解析总项目数出错 [{total_projects}]: {str(e)}")
@@ -694,7 +694,7 @@ class ExcelProcessor:
                                 if not pd.isna(price_val):
                                     try:
                                         unit_price = float(price_val)
-                                    except:
+                    except:
                                         logger.warning(f"解析项目金额出错 [{price_val}]")
                             
                             # 获取是否指定
@@ -704,7 +704,7 @@ class ExcelProcessor:
                                 if not pd.isna(specified_val):
                                     if isinstance(specified_val, str):
                                         is_specified = specified_val.strip() in ['✓', '√', '是', 'Yes', 'yes', 'TRUE', 'true', 'True', '1', 'Y', 'y']
-                                    else:
+                else:
                                         is_specified = bool(specified_val)
                             
                             # 使用有意义的字段名存储项目数据
@@ -749,13 +749,13 @@ class ExcelProcessor:
                     imported_services += 1
                     logger.info(f"创建服务记录: 客户ID={customer_id}, 项目数={len(service_items)}")
                 
-                except Exception as e:
+            except Exception as e:
                     logger.error(f"处理行 {row_idx} 时出错: {str(e)}")
                     logger.error(traceback.format_exc())
             
             logger.info(f"服务记录处理完成: 共处理 {imported_services} 条记录, {imported_items} 个服务项目")
             
-        except Exception as e:
+            except Exception as e:
             logger.error(f"处理服务记录时出错: {str(e)}")
             logger.error(traceback.format_exc())
         
@@ -922,7 +922,7 @@ class ExcelProcessor:
                     return self._parse_datetime(val)
             return None
             
-        if pd.isna(value):
+                if pd.isna(value):
             return None
             
         try:
@@ -944,7 +944,7 @@ class ExcelProcessor:
                 return pd.to_datetime(value).to_pydatetime()
             else:
                 return None
-        except Exception as e:
+            except Exception as e:
             logger.warning(f"处理日期时间异常: {str(e)}")
             return None
             

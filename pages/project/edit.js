@@ -1,3 +1,5 @@
+const apiConfig = require('../../config/api');
+
 Page({
   data: {
     projectId: null,
@@ -35,7 +37,7 @@ Page({
   loadCategories: function() {
     const self = this;
     wx.request({
-      url: 'http://localhost:5000/api/projects/categories',
+      url: apiConfig.getUrl(apiConfig.paths.project.categories),
       method: 'GET',
       success: function(res) {
         if (res.data && res.data.success && res.data.data.length > 0) {
@@ -65,19 +67,71 @@ Page({
     });
 
     wx.request({
-      url: `http://localhost:5000/api/projects/${id}`,
+      url: apiConfig.getUrl(apiConfig.paths.project.detail(id)),
       method: 'GET',
       success: function(res) {
-        if (res.data && res.data.success) {
-          const projectData = res.data.data;
-          const categoryIndex = self.data.categories.indexOf(projectData.category);
-          self.setData({
-            projectData: projectData,
-            categoryIndex: categoryIndex >= 0 ? categoryIndex : null
-          });
+        console.log('项目编辑加载响应:', res.statusCode);
+        
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          console.log('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            console.log(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'GET',
+              success: (redirectRes) => {
+                console.log(`重定向请求响应:`, redirectRes.statusCode);
+                if (redirectRes.statusCode === 200 && redirectRes.data && redirectRes.data.success) {
+                  // 处理重定向后的成功响应
+                  const projectData = redirectRes.data.data;
+                  const categoryIndex = self.data.categories.indexOf(projectData.category);
+                  self.setData({
+                    projectData: projectData,
+                    categoryIndex: categoryIndex >= 0 ? categoryIndex : null
+                  });
+                } else {
+                  wx.showToast({
+                    title: (redirectRes.data && redirectRes.data.message) || '重定向后请求失败',
+                    icon: 'none'
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                console.error('重定向请求错误:', redirectErr);
+                wx.showToast({
+                  title: '重定向请求失败',
+                  icon: 'none'
+                });
+              },
+              complete: function() {
+                wx.hideLoading();
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
+        if (res.statusCode === 200) {
+          if (res.data && res.data.success) {
+            const projectData = res.data.data;
+            const categoryIndex = self.data.categories.indexOf(projectData.category);
+            self.setData({
+              projectData: projectData,
+              categoryIndex: categoryIndex >= 0 ? categoryIndex : null
+            });
+          } else {
+            wx.showToast({
+              title: res.data.message || '加载失败',
+              icon: 'none'
+            });
+          }
         } else {
           wx.showToast({
-            title: res.data.message || '加载失败',
+            title: `加载失败 (${res.statusCode})`,
             icon: 'none'
           });
         }
@@ -174,22 +228,77 @@ Page({
 
     // 发送请求更新项目
     wx.request({
-      url: `http://localhost:5000/api/projects/${this.data.projectId}`,
+      url: apiConfig.getUrl(apiConfig.paths.project.update(this.data.projectId)),
       method: 'PUT',
       data: projectData,
       success: function(res) {
-        if (res.data && res.data.success) {
-          wx.showToast({
-            title: '更新成功',
-            icon: 'success'
-          });
-          // 返回上一页
-          setTimeout(() => {
-            wx.navigateBack();
-          }, 1500);
+        console.log('项目保存响应:', res.statusCode);
+        
+        // 处理状态码308的情况
+        if (res.statusCode === 308) {
+          console.log('收到308重定向响应');
+          // 获取重定向URL
+          const redirectUrl = res.header['Location'] || res.header['location'];
+          if (redirectUrl) {
+            console.log(`跟随重定向到: ${redirectUrl}`);
+            // 重新请求重定向URL
+            wx.request({
+              url: redirectUrl,
+              method: 'PUT',
+              data: projectData,
+              success: (redirectRes) => {
+                console.log(`重定向请求响应:`, redirectRes.statusCode);
+                if (redirectRes.statusCode === 200 && redirectRes.data && redirectRes.data.success) {
+                  // 处理重定向后的成功响应
+                  wx.showToast({
+                    title: '更新成功',
+                    icon: 'success'
+                  });
+                  // 返回上一页
+                  setTimeout(() => {
+                    wx.navigateBack();
+                  }, 1500);
+                } else {
+                  wx.showToast({
+                    title: (redirectRes.data && redirectRes.data.message) || '重定向后请求失败',
+                    icon: 'none'
+                  });
+                }
+              },
+              fail: (redirectErr) => {
+                console.error('重定向请求错误:', redirectErr);
+                wx.showToast({
+                  title: '重定向请求失败',
+                  icon: 'none'
+                });
+              },
+              complete: function() {
+                wx.hideLoading();
+              }
+            });
+            return; // 已处理重定向请求，提前返回
+          }
+        }
+        
+        if (res.statusCode === 200) {
+          if (res.data && res.data.success) {
+            wx.showToast({
+              title: '更新成功',
+              icon: 'success'
+            });
+            // 返回上一页
+            setTimeout(() => {
+              wx.navigateBack();
+            }, 1500);
+          } else {
+            wx.showToast({
+              title: res.data.message || '更新失败',
+              icon: 'none'
+            });
+          }
         } else {
           wx.showToast({
-            title: res.data.message || '更新失败',
+            title: `更新失败 (${res.statusCode})`,
             icon: 'none'
           });
         }
