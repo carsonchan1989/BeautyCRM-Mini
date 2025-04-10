@@ -1,11 +1,12 @@
 // app.js
 const Logger = require('./utils/logger')
+const apiConfig = require('./config/api')
 
 App({
   globalData: {
     userInfo: null,
     logger: null,
-    apiBaseUrl: 'http://localhost:5000/api' // API服务器地址，加上/api前缀
+    apiBaseUrl: apiConfig.getBaseUrl() // 使用apiConfig中的baseUrl
   },
   
   onLaunch() {
@@ -16,12 +17,22 @@ App({
     });
     
     this.globalData.logger.info('小程序启动');
+    this.globalData.logger.info('API地址:', this.globalData.apiBaseUrl);
     
-    // 获取系统信息
+    // 判断运行环境
     try {
       const systemInfo = wx.getSystemInfoSync();
       this.globalData.systemInfo = systemInfo;
-      this.globalData.logger.info('获取系统信息成功', systemInfo);
+      this.globalData.logger.info('运行环境:', systemInfo.platform);
+      this.globalData.logger.info('系统信息:', systemInfo.system);
+      this.globalData.logger.info('微信版本:', systemInfo.version);
+      
+      // 记录特定的网络信息
+      wx.getNetworkType({
+        success: (res) => {
+          this.globalData.logger.info('网络类型:', res.networkType);
+        }
+      });
     } catch (e) {
       this.globalData.logger.error('获取系统信息失败', e);
     }
