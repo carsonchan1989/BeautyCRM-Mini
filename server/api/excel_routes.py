@@ -425,14 +425,19 @@ def import_to_database(data):
                 if service_items_list:
                     logger.info(f"服务项目样例: {service_items_list[0]}")
                 
-                # 过滤服务记录主表字段
-                filtered_data = {k: v for k, v in service_data.items() if k in service_fields}
-                logger.info(f"过滤后的服务记录数据: {filtered_data.keys()}")
+                # 过滤服务记录主表字段并确保字段名称一致性
+                filtered_data = ensure_field_mapping_consistency(service_data, service_fields)
+                logger.info(f"过滤并映射后的服务记录数据: {filtered_data.keys()}")
                 
                 # 如果service_date为空，使用当前时间作为替代
                 if not filtered_data.get('service_date'):
                     logger.warning(f"服务记录缺少service_date字段，使用当前时间: {filtered_data}")
                     filtered_data['service_date'] = datetime.now()
+                
+                # 确保satisfaction_rating字段存在
+                if 'satisfaction' in service_data and 'satisfaction_rating' not in filtered_data:
+                    filtered_data['satisfaction_rating'] = service_data['satisfaction']
+                    logger.info(f"修正满意度字段: satisfaction -> satisfaction_rating")
                 
                 # 检查是否已存在相同服务记录（相同客户、相同日期）
                 existing_service = Service.query.filter_by(
@@ -472,61 +477,36 @@ def import_to_database(data):
                 # 处理服务项目 - 无论是更新还是创建服务记录
                 if service_items_list and service_record:
                     # 获取现有服务项目
-                    existing_items = {}
-                    if service_record.service_id:
-                        for item in ServiceItem.query.filter_by(service_id=service_record.service_id).all():
-                            key = (item.project_name, item.beautician_name)
-                            existing_items[key] = item
+                    existing_items = ServiceItem.query.filter_by(service_id=service_record.service_id).all()
                     
-                    # 处理每个服务项目
-                    for item_idx, item_data in enumerate(service_items_list):
-                        try:
-                            # 确保所有必要字段存在
-                            if 'project_name' not in item_data or not item_data.get('project_name'):
-                                logger.warning(f"服务项目 {item_idx+1} 缺少project_name字段，跳过: {item_data}")
-                                result['skipped']['service_items'] += 1
-                                continue
-                            
-                            # 准备服务项目数据
-                            service_item_data = {
-                                'service_id': service_record.service_id,
-                                'project_name': item_data['project_name'].strip(),
-                                'beautician_name': item_data.get('beautician_name', '').strip(),
-                                'unit_price': float(item_data.get('unit_price', 0)),
-                                'is_specified': bool(item_data.get('is_specified', False))
-                            }
-                            
-                            # 创建查找键
-                            item_key = (service_item_data['project_name'], service_item_data['beautician_name'])
-                            
-                            # 检查是否已存在相同服务项目
-                            if item_key in existing_items:
-                                # 更新已存在的项目
-                                existing_item = existing_items[item_key]
-                                for key, value in service_item_data.items():
-                                    if hasattr(existing_item, key) and value is not None:
-                                        setattr(existing_item, key, value)
-                                logger.info(f"更新服务项目: {item_key}")
-                            else:
-                                # 创建新的服务项目
-                                service_item = ServiceItem(**service_item_data)
-                                db.session.add(service_item)
-                                logger.info(f"创建新服务项目: {item_key}")
-                            
-                            result['service_items'] += 1
-                        except Exception as e:
-                            logger.error(f"处理服务项目 {item_idx+1} 时出错: {str(e)}")
-                            logger.error(f"项目数据: {item_data}")
-                            result['errors'].append(f"服务项目错误: {str(e)}")
-                            result['skipped']['service_items'] += 1
+                    # 如果存在服务项目，先删除
+                    if existing_items:
+                        for item in existing_items:
+                            db.session.delete(item)
                     
-                    # 更新服务记录的总项目数
-                    if service_record:
-                        # 重新查询关联的服务项目
-                        items_count = ServiceItem.query.filter_by(service_id=service_record.service_id).count()
-                        if items_count > 0 and (not service_record.total_sessions or service_record.total_sessions < items_count):
-                            service_record.total_sessions = items_count
-                            logger.info(f"更新服务记录总项目数: {items_count}")
+                    # 添加新的服务项目
+                    for item_data in service_items_list:
+                        # 确保字段名称一致性
+                        item_filtered_data = ensure_field_mapping_consistency(item_data, service_item_fields)
+                        
+                        # 记录服务项目数据映射
+                        logger.info(f"服务项目字段映射: 原始字段={list(item_data.keys())}, 映射后字段={list(item_filtered_data.keys())}")
+                        
+                        # 设置service_id
+                        item_filtered_data['service_id'] = service_record.service_id
+                        
+                        # 确保beautician_name字段存在
+                        if 'beautician' in item_data and 'beautician_name' not in item_filtered_data:
+                            item_filtered_data['beautician_name'] = item_data['beautician']
+                        
+                        # 确保unit_price字段存在
+                        if 'service_amount' in item_data and 'unit_price' not in item_filtered_data:
+                            item_filtered_data['unit_price'] = item_data['service_amount']
+                        
+                        # 创建新服务项目
+                        service_item = ServiceItem(**item_filtered_data)
+                        db.session.add(service_item)
+                        result['service_items'] += 1
             except Exception as e:
                 logger.error(f"处理服务记录时出错: {str(e)}")
                 result['errors'].append(f"服务记录错误: {str(e)}")
@@ -811,3 +791,52 @@ def export_communications(customer_ids):
     df = df[cols]
     
     return df
+
+def ensure_field_mapping_consistency(data_dict, model_fields, field_mapping=None):
+    """
+    确保字段名称与数据库模型保持一致性的中间件函数
+    
+    Args:
+        data_dict: 要处理的数据字典
+        model_fields: 数据库模型的字段列表
+        field_mapping: 可选的字段映射字典，用于重命名字段
+        
+    Returns:
+        修正后的数据字典，只包含模型中存在的字段
+    """
+    if not data_dict:
+        return {}
+        
+    # 标准化字段映射
+    standard_mappings = {
+        'satisfaction': 'satisfaction_rating',
+        'service_items': 'project_name',
+        'beautician': 'beautician_name',
+        'service_amount': 'unit_price',
+        'comm_time': 'communication_date',
+        'comm_location': 'communication_location',
+        'comm_content': 'communication_content',
+        'staff': 'staff_name'
+    }
+    
+    # 合并自定义映射
+    if field_mapping:
+        standard_mappings.update(field_mapping)
+    
+    # 应用字段映射转换
+    result = {}
+    for key, value in data_dict.items():
+        # 如果字段需要重命名
+        mapped_key = standard_mappings.get(key, key)
+        
+        # 只保留模型中存在的字段
+        if mapped_key in model_fields:
+            result[mapped_key] = value
+        elif key in model_fields:
+            # 如果原始键在模型中，也保留
+            result[key] = value
+    
+    logger.debug(f"字段映射转换前: {list(data_dict.keys())}")
+    logger.debug(f"字段映射转换后: {list(result.keys())}")
+    
+    return result

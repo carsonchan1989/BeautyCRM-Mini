@@ -128,11 +128,12 @@ class ExcelProcessor:
             '到店时间': 'service_date',  # 更新为与数据库模型匹配的字段名
             '离店时间': 'departure_time',
             '总耗卡金额': 'total_amount',  # 更新为与数据库模型匹配的字段名
-            '服务满意度': 'satisfaction',
-            '项目内容': 'service_items',  # 更新为与数据库模型匹配的字段名
-            '操作美容师': 'beautician',  # 更新为与数据库模型匹配的字段名
-            '耗卡金额': 'service_amount',  # 更新为与数据库模型匹配的字段名
-            '是否指定': 'is_specified'
+            '服务满意度': 'satisfaction_rating',  # 更新为与数据库模型匹配的字段名
+            '项目内容': 'project_name',  # 更新为与数据库模型匹配的字段名
+            '操作美容师': 'beautician_name',  # 更新为与数据库模型匹配的字段名
+            '耗卡金额': 'unit_price',  # 更新为与数据库模型匹配的字段名
+            '是否指定': 'is_specified',
+            '总次数': 'total_sessions'  # 添加总次数字段
         }
 
         # 沟通记录表模板字段映射 - 根据"模拟-客户信息档案.xlsx"中的沟通记录表格式
@@ -529,6 +530,7 @@ class ExcelProcessor:
             # 记录DataFrame的形状和原始列名
             logger.info(f"DataFrame形状: {df.shape}")
             logger.info(f"原始列名: {list(df.columns)}")
+            logger.info(f"服务记录字段映射: {self.service_fields}")
             
             # 直接使用原始数据(不使用pandas默认的列名处理)
             # 创建一个没有预设标题行的数据框
@@ -546,6 +548,7 @@ class ExcelProcessor:
                     header_row = i
                     data_start_row = i + 1
                     logger.info(f"找到标题行: 第{header_row+1}行, 数据从第{data_start_row+1}行开始")
+                    logger.info(f"标题行内容: {row_values}")
                     break
             
             if header_row is None:
@@ -715,6 +718,13 @@ class ExcelProcessor:
                                 'is_specified': is_specified
                             }
                             
+                            # 记录详细的项目数据转换过程
+                            logger.info(f"项目数据转换: Excel项目 -> 数据库模型")
+                            logger.info(f"  - 项目名称: '{project_name_val}' -> 'project_name': '{project_name}'")
+                            logger.info(f"  - 美容师: '{beautician_val if not pd.isna(beautician_val) else 'N/A'}' -> 'beautician_name': '{beautician_name}'")
+                            logger.info(f"  - 金额: '{price_val if not pd.isna(price_val) else 'N/A'}' -> 'unit_price': {unit_price}")
+                            logger.info(f"  - 是否指定: '{specified_val if not pd.isna(specified_val) else 'N/A'}' -> 'is_specified': {is_specified}")
+
                             service_items.append(service_item)
                             
                             imported_items += 1
@@ -740,10 +750,21 @@ class ExcelProcessor:
                         'departure_time': departure_time_obj,
                         'total_amount': total_amount,
                         'total_sessions': total_sessions,
-                        'satisfaction': satisfaction,
+                        'satisfaction_rating': satisfaction,
                         'service_items': service_items
                     }
                     
+                    # 记录服务记录的字段和值
+                    logger.info(f"服务记录字段映射结果:")
+                    logger.info(f"  - customer_id: {customer_id}")
+                    logger.info(f"  - name: {customer_name}")
+                    logger.info(f"  - service_date: {service_date}")
+                    logger.info(f"  - departure_time: {departure_time_obj}")
+                    logger.info(f"  - total_amount: {total_amount}")
+                    logger.info(f"  - total_sessions: {total_sessions}")
+                    logger.info(f"  - satisfaction_rating: {satisfaction}")
+                    logger.info(f"  - service_items: {len(service_items)} 项")
+
                     services.append(service_record)
                     
                     imported_services += 1

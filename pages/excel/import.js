@@ -208,6 +208,45 @@ Page({
 
     const file = this.data.fileList[0];
     logger.info('开始上传文件:', file.name);
+    
+    // 验证文件格式
+    if (!/\.(xlsx|xls)$/i.test(file.name)) {
+      this.setData({
+        errorMessage: '请选择正确的Excel文件格式(.xlsx或.xls)'
+      });
+      return;
+    }
+    
+    // 验证文件大小
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      this.setData({
+        errorMessage: '文件过大，请控制在10MB以内'
+      });
+      return;
+    }
+    
+    // 验证预检查是否完成
+    if (!this.data.importResult || !this.data.importResult.preCheckResult) {
+      this.setData({
+        errorMessage: '请先通过文件预检查'
+      });
+      return;
+    }
+    
+    // 检查必要的Sheet页是否存在
+    const requiredSheets = ['客户', '健康档案', '消费记录', '服务记录'];
+    const foundSheets = this.data.importResult.sheets.map(sheet => sheet.name);
+    const missingSheets = requiredSheets.filter(sheet => 
+      !foundSheets.some(name => name.includes(sheet))
+    );
+    
+    if (missingSheets.length > 0) {
+      this.setData({
+        errorMessage: `Excel文件缺少必要的Sheet页: ${missingSheets.join(', ')}`
+      });
+      return;
+    }
 
     this.setData({
       uploading: true,
