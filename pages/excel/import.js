@@ -251,10 +251,21 @@ Page({
     const importUrl = apiConfig.getUrl(apiConfig.paths.excel.import);
     logger.info('上传文件到:', importUrl);
 
-    // 添加调试信息到表单
-    const formData = {};
+    // 添加关键处理参数到表单，与测试脚本保持一致
+    const formData = {
+      process_type: 'full',       // 指定完整处理流程
+      map_services: 'true',       // 启用服务记录映射
+      clean_data: 'true',         // 启用数据清洗
+      map_beauticians: 'true',    // 启用美容师映射
+      validate_fields: 'true',    // 验证字段有效性
+      handle_missing: 'soft',     // 对缺失值使用软处理
+      detect_sheet_names: 'true'  // 自动检测Sheet名称
+    };
+    
+    // 添加调试信息
     if (this.data.debugMode) {
       formData.debug = 'true';
+      logger.info('表单数据:', JSON.stringify(formData));
     }
 
     wx.uploadFile({
@@ -279,7 +290,8 @@ Page({
               ...this.data.debugInfo, 
               statusCode: res.statusCode,
               responseHeaders: res.header,
-              responseLength: res.data ? res.data.length : 0
+              responseLength: res.data ? res.data.length : 0,
+              requestParams: formData
             }
           });
         }
