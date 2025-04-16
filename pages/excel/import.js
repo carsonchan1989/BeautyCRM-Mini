@@ -235,7 +235,8 @@ Page({
     }
     
     // 检查必要的Sheet页是否存在
-    const requiredSheets = ['客户', '健康档案', '消费记录', '服务记录'];
+    const requiredSheets = ['客户']; // 仅要求客户表必须存在
+    const optionalSheets = ['健康档案', '消费记录', '服务记录', '沟通记录']; // 其他表为可选
     const foundSheets = this.data.importResult.sheets.map(sheet => sheet.name);
     const missingSheets = requiredSheets.filter(sheet => 
       !foundSheets.some(name => name && typeof name === 'string' && name.includes(sheet))
@@ -243,9 +244,18 @@ Page({
     
     if (missingSheets.length > 0) {
       this.setData({
-        errorMessage: `Excel文件缺少必要的Sheet页: ${missingSheets.join(', ')}`
+        errorMessage: `Excel文件缺少必要的Sheet页: ${missingSheets.join(', ')}，至少需要包含客户信息表`
       });
       return;
+    }
+
+    // 检查并提示缺少的可选Sheet页
+    const missingOptional = optionalSheets.filter(sheet => 
+      !foundSheets.some(name => name && typeof name === 'string' && name.includes(sheet))
+    );
+    
+    if (missingOptional.length > 0) {
+      logger.info(`Excel文件缺少可选的Sheet页: ${missingOptional.join(', ')}，但不影响导入`);
     }
 
     this.setData({
