@@ -10,6 +10,7 @@ from flask import Blueprint, request, jsonify, send_file, current_app
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import uuid
+import inspect
 
 from utils.excel_processor import ExcelProcessor
 # 修复导入路径问题，直接从models模块导入
@@ -451,9 +452,17 @@ def import_to_database(data):
         else:
             logger.info("未找到消费记录数据，跳过消费记录导入")
         
-        # 导入服务记录 - 可选
+        # 处理服务记录 - 可选
         if data['services'] and len(data['services']) > 0:
             logger.info(f"开始导入服务记录，共{len(data['services'])}条")
+            
+            # 获取可用的字段列表
+            service_fields = [column.name for column in inspect(Service).columns]
+            service_item_fields = [column.name for column in inspect(ServiceItem).columns]
+            
+            logger.info(f"Service字段: {service_fields}")
+            logger.info(f"ServiceItem字段: {service_item_fields}")
+            
             for service_data in data['services']:
                 try:
                     # 跳过标题行或无效数据
@@ -461,29 +470,29 @@ def import_to_database(data):
                         result['skipped']['services'] += 1
                         continue
                     
-                    # 提取服务项目列表
-                    service_items_list = service_data.pop('service_items', []) if isinstance(service_data.get('service_items'), list) else []
+                    # 检查是否有service_date，如果没有则跳过
+                    if 'service_date' not in service_data or not service_data['service_date']:
+                        logger.warning(f"跳过缺少service_date的服务记录: {service_data}")
+                        result['skipped']['services'] += 1
+                        continue
                     
-                    # 记录服务项目数据
-                    logger.info(f"服务项目列表大小: {len(service_items_list)}")
-                    if service_items_list:
-                        logger.info(f"服务项目样例: {service_items_list[0]}")
+                    # 从service_items提取，随后在创建ServiceItem时使用
+                    service_items_list = service_data.pop('service_items', [])
                     
-                    # 过滤服务记录主表字段并确保字段名称一致性
-                    filtered_data = ensure_field_mapping_consistency(service_data, service_fields)
-                    logger.info(f"过滤并映射后的服务记录数据: {filtered_data.keys()}")
+                    # 过滤字段 - 仅保留模型中存在的字段
+                    filtered_data = {k: v for k, v in service_data.items() if k in service_fields}
+                    logger.info(f"过滤后的服务记录数据: {filtered_data.keys()}")
                     
-                    # 如果service_date为空，使用当前时间作为替代
-                    if not filtered_data.get('service_date'):
-                        logger.warning(f"服务记录缺少service_date字段，使用当前时间: {filtered_data}")
-                        filtered_data['service_date'] = datetime.now()
+                    # 修复字段名称差异
+                    # 客户名称映射
+                    if 'customer_name' not in filtered_data and 'name' in service_data:
+                        filtered_data['customer_name'] = service_data['name']
                     
-                    # 确保satisfaction_rating字段存在
-                    if 'satisfaction' in service_data and 'satisfaction_rating' not in filtered_data:
-                        filtered_data['satisfaction_rating'] = service_data['satisfaction']
-                        logger.info(f"修正满意度字段: satisfaction -> satisfaction_rating")
+                    # 满意度字段映射
+                    if 'satisfaction' not in filtered_data and 'satisfaction_rating' in service_data:
+                        filtered_data['satisfaction'] = service_data['satisfaction_rating']
                     
-                    # 检查是否已存在相同服务记录（相同客户、相同日期）
+                    # 检查是否已存在相同的服务记录
                     existing_service = Service.query.filter_by(
                         customer_id=filtered_data['customer_id'],
                         service_date=filtered_data['service_date']
@@ -506,9 +515,14 @@ def import_to_database(data):
                             service_id = f"S{uuid.uuid4().hex[:10].upper()}"
                             filtered_data['service_id'] = service_id
                         
-                        # 复制客户姓名到service记录
-                        if 'name' in service_data and not filtered_data.get('customer_name'):
-                            filtered_data['customer_name'] = service_data['name']
+                        # 确保customer_name字段存在
+                        if 'customer_name' not in filtered_data:
+                            # 尝试从Customer表中获取客户名称
+                            customer = Customer.query.get(filtered_data['customer_id'])
+                            if customer:
+                                filtered_data['customer_name'] = customer.name
+                            else:
+                                filtered_data['customer_name'] = f"客户{filtered_data['customer_id']}"
                         
                         # 创建新服务记录
                         service_record = Service(**filtered_data)
@@ -531,7 +545,7 @@ def import_to_database(data):
                         # 添加新的服务项目
                         for item_data in service_items_list:
                             # 确保字段名称一致性
-                            item_filtered_data = ensure_field_mapping_consistency(item_data, service_item_fields)
+                            item_filtered_data = {k: v for k, v in item_data.items() if k in service_item_fields}
                             
                             # 记录服务项目数据映射
                             logger.info(f"服务项目字段映射: 原始字段={list(item_data.keys())}, 映射后字段={list(item_filtered_data.keys())}")
@@ -539,18 +553,39 @@ def import_to_database(data):
                             # 设置service_id
                             item_filtered_data['service_id'] = service_record.service_id
                             
-                            # 确保beautician_name字段存在
-                            if 'beautician' in item_data and 'beautician_name' not in item_filtered_data:
+                            # 字段名称修正和默认值设置
+                            
+                            # 美容师字段映射
+                            if 'beautician_name' not in item_filtered_data and 'beautician' in item_data:
                                 item_filtered_data['beautician_name'] = item_data['beautician']
                             
-                            # 确保unit_price字段存在
-                            if 'service_amount' in item_data and 'unit_price' not in item_filtered_data:
+                            # 金额字段映射 - 确保两种金额字段都有值
+                            if 'unit_price' not in item_filtered_data and 'card_deduction' in item_data:
+                                item_filtered_data['unit_price'] = item_data['card_deduction']
+                            elif 'card_deduction' not in item_filtered_data and 'unit_price' in item_data:
+                                item_filtered_data['card_deduction'] = item_data['unit_price']
+                            elif 'unit_price' not in item_filtered_data and 'service_amount' in item_data:
                                 item_filtered_data['unit_price'] = item_data['service_amount']
+                                item_filtered_data['card_deduction'] = item_data['service_amount']
+                            
+                            # 指定状态字段
+                            if 'is_specified' not in item_filtered_data:
+                                item_filtered_data['is_specified'] = False
+                            
+                            # 数量字段
+                            if 'quantity' not in item_filtered_data:
+                                item_filtered_data['quantity'] = 1
+                            
+                            # 确保项目名称存在
+                            if 'project_name' not in item_filtered_data:
+                                continue  # 没有项目名称则跳过
                             
                             # 创建新服务项目
                             service_item = ServiceItem(**item_filtered_data)
                             db.session.add(service_item)
                             result['service_items'] += 1
+                            
+                            logger.info(f"创建服务项目: {item_filtered_data.get('project_name')} - {item_filtered_data.get('beautician_name')} - {item_filtered_data.get('unit_price')}")
                 except Exception as e:
                     logger.error(f"处理服务记录时出错: {str(e)}")
                     result['errors'].append(f"服务记录错误: {str(e)}")

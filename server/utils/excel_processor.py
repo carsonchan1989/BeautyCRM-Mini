@@ -54,97 +54,199 @@ class ExcelProcessor:
     def __init__(self):
         # 客户表模板字段映射 - 根据"模拟-客户信息档案.xlsx"中的客户表格式
         self.customer_fields = {
-            '客户ID': 'id',  # 直接使用Excel中的客户ID
+            # 基本信息
+            '客户ID': 'id',
+            'ID': 'id',
             '姓名': 'name',
             '性别': 'gender',
             '年龄': 'age',
-            '门店归属': 'store',
+            '归属门店': 'store',
+            '门店': 'store',
+            '手机号': 'phone',
+            '会员等级': 'memberLevel',
+            
+            # 地区和居住信息
             '籍贯': 'hometown',
             '现居地': 'residence',
             '居住时长': 'residence_years',
+            
+            # 家庭信息
             '家庭成员构成': 'family_structure',
             '家庭人员年龄分布': 'family_age_distribution',
             '家庭居住情况': 'living_condition',
+            
+            # 个性和习惯
             '性格类型标签': 'personality_tags',
             '消费决策主导': 'consumption_decision',
-            '风险敏感度': 'risk_sensitivity',
             '兴趣爱好': 'hobbies',
             '作息规律': 'routine',
             '饮食偏好': 'diet_preference',
-            '生理期': 'menstrual_record',
-            '家族遗传病史': 'family_medical_history',
+            
+            # 工作信息
             '职业': 'occupation',
             '单位性质': 'work_unit_type',
-            '年收入': 'annual_income'
+            '年收入': 'annual_income',
+            '工作性质': 'work_nature',
+            
+            # 备注信息
+            '备注': 'remark',
+            '创建时间': 'created_at',
+            '更新时间': 'updated_at'
         }
-
-        # 健康档案表模板字段映射 - 根据"模拟-客户信息档案.xlsx"中的健康档案表格式
+        
+        # 健康记录模板字段映射
         self.health_fields = {
-            '客户ID': 'customer_id',  # 关联到客户表的ID
-            '姓名': 'name',  # 增加姓名字段用于交叉验证
+            '客户ID': 'customer_id',
+            'ID': 'customer_id',
+            
+            # 皮肤状况
             '肤质类型': 'skin_type',
-            '水油情况': 'oil_water_balance',  # 更新为与数据库模型匹配的字段名
-            '毛孔与黑头': 'pores_blackheads',  # 更新为与数据库模型匹配的字段名
-            '皱纹与纹理': 'wrinkles_texture',  # 更新为与数据库模型匹配的字段名
-            '色素沉着': 'pigmentation',  # 更新为与数据库模型匹配的字段名
-            '光老化与炎症': 'photoaging_inflammation',  # 更新为与数据库模型匹配的字段名
-            '中医体质类型': 'tcm_constitution',
-            '舌象特征': 'tongue_features',  # 更新为与数据库模型匹配的字段名
-            '脉象数据': 'pulse_data',  # 更新为与数据库模型匹配的字段名
-            '作息规律': 'sleep_routine',
-            '运动频率及类型': 'exercise_pattern',
-            '饮食禁忌/偏好': 'diet_restrictions',  # 更新为与数据库模型匹配的字段名
-            '护理时间灵活度': 'care_time_flexibility',  # 更新为与数据库模型匹配的字段名
-            '手法力度偏好': 'massage_pressure_preference',  # 更新为与数据库模型匹配的字段名
-            '环境氛围要求': 'environment_requirements',
+            '水油平衡': 'oil_water_balance',
+            '毛孔与黑头': 'pores_blackheads',
+            '皱纹与纹理': 'wrinkles_texture',
+            '色素沉着': 'pigmentation',
+            '光老化与炎症': 'photoaging_inflammation',
+            
+            # 中医体质
+            '体质类型': 'tcm_constitution',
+            '舌象特征': 'tongue_features',
+            '脉象数据': 'pulse_data',
+            
+            # 生活习惯
+            '睡眠规律': 'sleep_routine',
+            '运动模式': 'exercise_pattern',
+            '饮食禁忌': 'diet_restrictions',
+            
+            # 护理需求
+            '护理时间灵活度': 'care_time_flexibility',
+            '手法力度偏好': 'massage_pressure_preference',
+            '环境要求': 'environment_requirements',
+            
+            # 美容健康目标
             '短期美丽目标': 'short_term_beauty_goal',
             '长期美丽目标': 'long_term_beauty_goal',
             '短期健康目标': 'short_term_health_goal',
             '长期健康目标': 'long_term_health_goal',
-            '医美操作史': 'medical_cosmetic_history',  # 更新为与数据库模型匹配的字段名
-            '大健康服务史': 'wellness_service_history',  # 更新为与数据库模型匹配的字段名
-            '重大疾病历史': 'major_disease_history',
-            '过敏史': 'allergies'  # 更新为与数据库模型匹配的字段名
+            
+            # 健康记录
+            '医美操作史': 'medical_cosmetic_history',
+            '大健康服务史': 'wellness_service_history',
+            '过敏史': 'allergies',
+            '重大疾病史': 'major_disease_history',
+            
+            '备注': 'remark',
+            '创建时间': 'created_at',
+            '更新时间': 'updated_at'
         }
-
-        # 消费记录表模板字段映射 - 根据"模拟-客户信息档案.xlsx"中的消费表格式
+        
+        # 消费记录模板字段映射
         self.consumption_fields = {
-            '客户ID': 'customer_id',  # 关联到客户表的ID
-            '姓名': 'name',  # 增加姓名字段用于交叉验证
-            '消费时间': 'date',
-            '日期': 'date',  # 增加日期字段别名匹配
-            '项目名称': 'project_name',  # 更新为与数据库模型匹配的字段名
+            '客户ID': 'customer_id',
+            'ID': 'customer_id',
+            '日期': 'date',
+            '消费日期': 'date',
+            '购买日期': 'date',
+            '项目名称': 'project_name',
+            '品项名称': 'project_name',
+            '项目': 'project_name',
+            '金额': 'amount',
             '消费金额': 'amount',
+            '购买金额': 'amount',
             '支付方式': 'payment_method',
-            '总次数': 'total_sessions',  # 更新为与数据库模型匹配的字段名
+            '总次数': 'total_sessions',
+            '购买次数': 'total_sessions',
+            '次数': 'total_sessions',
             '耗卡完成时间': 'completion_date',
-            '项目满意度': 'satisfaction'
+            '预计完成日期': 'completion_date',
+            '完成日期': 'completion_date',
+            '满意度': 'satisfaction',
+            '服务满意度': 'satisfaction',
+            '备注': 'remark',
+            '操作人员': 'operator',
+            '创建时间': 'created_at',
+            '更新时间': 'updated_at'
         }
-
-        # 服务记录表模板字段映射 - 根据"模拟-客户信息档案.xlsx"中的消耗表格式
+        
+        # 服务记录模板字段映射 - 用于处理服务消耗记录
         self.service_fields = {
-            '客户ID': 'customer_id',  # 关联到客户表的ID
-            '姓名': 'name',  # 增加姓名字段用于交叉验证
-            '到店时间': 'service_date',  # 更新为与数据库模型匹配的字段名
+            '客户ID': 'customer_id',
+            'ID': 'customer_id',
+            '客户姓名': 'customer_name',
+            '姓名': 'customer_name',
+            '服务ID': 'service_id',
+            '服务时间': 'service_date',
+            '到店时间': 'service_date',
+            '进店时间': 'service_date',
             '离店时间': 'departure_time',
-            '总耗卡金额': 'total_amount',  # 更新为与数据库模型匹配的字段名
-            '服务满意度': 'satisfaction_rating',  # 更新为与数据库模型匹配的字段名
-            '项目内容': 'project_name',  # 更新为与数据库模型匹配的字段名
-            '操作美容师': 'beautician_name',  # 更新为与数据库模型匹配的字段名
-            '耗卡金额': 'unit_price',  # 更新为与数据库模型匹配的字段名
-            '是否指定': 'is_specified',
-            '总次数': 'total_sessions'  # 添加总次数字段
+            '完成时间': 'departure_time',
+            '总金额': 'total_amount',
+            '耗卡金额': 'total_amount',
+            '消耗金额': 'total_amount',
+            '总次数': 'total_sessions',
+            '项目数': 'total_sessions',
+            '消耗次数': 'total_sessions',
+            '支付方式': 'payment_method',
+            '操作人员': 'operator',
+            '满意度': 'satisfaction',
+            '服务满意度': 'satisfaction',
+            '备注': 'remark',
+            '备注信息': 'remark',
+            '创建时间': 'created_at',
+            '更新时间': 'updated_at'
         }
-
-        # 沟通记录表模板字段映射 - 根据"模拟-客户信息档案.xlsx"中的沟通记录表格式
+        
+        # 服务项目字段映射 - 用于处理服务项目明细
+        self.service_item_fields = {
+            '项目名称': 'project_name',
+            '项目': 'project_name',
+            '服务项目': 'project_name',
+            '项目内容': 'project_name',
+            '美容师': 'beautician_name',
+            '操作美容师': 'beautician_name',
+            '技师': 'beautician_name',
+            '操作技师': 'beautician_name',
+            '单价': 'unit_price',
+            '项目单价': 'unit_price',
+            '扣卡金额': 'card_deduction',
+            '耗卡金额': 'card_deduction',
+            '金额': 'card_deduction',
+            '数量': 'quantity',
+            '项目数量': 'quantity',
+            '是否指定': 'is_specified',
+            '指定美容师': 'is_specified',
+            '是否指定技师': 'is_specified',
+            '备注': 'remark',
+            '项目备注': 'remark',
+            '是否满意': 'is_satisfied',
+            '满意度': 'is_satisfied'
+        }
+        
+        # 沟通记录模板字段映射
         self.communication_fields = {
-            '客户ID': 'customer_id',  # 关联到客户表的ID
-            '姓名': 'name',  # 增加姓名字段用于交叉验证
-            '沟通时间': 'comm_time',
-            '沟通地点': 'comm_location',
-            '沟通主要内容': 'comm_content',
-            '是否需要跟进': 'follow_up_needed',
-            '沟通人员': 'staff'
+            '客户ID': 'customer_id',
+            'ID': 'customer_id',
+            '沟通时间': 'communication_date',
+            '日期': 'communication_date',
+            '沟通日期': 'communication_date',
+            '沟通地点': 'communication_location',
+            '地点': 'communication_location',
+            '沟通内容': 'communication_content',
+            '内容': 'communication_content',
+            '内容描述': 'communication_content',
+            '沟通描述': 'communication_content',
+            '客户反馈': 'customer_feedback',
+            '反馈': 'customer_feedback',
+            '后续跟进': 'follow_up_action',
+            '跟进计划': 'follow_up_action',
+            '后续计划': 'follow_up_action',
+            '员工': 'staff_name',
+            '员工姓名': 'staff_name',
+            '沟通人员': 'staff_name',
+            '沟通类型': 'communication_type',
+            '类型': 'communication_type',
+            '备注': 'remark',
+            '创建时间': 'created_at',
+            '更新时间': 'updated_at'
         }
 
     def process_file(self, filepath):
@@ -556,7 +658,7 @@ class ExcelProcessor:
                 return services
             
             # 将关键列索引映射到易于理解的变量名
-            customer_id_col = 0      # 客户ID
+            customer_id_col = 0
             customer_name_col = 1    # 姓名
             arrival_time_col = 2     # 到店时间
             departure_time_col = 3   # 离店时间
@@ -590,6 +692,7 @@ class ExcelProcessor:
                         continue  # 跳过没有客户ID的行
                     
                     customer_id = str(customer_id).strip()
+                    # 确保客户名称正确获取，如果为空则使用备用名称
                     customer_name = str(row[customer_name_col]).strip() if not pd.isna(row[customer_name_col]) else f"客户{customer_id}"
                     
                     logger.info(f"处理客户: {customer_id} - {customer_name}")
@@ -710,12 +813,14 @@ class ExcelProcessor:
                                     else:
                                         is_specified = bool(specified_val)
                             
-                            # 使用有意义的字段名存储项目数据
+                            # 使用有意义的字段名存储项目数据，确保字段名与ServiceItem模型一致
                             service_item = {
-                                'project_name': project_name,  # 明确使用project_name作为项目名称字段
+                                'project_name': project_name,
                                 'beautician_name': beautician_name,
                                 'unit_price': unit_price,
-                                'is_specified': is_specified
+                                'card_deduction': unit_price,  # 设置为相同的值
+                                'is_specified': is_specified,
+                                'quantity': 1  # 默认数量为1
                             }
                             
                             # 记录详细的项目数据转换过程
@@ -745,30 +850,30 @@ class ExcelProcessor:
                     # 创建服务记录
                     service_record = {
                         'customer_id': customer_id,
-                        'name': customer_name,
+                        'customer_name': customer_name,  # 确保客户名称被正确设置
                         'service_date': service_date,
                         'departure_time': departure_time_obj,
                         'total_amount': total_amount,
                         'total_sessions': total_sessions,
-                        'satisfaction_rating': satisfaction,
+                        'satisfaction': satisfaction,
                         'service_items': service_items
                     }
                     
                     # 记录服务记录的字段和值
                     logger.info(f"服务记录字段映射结果:")
                     logger.info(f"  - customer_id: {customer_id}")
-                    logger.info(f"  - name: {customer_name}")
+                    logger.info(f"  - customer_name: {customer_name}")
                     logger.info(f"  - service_date: {service_date}")
                     logger.info(f"  - departure_time: {departure_time_obj}")
                     logger.info(f"  - total_amount: {total_amount}")
                     logger.info(f"  - total_sessions: {total_sessions}")
-                    logger.info(f"  - satisfaction_rating: {satisfaction}")
+                    logger.info(f"  - satisfaction: {satisfaction}")
                     logger.info(f"  - service_items: {len(service_items)} 项")
 
                     services.append(service_record)
                     
                     imported_services += 1
-                    logger.info(f"创建服务记录: 客户ID={customer_id}, 项目数={len(service_items)}")
+                    logger.info(f"创建服务记录: 客户ID={customer_id}, 客户名称={customer_name}, 项目数={len(service_items)}")
                 
                 except Exception as e:
                     logger.error(f"处理行 {row_idx} 时出错: {str(e)}")
