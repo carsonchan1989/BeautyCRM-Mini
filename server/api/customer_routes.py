@@ -252,35 +252,37 @@ def manage_consumption(customer_id):
 @customer_bp.route('/<customer_id>/service', methods=['GET'])
 @require_role(['admin', 'staff'])
 def get_customer_services(customer_id):
-    """获取客户服务记录"""
+    """获取客户的服务记录"""
     try:
-        # 先获取客户信息，确保客户存在
-        customer = Customer.query.get(customer_id)
-        if not customer:
-            return jsonify({'success': False, 'message': '客户不存在'}), 404
+        # 先检查客户是否存在
+        customer = Customer.query.get_or_404(customer_id)
         
-        # 获取客户的所有服务记录，按日期倒序排列
+        # 查询该客户的所有服务记录
         services = Service.query.filter_by(customer_id=customer_id).order_by(Service.service_date.desc()).all()
         
-        # 去重逻辑 - 根据服务日期和金额
-        seen_keys = set()
-        unique_services = []
-        
+        # 转换为字典列表
+        service_list = []
         for service in services:
-            # 创建唯一键
-            key = f"{service.service_date}_{service.total_amount}"
-            if key not in seen_keys:
-                seen_keys.add(key)
-                unique_services.append(service)
+            service_dict = service.to_dict()
+            
+            # 查询关联的服务项目
+            service_items = ServiceItem.query.filter_by(service_id=service.service_id).all()
+            service_dict['service_items'] = [item.to_dict() for item in service_items]
+            
+            service_list.append(service_dict)
         
-        # 转换为字典
-        services_json = [service.to_dict() for service in unique_services]
+        # 记录服务项目总数
+        total_items = sum(len(service.get('service_items', [])) for service in service_list)
+        current_app.logger.info(f"获取客户{customer_id}的服务记录成功，共{len(service_list)}条记录，{total_items}个服务项目")
         
-        return jsonify(services_json)
-    
+        return jsonify(service_list), 200
+        
     except Exception as e:
         current_app.logger.error(f"获取客户服务记录失败: {str(e)}")
-        return jsonify({'success': False, 'message': f'获取服务记录失败: {str(e)}'}), 500
+        return jsonify({
+            'success': False,
+            'message': f'获取客户服务记录失败: {str(e)}'
+        }), 500
 
 @customer_bp.route('/<customer_id>/service', methods=['POST'])
 @require_role(['admin', 'staff'])

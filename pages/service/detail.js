@@ -46,13 +46,26 @@ Page({
       success: (res) => {
         console.log("服务记录详情API返回数据:", res.data)
         
-        if (res.data && res.data.success) {
+        if (res.data && (res.data.success || res.statusCode === 200)) {
           // 确保service_items字段存在并且格式化显示数据
-          let serviceData = res.data.data
+          let serviceData = res.data;
+          
+          // 如果数据在data字段中，获取正确的数据对象
+          if (res.data.data) {
+            serviceData = res.data.data;
+          }
           
           if (!serviceData.service_items) {
             serviceData.service_items = []
             console.warn("服务项目数据不存在，创建空数组")
+          } else if (typeof serviceData.service_items === 'string') {
+            // 尝试解析可能是字符串的service_items
+            try {
+              serviceData.service_items = JSON.parse(serviceData.service_items);
+            } catch (e) {
+              console.error("解析service_items字符串失败:", e);
+              serviceData.service_items = [];
+            }
           }
           
           // 检查是否有消耗记录
@@ -81,21 +94,33 @@ Page({
           serviceData.service_items = serviceData.service_items.map((item, index) => {
             console.log(`处理服务项目 ${index+1}:`, item)
             
+            // 预处理金额值，确保是数字
+            let amount = item.amount || item.unit_price || 0;
+            if (typeof amount === 'string') {
+              amount = parseFloat(amount) || 0;
+            }
+            
+            // 预处理卡扣金额
+            let cardDeduction = item.card_deduction || 0;
+            if (typeof cardDeduction === 'string') {
+              cardDeduction = parseFloat(cardDeduction) || 0;
+            }
+            
             return {
               id: item.id,
               service_id: item.service_id,
               project_id: item.project_id || '',
               service_name: item.service_name || item.project_name, // 优先使用服务端提供的mapped字段
               project_name: item.project_name,
-              amount: item.amount || item.unit_price, // 同上，优先使用mapped字段
-              unit_price: item.unit_price,
-              card_deduction: item.card_deduction || 0,
+              amount: amount,
+              unit_price: item.unit_price || amount,
+              card_deduction: cardDeduction,
               quantity: item.quantity || 1,
               beautician: item.beautician || item.beautician_name,
-              beautician_name: item.beautician_name,
+              beautician_name: item.beautician_name || item.beautician,
               is_specified: typeof item.is_specified === 'boolean' ? item.is_specified : Boolean(item.is_specified),
               note: item.note || item.remark || '',
-              remark: item.remark || '',
+              remark: item.remark || item.note || '',
               is_satisfied: typeof item.is_satisfied === 'boolean' ? item.is_satisfied : true,
               consumed_sessions: item.consumed_sessions || []
             }
@@ -249,7 +274,9 @@ Page({
   
   // 生命周期函数 - 页面重新显示
   onShow: function() {
-    // 从其他页面返回时刷新数据
-    this.refreshData()
+    // 每次显示页面时刷新数据
+    if (this.data.serviceId) {
+      this.refreshData()
+    }
   }
 })

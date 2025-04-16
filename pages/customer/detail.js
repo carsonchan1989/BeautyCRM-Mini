@@ -51,13 +51,25 @@ Page({
   // 获取客户基本信息
   getCustomerDetail: function() {
     const that = this;
+    console.log("请求客户详情URL:", apiConfig.getUrl(apiConfig.paths.customer.detail(this.data.customerId)));
+    
     wx.request({
       url: apiConfig.getUrl(apiConfig.paths.customer.detail(this.data.customerId)),
       method: 'GET',
       success: function(res) {
+        console.log("客户详情API返回:", res.data);
+        
         if (res.statusCode === 200) {
+          // 添加处理以适应不同的API响应格式
+          let customerData = res.data;
+          
+          // 如果API返回的是带有code/data的封装格式
+          if (res.data.code === 0 && res.data.data) {
+            customerData = res.data.data;
+          }
+          
           that.setData({
-            customer: res.data,
+            customer: customerData,
             loading: false
           });
           
@@ -99,10 +111,25 @@ Page({
       url: apiConfig.getUrl(apiConfig.paths.customer.health(this.data.customerId)),
       method: 'GET',
       success: function(res) {
+        console.log("健康档案API返回:", res.data);
+        
         if (res.statusCode === 200) {
-          that.setData({
-            healthData: Array.isArray(res.data) && res.data.length > 0 ? res.data[0] : null
-          });
+          let healthData = res.data;
+          
+          // 确保健康数据正确处理 - 取第一条数据
+          if (Array.isArray(healthData) && healthData.length > 0) {
+            that.setData({
+              healthData: healthData[0]
+            });
+          } else if (healthData && healthData.items && Array.isArray(healthData.items) && healthData.items.length > 0) {
+            that.setData({
+              healthData: healthData.items[0]
+            });
+          } else {
+            that.setData({
+              healthData: null
+            });
+          }
         } else {
           console.error('获取健康档案失败:', res.data);
         }
@@ -120,10 +147,25 @@ Page({
       url: apiConfig.getUrl(apiConfig.paths.customer.consumption(this.data.customerId)),
       method: 'GET',
       success: function(res) {
+        console.log("消费记录API返回:", res.data);
+        
         if (res.statusCode === 200) {
-          that.setData({
-            consumptionData: Array.isArray(res.data) ? res.data : []
-          });
+          let consumptionData = res.data;
+          
+          // 处理不同格式的响应
+          if (Array.isArray(consumptionData)) {
+            that.setData({
+              consumptionData: consumptionData
+            });
+          } else if (consumptionData && consumptionData.items && Array.isArray(consumptionData.items)) {
+            that.setData({
+              consumptionData: consumptionData.items
+            });
+          } else {
+            that.setData({
+              consumptionData: []
+            });
+          }
         } else {
           console.error('获取消费记录失败:', res.data);
         }
@@ -141,10 +183,25 @@ Page({
       url: apiConfig.getUrl(apiConfig.paths.customer.service(this.data.customerId)),
       method: 'GET',
       success: function(res) {
+        console.log("服务记录API返回:", res.data);
+        
         if (res.statusCode === 200) {
-          that.setData({
-            serviceData: Array.isArray(res.data) ? res.data : []
-          });
+          let serviceData = res.data;
+          
+          // 处理不同格式的响应
+          if (Array.isArray(serviceData)) {
+            that.setData({
+              serviceData: serviceData
+            });
+          } else if (serviceData && serviceData.items && Array.isArray(serviceData.items)) {
+            that.setData({
+              serviceData: serviceData.items
+            });
+          } else {
+            that.setData({
+              serviceData: []
+            });
+          }
         } else {
           console.error('获取服务记录失败:', res.data);
         }
@@ -162,10 +219,25 @@ Page({
       url: apiConfig.getUrl(apiConfig.paths.customer.communication(this.data.customerId)),
       method: 'GET',
       success: function(res) {
+        console.log("沟通记录API返回:", res.data);
+        
         if (res.statusCode === 200) {
-          that.setData({
-            communicationData: Array.isArray(res.data) ? res.data : []
-          });
+          let communicationData = res.data;
+          
+          // 处理不同格式的响应
+          if (Array.isArray(communicationData)) {
+            that.setData({
+              communicationData: communicationData
+            });
+          } else if (communicationData && communicationData.items && Array.isArray(communicationData.items)) {
+            that.setData({
+              communicationData: communicationData.items
+            });
+          } else {
+            that.setData({
+              communicationData: []
+            });
+          }
         } else {
           console.error('获取沟通记录失败:', res.data);
         }
