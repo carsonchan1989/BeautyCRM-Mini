@@ -238,7 +238,7 @@ Page({
     const requiredSheets = ['客户', '健康档案', '消费记录', '服务记录'];
     const foundSheets = this.data.importResult.sheets.map(sheet => sheet.name);
     const missingSheets = requiredSheets.filter(sheet => 
-      !foundSheets.some(name => name.includes(sheet))
+      !foundSheets.some(name => name && typeof name === 'string' && name.includes(sheet))
     );
     
     if (missingSheets.length > 0) {

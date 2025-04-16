@@ -151,12 +151,41 @@ def precheck_excel(file):
                     if df.shape[0] > 0:
                         # 检查是否是标题行
                         if isinstance(df.iloc[0, 0], str) and ('客户ID' in df.iloc[0, 0] or 'ID' in df.iloc[0, 0]):
-                            sample_data['customer_headers'] = df.iloc[0].tolist()
-                            sample_data['customer_data'] = df.iloc[1] if df.shape[0] > 1 else None
+                            # 将Series转换为Python原生数据类型列表
+                            sample_data['customer_headers'] = df.iloc[0].astype(str).tolist()
+                            if df.shape[0] > 1:
+                                # 将Series转换为可序列化的字典
+                                row_dict = {}
+                                for idx, val in enumerate(df.iloc[1]):
+                                    # 确保键和值都是可序列化的
+                                    col_name = str(df.iloc[0].iloc[idx]) if idx < len(df.iloc[0]) else f"列{idx}"
+                                    if isinstance(val, (pd.Series, pd.DataFrame)):
+                                        row_dict[col_name] = val.to_dict() if hasattr(val, 'to_dict') else str(val)
+                                    elif pd.isna(val):
+                                        row_dict[col_name] = None
+                                    else:
+                                        row_dict[col_name] = str(val) if not isinstance(val, (int, float, bool, type(None))) else val
+                                sample_data['customer_data'] = row_dict
+                            else:
+                                sample_data['customer_data'] = None
                         else:
-                            sample_data['customer_headers'] = df.columns.tolist()
-                            sample_data['customer_data'] = df.iloc[0] if df.shape[0] > 0 else None
-                    break
+                            # 将列名转换为字符串列表
+                            sample_data['customer_headers'] = [str(col) for col in df.columns.tolist()]
+                            if df.shape[0] > 0:
+                                # 将Series转换为可序列化的字典
+                                row_dict = {}
+                                for col in df.columns:
+                                    val = df.iloc[0][col]
+                                    if isinstance(val, (pd.Series, pd.DataFrame)):
+                                        row_dict[str(col)] = val.to_dict() if hasattr(val, 'to_dict') else str(val)
+                                    elif pd.isna(val):
+                                        row_dict[str(col)] = None
+                                    else:
+                                        row_dict[str(col)] = str(val) if not isinstance(val, (int, float, bool, type(None))) else val
+                                sample_data['customer_data'] = row_dict
+                            else:
+                                sample_data['customer_data'] = None
+                        break
         
         # 清理临时文件
         os.unlink(temp_path)

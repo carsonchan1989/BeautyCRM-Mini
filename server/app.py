@@ -3,6 +3,8 @@ BeautyCRM后端服务主程序
 """
 import os
 import sys
+import stat
+import logging
 # 添加当前目录到Python路径中
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -16,6 +18,49 @@ from api.excel_routes import excel_bp
 from api.project_routes import project_bp
 from api.service_routes import service_bp
 
+# 配置日志记录
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('app')
+
+def check_and_fix_db_permissions(db_file):
+    """
+    检查数据库文件权限，如果不是可读写的，则设置正确的权限
+    
+    Args:
+        db_file: 数据库文件路径
+    """
+    try:
+        # 检查文件是否存在
+        if os.path.exists(db_file):
+            logger.info(f"检查数据库文件权限: {db_file}")
+            
+            # 获取当前权限
+            current_permissions = os.stat(db_file).st_mode
+            
+            # 检查是否具有读写权限 (用户/组/其他用户)
+            required_permission = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH
+            
+            if not (current_permissions & required_permission == required_permission):
+                logger.warning(f"数据库文件权限不正确，当前权限: {oct(current_permissions)}")
+                # 设置权限为 rw-rw-rw- (666)
+                os.chmod(db_file, 0o666)
+                logger.info(f"已修复数据库文件权限: {db_file}")
+            else:
+                logger.info(f"数据库文件权限正确: {db_file}")
+                
+        # 检查目录是否存在，如果不存在则创建并设置权限
+        db_dir = os.path.dirname(db_file)
+        if not os.path.exists(db_dir):
+            logger.info(f"创建数据库目录: {db_dir}")
+            os.makedirs(db_dir, exist_ok=True)
+            # 确保目录有适当的权限 (755)
+            os.chmod(db_dir, 0o755)
+    except Exception as e:
+        logger.error(f"检查/修复数据库文件权限失败: {str(e)}")
+
 def create_app(config=None):
     """创建Flask应用实例"""
     app = Flask(__name__)
@@ -26,7 +71,7 @@ def create_app(config=None):
     # 默认配置
     app.config.update(
         SECRET_KEY=os.environ.get('SECRET_KEY', 'beauty-crm-secret-key'),
-        SQLALCHEMY_DATABASE_URI=os.environ.get('DATABASE_URI', 'sqlite:///beauty_crm.db'),
+        SQLALCHEMY_DATABASE_URI=os.environ.get('DATABASE_URI', f'sqlite:///{os.path.join(os.path.dirname(os.path.abspath(__file__)), "instance", "beauty_crm.db")}'),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         UPLOAD_FOLDER=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads'),
         EXPORT_FOLDER=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'exports'),
@@ -36,6 +81,19 @@ def create_app(config=None):
     # 应用自定义配置
     if config:
         app.config.update(config)
+    
+    # 获取SQLite数据库文件路径
+    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+    if db_uri.startswith('sqlite:///'):
+        # 相对路径
+        db_path = db_uri.replace('sqlite:///', '')
+        if not os.path.isabs(db_path):
+            # 如果是相对路径，转换为绝对路径
+            db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), db_path)
+        
+        # 检查并修复数据库文件权限
+        logger.info(f"检查数据库文件权限: {db_path}")
+        check_and_fix_db_permissions(db_path)
 
     # 初始化数据库
     db.init_app(app)
